@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import styled from "styled-components";
 
 import BigRightArrowSvg from "@/assets/icons/big-right-arrow.svg";
+import { Section } from "@/styled";
 
 export const HomeWrapper = styled.main<{
   gap?: string;
@@ -16,71 +17,6 @@ export const HomeWrapper = styled.main<{
 
   * {
     margin: 0;
-  }
-`;
-
-export const Section = styled.section<{
-  flexDirection?: string;
-  gap?: string;
-  alignItems?: string;
-  justifyContent?: string;
-  background?: string;
-  padding?: string;
-  margin?: string;
-  flex?: string;
-  overflow?: string;
-  width?: string;
-  height?: string;
-}>`
-  display: flex;
-  flex-direction: ${prop => prop.flexDirection || "column"};
-  gap: ${prop => prop.gap || "0px"};
-  align-items: ${prop => prop.alignItems || "flex-start"};
-  justify-content: ${prop => prop.justifyContent || "flex-start"};
-  background: ${prop => prop.background || "none"};
-  padding: ${prop => prop.padding || "0px"};
-  margin: ${prop => prop.margin || "0px"};
-  flex: ${prop => prop.flex || "1 1 auto"};
-  overflow: ${prop => prop.overflow || "visible"};
-  width: ${prop => prop.width || "auto"};
-  height: ${prop => prop.height || "auto"};
-`;
-
-export const FlexRow = styled.div<{
-  gap?: string;
-  alignItems?: string;
-  justifyContent?: string;
-  background?: string;
-  padding?: string;
-  margin?: string;
-  flex?: string;
-  width?: string;
-}>`
-  display: flex;
-  flex-direction: row;
-  gap: ${prop => prop.gap || "0px"};
-  align-items: ${prop => prop.alignItems || "center"};
-  justify-content: ${prop => prop.justifyContent || "flex-start"};
-  background: ${prop => prop.background || "none"};
-  padding: ${prop => prop.padding || "0px"};
-  margin: ${prop => prop.margin || "0px"};
-  flex: ${prop => prop.flex || "1 1 auto"};
-  width: ${prop => prop.width || "auto"};
-`;
-
-export const RoundCard = styled.div<{
-  width?: string;
-  height?: string;
-  borderRadius?: string;
-}>`
-  width: ${prop => prop.width || "auto"};
-  height: ${prop => prop.height || "auto"};
-  border-radius: ${prop => prop.borderRadius || "16px"};
-  background: #96ffe5;
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 16px;
   }
 `;
 
@@ -219,59 +155,6 @@ export const ProgressBar = styled(motion.div)`
     border-radius: 4px;
     background: #202025;
     cursor: grab;
-  }
-`;
-
-export const GridWrap = styled.div<{
-  rowGap?: string;
-  columnGap?: string;
-  columnCount?: number;
-}>`
-  display: grid;
-  grid-template-columns: repeat(
-    ${prop => prop.columnCount || 1},
-    minmax(min-content, 1fr)
-  );
-  grid-row-gap: ${prop => prop.rowGap || "0px"};
-  grid-column-gap: ${prop => prop.columnGap || "0px"};
-`;
-
-export const TabButtonsWrap = styled.div`
-  display: flex;
-  gap: 44px;
-  padding: 3px;
-  align-items: center;
-  background: #f4f4f4;
-  border-radius: 14px;
-
-  .tab-button {
-    /* font */
-    font-family: Inter-Bold;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 17px;
-    letter-spacing: 0em;
-    text-align: left;
-    background: transparent;
-    color: #686a6c;
-    padding: 16px 0px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-
-    &[data-active="true"] {
-      background: #ffffff;
-      color: #232325;
-      padding: 16px 26px;
-    }
-
-    &:first-child[data-active="false"] {
-      margin-left: 26px;
-    }
-    &:last-child[data-active="false"] {
-      margin-right: 28px;
-    }
   }
 `;
 

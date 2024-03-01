@@ -1,16 +1,20 @@
 import React from "react";
 
-import Header from "./Header";
+import { Outlet, useLocation } from "react-router-dom";
+
+import { CreatorHeader } from "./CreatorHeader";
+import { Header } from "./Header";
 import { Container, BodyWrapper } from "./styled";
 
-import Home from "@/pages/Home";
-
 const Layout: React.FC = (): React.ReactElement => {
+  const location = useLocation();
+
   return (
     <Container>
-      <Header />
+      {location.pathname === "/" && <Header />}
+      {location.pathname === "/creator" && <CreatorHeader />}
       <BodyWrapper>
-        <Home />
+        <Outlet />
       </BodyWrapper>
     </Container>
   );

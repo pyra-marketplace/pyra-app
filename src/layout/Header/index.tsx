@@ -5,7 +5,7 @@ import { Wrapper } from "./styled";
 import SearchIconSvg from "@/assets/icons/search.svg";
 import PyraSvg from "@/assets/pyra.svg";
 
-const Header = (): React.ReactElement => {
+export const Header = (): React.ReactElement => {
   return (
     <Wrapper>
       <div className='inner-header'>
@@ -27,5 +27,3 @@ const Header = (): React.ReactElement => {
     </Wrapper>
   );
 };
-
-export default Header;

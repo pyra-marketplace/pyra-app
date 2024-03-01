@@ -3,27 +3,25 @@ import React, { useRef, useState } from "react";
 import { motion, useScroll } from "framer-motion";
 
 import {
-  Description,
-  Section,
-  Title,
-  Text,
   HomeWrapper,
   BigRightArrow,
-  FlexRow,
+  ScrollableSection,
+  ProgressBar,
+  Title,
+  Description,
+  Text,
   LinkButton,
   WhiteButton,
   RoundArrowButton,
-  ScrollableSection,
-  RoundCard,
-  ProgressBar,
   TableWrap,
-  TabButtonsWrap,
 } from "./styled";
 
 import PlaceholderSvg from "@/assets/icons/placeholder.svg";
 import FeaturedNftPng from "@/assets/images/featured-nft.png";
+import { TabButtons } from "@/components/TabButtons";
+import { Section, FlexRow, RoundCard } from "@/styled";
 
-const Home: React.FC = () => {
+export const Home: React.FC = () => {
   return (
     <HomeWrapper gap='87px'>
       <Section
@@ -261,25 +259,13 @@ const CollectionCard: React.FC = () => {
 };
 
 const CreatorSection: React.FC = () => {
-  const tabButtons = ["Trending", "Top", "Recent"];
-  const [selectedTabButton, setSelectedTabButton] = useState("Trending");
+  const tabs = ["Trending", "Top", "Recent"];
 
   return (
     <Section background='#010101' padding='80px' gap='80px' width='100%'>
       <Title>Excellent creator.</Title>
       <Section width='100%'>
-        <TabButtonsWrap>
-          {tabButtons.map(tabButton => (
-            <button
-              key={tabButton}
-              className='tab-button'
-              data-active={selectedTabButton === tabButton}
-              onClick={() => setSelectedTabButton(tabButton)}
-            >
-              {tabButton}
-            </button>
-          ))}
-        </TabButtonsWrap>
+        <TabButtons tabs={tabs} />
         <TableWrap>
           <div className='table-container hideScrollbar'>
             <div className='table-header'>
@@ -319,5 +305,3 @@ const CreatorTableItem: React.FC = () => {
     </div>
   );
 };
-
-export default Home;
