@@ -6,6 +6,7 @@ import Layout from "@/layout";
 import { Creator } from "@/pages/Creator";
 import { Home } from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
+import { Upload } from "@/pages/Upload";
 
 export const router = createBrowserRouter([
   {
@@ -15,6 +16,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <Home /> },
       { path: "/creator", element: <Creator /> },
+      { path: "/upload", element: <Upload /> },
       { path: "*", element: <NotFound /> },
     ],
   },
