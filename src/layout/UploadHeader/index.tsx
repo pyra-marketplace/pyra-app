@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import { Wrapper } from "./styled";
 
 import BookmarkIconSvg from "@/assets/icons/bookmark.svg";
@@ -8,6 +10,8 @@ import DefaultAvatarUploadPng from "@/assets/images/default-avatar-upload.png";
 import PyraSvg from "@/assets/pyra.svg";
 
 export const UploadHeader = (): React.ReactElement => {
+  const navigate = useNavigate();
+
   return (
     <Wrapper>
       <div className='inner-header'>
@@ -18,8 +22,10 @@ export const UploadHeader = (): React.ReactElement => {
           </div>
         </div>
         <div className='right'>
-          <div className='link'>Home</div>
-          <button className='link'>
+          <div className='link' onClick={() => navigate("/")}>
+            Home
+          </div>
+          <button className='link' onClick={() => navigate("/creator")}>
             <span>Create</span>
             <img src={PlusIconSvg} alt='Create' />
           </button>

@@ -154,7 +154,7 @@ export const ProgressBar = styled(motion.div)`
     height: 4px;
     border-radius: 4px;
     background: #202025;
-    cursor: grab;
+    /* cursor: grab; */
   }
 `;
 

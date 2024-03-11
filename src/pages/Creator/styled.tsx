@@ -159,32 +159,55 @@ export const FinderContainer = styled(Section)`
     gap: 86px;
     padding: 32px 80px;
   }
+`;
 
-  .date-sorted-section {
-    width: 100%;
-    gap: 32px;
-    .date-text {
-      /* font */
-      font-family: Inter-Bold;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 25px;
-      letter-spacing: -0.02em;
-      text-align: left;
-      color: #000000;
-    }
+export const DateSortedSectionWrap = styled(Section)`
+  width: 100%;
+  gap: 32px;
+  .date-text {
+    /* font */
+    font-family: Inter-Bold;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 25px;
+    letter-spacing: -0.02em;
+    text-align: left;
+    color: #000000;
+  }
+  .fold-bar {
+    flex: 0 0 auto;
+    gap: 3px;
+    cursor: pointer;
+    /* font */
+    font-family: Poppins-SemiBold;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .files-count {
+    /* font */
+    font-family: Poppins;
+    font-weight: 400;
+    color: #b1b1b1;
   }
 `;
 
 export const ContentSectionWrap = styled.div<{
   rowGap?: string;
   columnGap?: string;
+  foldItems?: boolean;
+  lineHeight?: number;
 }>`
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   column-gap: ${prop => prop.columnGap || "32px"};
   row-gap: ${prop => prop.rowGap || "55px"};
+  ${prop =>
+    prop.foldItems &&
+    `
+    height: ${prop.lineHeight}px;
+    overflow: hidden;
+  `}
 
   .file-card {
     /* width: 262px; */

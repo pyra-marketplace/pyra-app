@@ -179,7 +179,7 @@ const HighLightSection: React.FC = () => {
           <div className='bar-container' ref={progressContainerRef}>
             <motion.div
               className='bar'
-              drag='x'
+              // drag='x'
               dragConstraints={progressContainerRef}
               dragMomentum={false}
               dragElastic={0}

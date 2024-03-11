@@ -1,11 +1,16 @@
 import React from "react";
 
+import { useStore } from "@meteor-web3/hooks";
+
 import { Wrapper } from "./styled";
 
 import DownArrowSvg from "@/assets/icons/down-arrow.svg";
 import PyraSvg from "@/assets/pyra.svg";
+import { stringAbbreviation } from "@/utils";
 
 export const CreatorHeader = (): React.ReactElement => {
+  const { address } = useStore();
+
   return (
     <Wrapper>
       <div className='inner-header'>
@@ -17,7 +22,7 @@ export const CreatorHeader = (): React.ReactElement => {
         </div>
         <div className='right'>
           <div className='chip'>
-            <span>0x65...00f1</span>
+            <span>{address && stringAbbreviation(address, 4, 4)}</span>
             <img
               src={DownArrowSvg}
               style={{ marginLeft: "28px", cursor: "pointer" }}

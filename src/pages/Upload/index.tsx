@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 import { message } from "@meteor-web3/components";
+import { SYSTEM_CALL } from "@meteor-web3/connector";
+import { useStore } from "@meteor-web3/hooks";
+import { PyraZone } from "@pyra-marketplace/pyra-sdk";
 import { useDropzone, ErrorCode as DropzoneErrorCode } from "react-dropzone";
+import { useNavigate } from "react-router-dom";
 
 import {
   DropzoneSection,
@@ -16,13 +20,26 @@ import {
 
 import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
+import { checkOrCreatePryaZone } from "@/state/createor/slice";
+import { useDispatch, useSelector } from "@/state/hook";
 import { Section } from "@/styled";
 
 export const Upload: React.FC = () => {
   const maxFiles = 4;
   const maxSize = 50 * 1024 * 1024;
   const [fileList, setFileList] = useState<File[]>([]);
-  const [selectedTiers, setSelectedTiers] = useState<string>();
+  const [selectedTier, setSelectedTier] = useState<"All paid members" | number>(
+    "All paid members",
+  );
+  const [fileTitle, setFileTitle] = useState("");
+  const [fileDescription, setFileDescription] = useState("");
+  const [fileTags, setFileTags] = useState<string[]>([]);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { connector, address } = useStore();
+  const globalStates = useSelector(state => state.global);
+  const pyraZone = useSelector(state => state.creator.pyraZone);
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -63,6 +80,80 @@ export const Upload: React.FC = () => {
   const handleRemoveFile = (event: React.MouseEvent, index: number) => {
     event.stopPropagation();
     setFileList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUploadFiles = async () => {
+    if (fileList.length === 0) {
+      message.error("Nothing to upload");
+      return;
+    }
+    if (!selectedTier) {
+      message.error("You should select that who can see this");
+      return;
+    }
+    if (!fileTitle) {
+      message.error("Title is required");
+      return;
+    }
+    if (!address) {
+      message.error("Connect wallet first");
+      return;
+    }
+    let assetId: string;
+    if (!pyraZone) {
+      assetId = (
+        await dispatch(
+          checkOrCreatePryaZone({
+            chainId: globalStates.chainId,
+            address,
+            connector,
+          }),
+        ).unwrap()
+      ).asset_id;
+    } else {
+      assetId = pyraZone.asset_id;
+    }
+    await connector.runOS({
+      method: SYSTEM_CALL.createCapability,
+      params: {
+        appId: process.env.PYRA_APP_ID!,
+      },
+    });
+    const uploadedFileUrls = await Promise.all(
+      fileList.map(file =>
+        connector.uploadFile(file).then(cid => process.env.IPFS_GATEWAY + cid),
+      ),
+    );
+    const _pyraZone = new PyraZone({
+      chainId: globalStates.chainId,
+      assetId,
+      connector,
+    });
+
+    const date = new Date().toISOString();
+
+    const tierFile = {
+      modelId: process.env.PYRA_POST_MODEL_ID!,
+      fileName: "create a file",
+      fileContent: {
+        modelVersion: "0.0.1",
+        title: fileTitle,
+        description: fileDescription,
+        tags: fileTags,
+        resources: uploadedFileUrls,
+        createdAt: date,
+        updatedAt: date,
+        encrypted: JSON.stringify({
+          resources: true,
+        }),
+      },
+      tier: selectedTier === "All paid members" ? 0 : selectedTier,
+    };
+    console.log({ tierFile });
+    const createdTierFile = await _pyraZone.createTierFile(tierFile);
+    console.log({ createdTierFile });
+    message.success("Create successfully");
+    navigate(-1);
   };
 
   return (
@@ -127,18 +218,24 @@ export const Upload: React.FC = () => {
       </UploadSection>
       <FormSection>
         <Section gap='40px' width='100%'>
-          <TextInput type='text' placeholder='Title' />
-          <TextInput type='textarea' placeholder='Description(optional)' />
-          <TagInput />
+          <TextInput type='text' placeholder='Title' onChange={setFileTitle} />
+          <TextInput
+            type='textarea'
+            placeholder='Description(optional)'
+            onChange={setFileDescription}
+          />
+          <TagInput onChange={setFileTags} />
           <Selector
             title='Who can see this?'
-            options={["All paid members", "Select tiers"]}
-            onChange={(value, _) => setSelectedTiers(value)}
+            options={["All paid members"]}
+            defaultSelected='All paid members'
+            onChange={(value: any) => setSelectedTier(value)}
           />
         </Section>
         <button
           className='publish-btn'
-          data-active={fileList.length > 0 && !!selectedTiers}
+          data-active={fileList.length > 0 && !!selectedTier && !!fileTitle}
+          onClick={handleUploadFiles}
         >
           <span>Publish</span>
           <img src={WhiteRightArrowIconSvg} alt='Right Arrow' />
@@ -311,8 +408,16 @@ const Selector: React.FC<SelectorProps> = ({
   );
 };
 
-const TagInput: React.FC = () => {
+interface TagInputProps {
+  onChange?: (tags: string[]) => void;
+}
+
+const TagInput: React.FC<TagInputProps> = ({ onChange }: TagInputProps) => {
   const [tags, setTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    onChange?.(tags);
+  }, [tags]);
 
   const handleRemoveTag = (index: number) => {
     setTags(prev => prev.filter((_, i) => i !== index));
