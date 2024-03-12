@@ -20,6 +20,7 @@ export interface CreatorStates {
   shareTotalVolume?: string;
   shareActivities?: PyraMarketShareActivityRes[];
   contentFiles?: MirrorFileRecord;
+  contentAccessible?: boolean;
 }
 
 const initialState: CreatorStates = {};
@@ -49,6 +50,18 @@ export const checkOrCreatePryaZone = createAsyncThunk(
       )[0];
     }
     return _pyraZone;
+  },
+);
+
+export const loadPyraZone = createAsyncThunk(
+  "creator/loadPyraZone",
+  async (args: { chainId: number; address: string }) => {
+    const { chainId, address } = args;
+    const pyraZones = await PyraZone.loadPyraZones({
+      chainId,
+      publishers: [address],
+    });
+    return pyraZones[0];
   },
 );
 
@@ -147,14 +160,42 @@ export const loadCreatorShareInfos = createAsyncThunk(
 
 export const loadCreatorContents = createAsyncThunk(
   "creator/loadCreatorContents",
+  async (args: {
+    chainId: number;
+    assetId: string;
+    accountAddress?: string;
+    tier?: ethers.BigNumberish;
+    connector: Connector;
+  }) => {
+    const { chainId, assetId, accountAddress, tier, connector } = args;
+    const pyraZone = new PyraZone({
+      chainId,
+      assetId,
+      connector,
+    });
+    const files = await pyraZone.loadFilesInPyraZone(assetId);
+    const isAccessible = accountAddress
+      ? await pyraZone.isAccessible({
+          tier: tier || 0,
+          account: accountAddress,
+        })
+      : undefined;
+    return { files, isAccessible };
+  },
+);
+
+export const unlockCreatorContents = createAsyncThunk(
+  "creator/unlockCreatorContents",
   async (args: { chainId: number; assetId: string; connector: Connector }) => {
     const { chainId, assetId, connector } = args;
     const pyraZone = new PyraZone({
       chainId,
+      assetId,
       connector,
     });
-    const files = await pyraZone.loadFilesInPyraZone(assetId);
-    return { files };
+    const folder = await pyraZone.loadFolderInPyraZone(assetId);
+    const unlockedFolder = await pyraZone.unlockFolder(folder.folderId);
+    return { unlockedFolder };
   },
 );
 
@@ -182,6 +223,9 @@ export const creatorSlice = createSlice({
     builder.addCase(checkOrCreatePryaZone.fulfilled, (state, action) => {
       state.pyraZone = action.payload;
     });
+    builder.addCase(loadPyraZone.fulfilled, (state, action) => {
+      state.pyraZone = action.payload;
+    });
     builder.addCase(loadCreatorBaseInfos.fulfilled, (state, action) => {
       const { shareBuyPrice, tierKeyBuyPrice, shareHolders } = action.payload;
       state.shareBuyPrice = shareBuyPrice;
@@ -201,8 +245,18 @@ export const creatorSlice = createSlice({
       state.shareActivities = shareActivities;
     });
     builder.addCase(loadCreatorContents.fulfilled, (state, action) => {
-      const { files } = action.payload;
+      const { files, isAccessible } = action.payload;
       state.contentFiles = files;
+      state.contentAccessible = isAccessible;
+    });
+    builder.addCase(unlockCreatorContents.fulfilled, (state, action) => {
+      const { unlockedFolder } = action.payload;
+      const contentFiles: MirrorFileRecord = {};
+      Object.values(unlockedFolder.mirrorRecord).forEach(mirror => {
+        contentFiles[mirror.mirrorId] = mirror.mirrorFile;
+      });
+      state.contentFiles = contentFiles;
+      state.contentAccessible = true;
     });
   },
 });

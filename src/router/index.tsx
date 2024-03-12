@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
     // errorElement: <NotFound />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "/creator", element: <Creator /> },
+      { path: "/creator/:address", element: <Creator /> },
       { path: "/upload", element: <Upload /> },
       { path: "*", element: <NotFound /> },
     ],

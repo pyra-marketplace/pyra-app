@@ -20,6 +20,7 @@ import {
 } from "./styled";
 
 import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
+import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
 import { checkOrCreatePryaZone } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
@@ -37,6 +38,7 @@ export const Upload: React.FC = () => {
   const [fileTitle, setFileTitle] = useState("");
   const [fileDescription, setFileDescription] = useState("");
   const [fileTags, setFileTags] = useState<string[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -102,59 +104,67 @@ export const Upload: React.FC = () => {
       message.error("Connect wallet first");
       return;
     }
-    let assetId: string;
-    if (!pyraZone) {
-      assetId = (
-        await dispatch(
-          checkOrCreatePryaZone({
-            chainId: globalStates.chainId,
-            address,
-            connector,
+    setUploadLoading(true);
+    try {
+      let assetId: string;
+      if (!pyraZone) {
+        assetId = (
+          await dispatch(
+            checkOrCreatePryaZone({
+              chainId: globalStates.chainId,
+              address,
+              connector,
+            }),
+          ).unwrap()
+        ).asset_id;
+      } else {
+        assetId = pyraZone.asset_id;
+      }
+      await connector.runOS({
+        method: SYSTEM_CALL.createCapability,
+        params: {
+          appId: process.env.PYRA_APP_ID!,
+        },
+      });
+      const uploadedFileUrls = await Promise.all(
+        fileList.map(file => connector.uploadFile(file).then(ipfs.getFileLink)),
+      );
+      const _pyraZone = new PyraZone({
+        chainId: globalStates.chainId,
+        assetId,
+        connector,
+      });
+
+      const date = new Date().toISOString();
+
+      const tierFile = {
+        modelId: process.env.PYRA_POST_MODEL_ID!,
+        fileName: "create a file",
+        fileContent: {
+          modelVersion: "0.0.1",
+          title: fileTitle,
+          description: fileDescription,
+          tags: fileTags,
+          resources: uploadedFileUrls,
+          createdAt: date,
+          updatedAt: date,
+          encrypted: JSON.stringify({
+            resources: true,
           }),
-        ).unwrap()
-      ).asset_id;
-    } else {
-      assetId = pyraZone.asset_id;
+        },
+        tier: selectedTier === "All paid members" ? 0 : selectedTier,
+      };
+      console.log({ tierFile });
+      const createdTierFile = await _pyraZone.createTierFile(tierFile);
+      console.log({ createdTierFile });
+      message.success("Create successfully");
+      navigate(-1);
+    } catch (e) {
+      console.error(e);
+      message.error(e as any);
+    } finally {
+      setUploadLoading(false);
     }
-    await connector.runOS({
-      method: SYSTEM_CALL.createCapability,
-      params: {
-        appId: process.env.PYRA_APP_ID!,
-      },
-    });
-    const uploadedFileUrls = await Promise.all(
-      fileList.map(file => connector.uploadFile(file).then(ipfs.getFileLink)),
-    );
-    const _pyraZone = new PyraZone({
-      chainId: globalStates.chainId,
-      assetId,
-      connector,
-    });
-
-    const date = new Date().toISOString();
-
-    const tierFile = {
-      modelId: process.env.PYRA_POST_MODEL_ID!,
-      fileName: "create a file",
-      fileContent: {
-        modelVersion: "0.0.1",
-        title: fileTitle,
-        description: fileDescription,
-        tags: fileTags,
-        resources: uploadedFileUrls,
-        createdAt: date,
-        updatedAt: date,
-        encrypted: JSON.stringify({
-          resources: true,
-        }),
-      },
-      tier: selectedTier === "All paid members" ? 0 : selectedTier,
-    };
-    console.log({ tierFile });
-    const createdTierFile = await _pyraZone.createTierFile(tierFile);
-    console.log({ createdTierFile });
-    message.success("Create successfully");
-    navigate(-1);
   };
 
   return (
@@ -239,7 +249,10 @@ export const Upload: React.FC = () => {
           onClick={handleUploadFiles}
         >
           <span>Publish</span>
-          <img src={WhiteRightArrowIconSvg} alt='Right Arrow' />
+          <img
+            src={uploadLoading ? LoadingWhiteIconSvg : WhiteRightArrowIconSvg}
+            alt={uploadLoading ? "loading" : "Right Arrow"}
+          />
         </button>
       </FormSection>
     </UploadWrapper>

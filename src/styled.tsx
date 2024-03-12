@@ -150,6 +150,7 @@ export const Section = styled.section<{
   overflow?: string;
   width?: string;
   height?: string;
+  minHeight?: string;
 }>`
   display: flex;
   flex-direction: ${prop => prop.flexDirection || "column"};
@@ -163,6 +164,7 @@ export const Section = styled.section<{
   overflow: ${prop => prop.overflow || "visible"};
   width: ${prop => prop.width || "auto"};
   height: ${prop => prop.height || "auto"};
+  min-height: ${prop => prop.minHeight || "auto"};
 `;
 
 export const FlexRow = styled.div<{

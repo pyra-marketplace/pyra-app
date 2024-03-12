@@ -13,7 +13,7 @@ const Layout: React.FC = (): React.ReactElement => {
   return (
     <Container flex={location.pathname === "/upload"}>
       {location.pathname === "/" && <HomeHeader />}
-      {location.pathname === "/creator" && <CreatorHeader />}
+      {location.pathname.startsWith("/creator") && <CreatorHeader />}
       {location.pathname === "/upload" && <UploadHeader />}
       <BodyWrapper
         containerFlex={location.pathname === "/upload"}

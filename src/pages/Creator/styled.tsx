@@ -131,6 +131,9 @@ export const BlackButton = styled.button`
   padding: 16px 52px;
   border-radius: 111px;
   background: #000000;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   /* font */
   font-family: Inter-Bold;
   font-size: 20px;
@@ -142,6 +145,8 @@ export const BlackButton = styled.button`
 `;
 
 export const FinderContainer = styled(Section)`
+  width: 100%;
+
   .tool-bar {
     width: 100%;
     display: flex;
@@ -159,6 +164,17 @@ export const FinderContainer = styled(Section)`
     gap: 86px;
     padding: 32px 80px;
   }
+`;
+
+export const FinderMaskContainer = styled(Section)`
+  width: calc(100% - 80px);
+  height: 400px;
+  margin: 60px 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  background: #7a7a7a;
+  color: #ffffff;
 `;
 
 export const DateSortedSectionWrap = styled(Section)`
@@ -238,6 +254,83 @@ export const ContentSectionWrap = styled.div<{
       letter-spacing: -0.02em;
       text-align: left;
       color: #000000;
+    }
+  }
+`;
+
+export const EmptySectionWrap = styled(Section)`
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  gap: 30px;
+
+  .empty-tip {
+    /* font */
+    font-family: Lato;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #999999;
+  }
+`;
+
+export const PopupButtonWrap = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  padding: 4px;
+  &:hover {
+    .popup-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* row-gap: 4px; */
+      width: auto;
+      transform: translateX(30%);
+    }
+  }
+
+  .popup-list {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 100%;
+    background: #ffffff;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 30px;
+    border-radius: 10px;
+    padding: 5px;
+    z-index: 1000;
+    display: none;
+
+    .list-item {
+      width: 100%;
+      text-align: center;
+      padding: 5px 17px;
+      margin: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .list-item[data-active="true"] {
+      background: rgb(246, 246, 246);
+    }
+
+    .list-item[data-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    &::before {
+      position: absolute;
+      content: "";
+      width: 100%;
+      height: 10px;
+      top: -10px;
     }
   }
 `;
