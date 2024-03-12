@@ -216,6 +216,7 @@ export const ContentSectionWrap = styled.div<{
     flex-direction: column;
     gap: 19px;
     .preview {
+      position: relative;
       width: 262px;
       height: 262px;
       /* width: 100%;

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { message } from "@meteor-web3/components";
 import { SYSTEM_CALL } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
+import { IPFS } from "@meteor-web3/utils";
 import { PyraZone } from "@pyra-marketplace/pyra-sdk";
 import { useDropzone, ErrorCode as DropzoneErrorCode } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,8 @@ import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
 import { checkOrCreatePryaZone } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section } from "@/styled";
+
+const ipfs = new IPFS();
 
 export const Upload: React.FC = () => {
   const maxFiles = 4;
@@ -120,9 +123,7 @@ export const Upload: React.FC = () => {
       },
     });
     const uploadedFileUrls = await Promise.all(
-      fileList.map(file =>
-        connector.uploadFile(file).then(cid => process.env.IPFS_GATEWAY + cid),
-      ),
+      fileList.map(file => connector.uploadFile(file).then(ipfs.getFileLink)),
     );
     const _pyraZone = new PyraZone({
       chainId: globalStates.chainId,

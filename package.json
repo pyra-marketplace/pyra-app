@@ -16,6 +16,7 @@
     "@meteor-web3/components": "^1.0.25",
     "@meteor-web3/connector": "^1.0.31",
     "@meteor-web3/hooks": "^1.0.19",
+    "@meteor-web3/utils": "^1.0.5",
     "@reduxjs/toolkit": "^2.2.1",
     "buffer": "^6.0.3",
     "ethers": "^5.7.2",

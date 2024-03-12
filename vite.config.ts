@@ -30,7 +30,6 @@ export default defineConfig({
       PYRA_APP_ID: "8fb3e03f-05d6-4a27-9960-9d113ffb1246",
       PYRA_POST_MODEL_ID:
         "kjzl6hvfrbw6c5cjz4boft9bthoj452w31ocf7wm0vrwsnz6fv2wg90bt1zsham",
-      IPFS_GATEWAY: "https://w3s.link/ipfs/",
     },
   },
 });
