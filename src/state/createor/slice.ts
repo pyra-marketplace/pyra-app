@@ -194,6 +194,7 @@ export const unlockCreatorContents = createAsyncThunk(
       connector,
     });
     const folder = await pyraZone.loadFolderInPyraZone(assetId);
+    console.log("unlocking folder...", { folder });
     const unlockedFolder = await pyraZone.unlockFolder(folder.folderId);
     return { unlockedFolder };
   },

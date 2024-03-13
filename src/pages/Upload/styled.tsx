@@ -176,6 +176,9 @@ export const FormSection = styled(Section)`
     letter-spacing: 0.17em;
     text-align: left;
     color: #f7fbfa;
+    img {
+      max-height: 24px;
+    }
 
     &[data-active="true"] {
       background: #202025;

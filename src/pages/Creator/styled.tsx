@@ -142,6 +142,9 @@ export const BlackButton = styled.button`
   letter-spacing: 0px;
   text-align: left;
   color: #ffffff;
+  img {
+    max-height: 24px;
+  }
 `;
 
 export const FinderContainer = styled(Section)`

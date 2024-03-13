@@ -9,18 +9,15 @@ import { Wrapper } from "./styled";
 import SearchIconSvg from "@/assets/icons/search.svg";
 import PyraSvg from "@/assets/pyra.svg";
 import { useSelector } from "@/state/hook";
+import { stringAbbreviation } from "@/utils";
 
 export const HomeHeader = (): React.ReactElement => {
   const navigate = useNavigate();
-  const { pkh } = useStore();
+  const { pkh, address } = useStore();
   const meteorContext = useContext(MeteorContext);
   const autoConnecting = useSelector(state => state.global.autoConnecting);
 
   const handleConnect = async () => {
-    if (pkh) {
-      navigate("/creator");
-      return;
-    }
     if (autoConnecting) {
       message.info("Please wait for auto connecting...");
       return;
@@ -47,13 +44,26 @@ export const HomeHeader = (): React.ReactElement => {
           </div>
         </div>
         <div className='right'>
-          <div className='link'>Home</div>
-          <div className='link'>Create</div>
+          <div className='link' onClick={() => navigate("/")}>
+            Home
+          </div>
+          <div
+            className='link'
+            onClick={() => {
+              if (!address) {
+                message.error("Please connect wallet first");
+                return;
+              }
+              navigate("/creator/" + address);
+            }}
+          >
+            Create
+          </div>
           <button className='link' onClick={handleConnect}>
             {autoConnecting
               ? "Connecting..."
               : pkh
-                ? "Enter"
+                ? stringAbbreviation(address, 4, 4)
                 : "Connect Wallet"}
           </button>
         </div>

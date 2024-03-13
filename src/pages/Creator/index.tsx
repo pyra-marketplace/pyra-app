@@ -99,6 +99,7 @@ export const Creator: React.FC = () => {
           return;
         }
       }
+      console.log({ pyraZone });
       const baseInfos = await dispatch(
         loadCreatorBaseInfos({
           chainId: globalStates.chainId,
@@ -107,9 +108,9 @@ export const Creator: React.FC = () => {
           connector,
         }),
       ).unwrap();
-      console.log({ pyraZone, baseInfos });
+      console.log({ baseInfos });
     } catch (e: any) {
-      console.error(e);
+      console.error("Init failed: ", e);
       message.error("Init failed: " + (e.message || e));
     }
   };
@@ -130,15 +131,16 @@ export const Creator: React.FC = () => {
           .then(console.log);
         // try to unlock content folder
         try {
-          await dispatch(
+          const { unlockedFolder } = await dispatch(
             unlockCreatorContents({
               chainId: globalStates.chainId,
               assetId: creatorStates.pyraZone.asset_id,
               connector,
             }),
-          );
+          ).unwrap();
+          console.log({ unlockedFolder });
         } catch (e: any) {
-          console.warn("unlock folder failed: " + (e.message || e));
+          console.warn("unlock folder failed: ", e);
         }
       } else {
         await dispatch(
@@ -152,7 +154,7 @@ export const Creator: React.FC = () => {
           .then(console.log);
       }
     } catch (e: any) {
-      console.error(e);
+      console.error("Content init failed: ", e);
       message.error("Content init failed: " + (e.message || e));
     }
   };
@@ -236,13 +238,14 @@ export const Creator: React.FC = () => {
                 });
                 const keyId = await pyraZone.buyTierkey(0);
                 console.log({ keyId });
-                await dispatch(
+                const { unlockedFolder } = await dispatch(
                   unlockCreatorContents({
                     chainId: globalStates.chainId,
                     assetId: creatorStates.pyraZone.asset_id,
                     connector,
                   }),
-                );
+                ).unwrap();
+                console.log({ unlockedFolder });
               } finally {
                 setTradeKeyLoading(false);
               }
