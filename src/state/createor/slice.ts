@@ -42,6 +42,16 @@ export const checkOrCreatePryaZone = createAsyncThunk(
         connector,
       });
       await pyraZone.createPyraZone();
+      // TODO: remove auto-create-share when new contract is ready
+      const pyraMarket = new PyraMarket({
+        chainId,
+        connector,
+      });
+      await pyraMarket.createShare({
+        shareName: "Test Share",
+        shareSymbol: "TS",
+        feePoint: 100,
+      });
       _pyraZone = (
         await PyraZone.loadPyraZones({
           chainId,

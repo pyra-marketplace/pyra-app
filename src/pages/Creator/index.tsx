@@ -207,7 +207,7 @@ export const Creator: React.FC = () => {
             <div className='data-item'>
               <span className='item-value'>
                 {ethers.utils.formatEther(creatorStates.tierKeyBuyPrice || 0)}{" "}
-                ETH
+                {globalStates.chainCurrency}
               </span>
               <span className='item-title'>Key price</span>
             </div>
