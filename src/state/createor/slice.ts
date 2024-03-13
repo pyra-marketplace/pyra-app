@@ -195,7 +195,9 @@ export const unlockCreatorContents = createAsyncThunk(
     });
     const folder = await pyraZone.loadFolderInPyraZone(assetId);
     console.log("unlocking folder...", { folder });
-    const unlockedFolder = await pyraZone.unlockFolder(folder.folderId);
+    const unlockedFolder = folder
+      ? await pyraZone.unlockFolder(folder.folderId)
+      : undefined;
     return { unlockedFolder };
   },
 );
@@ -252,12 +254,14 @@ export const creatorSlice = createSlice({
     });
     builder.addCase(unlockCreatorContents.fulfilled, (state, action) => {
       const { unlockedFolder } = action.payload;
-      const contentFiles: MirrorFileRecord = {};
-      Object.values(unlockedFolder.mirrorRecord).forEach(mirror => {
-        contentFiles[mirror.mirrorId] = mirror.mirrorFile;
-      });
-      state.contentFiles = contentFiles;
-      state.contentAccessible = true;
+      if (unlockedFolder) {
+        const contentFiles: MirrorFileRecord = {};
+        Object.values(unlockedFolder.mirrorRecord).forEach(mirror => {
+          contentFiles[mirror.mirrorId] = mirror.mirrorFile;
+        });
+        state.contentFiles = contentFiles;
+        state.contentAccessible = true;
+      }
     });
   },
 });

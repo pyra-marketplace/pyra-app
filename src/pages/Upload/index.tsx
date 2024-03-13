@@ -157,7 +157,7 @@ export const Upload: React.FC = () => {
       console.log({ tierFile });
       const createdTierFile = await _pyraZone.createTierFile(tierFile);
       console.log({ createdTierFile });
-      message.success("Create successfully");
+      message.success("Publish successfully");
       navigate(-1);
     } catch (e) {
       console.error(e);

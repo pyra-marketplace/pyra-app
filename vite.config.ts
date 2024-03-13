@@ -27,9 +27,9 @@ export default defineConfig({
   define: {
     "process.env": {
       ENV: "Browser",
-      PYRA_APP_ID: "8fb3e03f-05d6-4a27-9960-9d113ffb1246",
+      PYRA_APP_ID: "e104c799-3cb6-4f4d-ba8a-16649cd9701a",
       PYRA_POST_MODEL_ID:
-        "kjzl6hvfrbw6c5cjz4boft9bthoj452w31ocf7wm0vrwsnz6fv2wg90bt1zsham",
+        "kjzl6hvfrbw6c8nivefcu4rozay0y3rzm8pomdsxl4abfc3n1rokft2m04flbd4",
     },
   },
 });
