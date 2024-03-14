@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+import LockedSectionPng from "@/assets/images/locked-section.png";
 import { Section } from "@/styled";
 
 export const CreatorWrapper = styled.main<{
@@ -41,7 +42,7 @@ export const Banner = styled.div`
   }
 `;
 
-export const Avatar = styled.div`
+export const AvatarWrap = styled.div`
   padding: 11px;
   border-radius: 50%;
   background: #ffffff;
@@ -234,6 +235,7 @@ export const ContentSectionWrap = styled.div<{
     display: flex;
     flex-direction: column;
     gap: 19px;
+    cursor: pointer;
     .preview {
       position: relative;
       width: 262px;
@@ -258,6 +260,46 @@ export const ContentSectionWrap = styled.div<{
       text-align: left;
       color: #000000;
     }
+  }
+`;
+
+export const LockedSectionWrap = styled(Section)`
+  width: 100%;
+  height: 800px;
+  background: url(${LockedSectionPng}) no-repeat;
+  background-size: cover;
+  align-items: center;
+  justify-content: space-between;
+
+  .locked-tip {
+    /* font */
+    font-family: Inter-SemiBold;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 36px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #000000;
+  }
+  .locked-bottom-extra-tip {
+    /* font */
+    font-family: Poppins-Medium;
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #636363;
+  }
+  .locked-bottom-tip {
+    /* font */
+    font-family: Inter-Medium;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #636363;
   }
 `;
 

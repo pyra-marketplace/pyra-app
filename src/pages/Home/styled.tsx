@@ -168,6 +168,16 @@ export const TableWrap = styled.div`
 
   .table-container {
     overflow: auto;
+
+    .loading {
+      width: 100%;
+      flex: 1 1 auto;
+      padding: 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
   }
 
   .table-row {
@@ -205,6 +215,11 @@ export const TableWrap = styled.div`
         height: 66px;
         border-radius: 10px;
         background: #5990f6;
+        img {
+          width: 100%;
+          height: 100%;
+          border-radius: 10px;
+        }
       }
     }
 

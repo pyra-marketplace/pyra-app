@@ -6,6 +6,7 @@ import {
   PyraMarketShareHolderRes,
   PyraZone,
   PyraZoneRes,
+  PyraZoneTierkeyHolderRes,
 } from "@pyra-marketplace/pyra-sdk";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
@@ -14,6 +15,7 @@ export interface CreatorStates {
   pyraZone?: PyraZoneRes;
   shareBuyPrice?: ethers.BigNumber;
   tierKeyBuyPrice?: ethers.BigNumber;
+  tierKeyHolders?: PyraZoneTierkeyHolderRes[];
   shareHolders?: PyraMarketShareHolderRes[];
   shareTotalValue?: string;
   shareTotalSupply?: ethers.BigNumber;
@@ -82,7 +84,7 @@ export const loadCreatorBaseInfos = createAsyncThunk(
     address: string;
     assetId: string;
     connector: Connector;
-    tier?: ethers.BigNumberish;
+    tier?: number;
   }) => {
     const { chainId, address, assetId, connector, tier } = args;
     const pyraMarket = new PyraMarket({
@@ -93,20 +95,29 @@ export const loadCreatorBaseInfos = createAsyncThunk(
       creator: address,
       amount: ethers.utils.parseEther("1"),
     });
-    console.log({ shareBuyPrice });
     const pyraZone = new PyraZone({
       chainId,
       assetId,
       connector,
     });
     const tierKeyBuyPrice = await pyraZone.loadBuyPrice(tier || 0);
-    console.log({ tierKeyBuyPrice });
+    console.log({ shareBuyPrice, tierKeyBuyPrice });
+    const tierKeyHolders = await PyraZone.loadPyraZoneTierkeyHolders({
+      chainId,
+      assetId,
+      tier: tier || 0,
+    });
     const shareHolders = await PyraMarket.loadPyraMarketShareHolders({
       chainId,
       publisher: address,
     });
-    console.log({ shareHolders });
-    return { shareBuyPrice, tierKeyBuyPrice, shareHolders };
+    console.log({ tierKeyHolders, shareHolders });
+    return {
+      shareBuyPrice,
+      tierKeyBuyPrice,
+      tierKeyHolders,
+      shareHolders,
+    };
   },
 );
 
@@ -240,9 +251,11 @@ export const creatorSlice = createSlice({
       state.pyraZone = action.payload;
     });
     builder.addCase(loadCreatorBaseInfos.fulfilled, (state, action) => {
-      const { shareBuyPrice, tierKeyBuyPrice, shareHolders } = action.payload;
+      const { shareBuyPrice, tierKeyBuyPrice, tierKeyHolders, shareHolders } =
+        action.payload;
       state.shareBuyPrice = shareBuyPrice;
       state.tierKeyBuyPrice = tierKeyBuyPrice;
+      state.tierKeyHolders = tierKeyHolders;
       state.shareHolders = shareHolders;
     });
     builder.addCase(loadCreatorShareInfos.fulfilled, (state, action) => {

@@ -10,6 +10,7 @@ import storage from "redux-persist/lib/storage";
 
 import { creatorSlice } from "./createor/slice";
 import { globalSlice, GlobalStates } from "./global/slice";
+import { homeSlice } from "./home/slice";
 
 const globalPersistConfig: PersistConfig<GlobalStates> = {
   key: "global",
@@ -20,6 +21,7 @@ const globalPersistConfig: PersistConfig<GlobalStates> = {
 const rootReducer = combineReducers({
   global: persistReducer(globalPersistConfig, globalSlice.reducer),
   creator: creatorSlice.reducer,
+  home: homeSlice.reducer,
 });
 
 // 使用persistReducer强化reducer,persistReducer(config, reducer)

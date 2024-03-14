@@ -1,5 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import { useStore } from "@meteor-web3/hooks";
+import { CircularProgress } from "@mui/material";
 import { motion, useScroll } from "framer-motion";
 
 import {
@@ -19,7 +21,10 @@ import {
 import PlaceholderSvg from "@/assets/icons/placeholder.svg";
 import FeaturedNftPng from "@/assets/images/featured-nft.png";
 import { TabButtons } from "@/components/TabButtons";
+import { TrendingPyraZone, loadTrendingPyraZones } from "@/state/home/slice";
+import { useDispatch, useSelector } from "@/state/hook";
 import { Section, FlexRow, RoundCard } from "@/styled";
+import { stringAbbreviation } from "@/utils";
 
 export const Home: React.FC = () => {
   return (
@@ -77,7 +82,7 @@ export const Home: React.FC = () => {
           alt='featured-nft'
         />
       </Section>
-      <HighLightSection />
+      {/* <HighLightSection /> */}
       <CreatorSection />
     </HomeWrapper>
   );
@@ -259,13 +264,60 @@ const CollectionCard: React.FC = () => {
 };
 
 const CreatorSection: React.FC = () => {
-  const tabs = ["Trending", "Top", "Recent"];
+  const trendingPyraZones = useSelector(state => state.home.trendingPyraZones);
+  const dispatch = useDispatch();
+  const globalStates = useSelector(state => state.global);
+  const { connector } = useStore();
+
+  const tabs: Array<"Trending" | "Top" | "Recent"> = [
+    "Trending",
+    "Top",
+    "Recent",
+  ];
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    init();
+  }, [selectedTab]);
+
+  const init = async () => {
+    setLoading(true);
+    try {
+      const trendingPyraZones = await dispatch(
+        loadTrendingPyraZones({
+          chainId: globalStates.chainId,
+          connector,
+          orderBy:
+            selectedTab === "Top"
+              ? "tierkey_sales"
+              : selectedTab === "Recent"
+                ? "block_number"
+                : undefined,
+          orderType: "desc",
+        }),
+      ).unwrap();
+      console.log({ trendingPyraZones });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Section background='#010101' padding='80px' gap='80px' width='100%'>
+    <Section
+      background='#010101'
+      padding='80px'
+      gap='80px'
+      width='100%'
+      style={{ marginTop: "-87px" }}
+    >
       <Title>Excellent creator.</Title>
       <Section width='100%'>
-        <TabButtons tabs={tabs} />
+        <TabButtons
+          tabs={tabs}
+          controlledSelectedTab={selectedTab}
+          onChange={tab => setSelectedTab(tab as any)}
+        />
         <TableWrap>
           <div className='table-container hideScrollbar'>
             <div className='table-header'>
@@ -277,9 +329,16 @@ const CreatorSection: React.FC = () => {
               <div className='table-item'>Holders</div>
               <div className='table-item'>Watchlists</div>
             </div>
-            {[...new Array(10)].map((_, index) => {
-              return <CreatorTableItem key={index} />;
-            })}
+            {!loading &&
+              trendingPyraZones &&
+              trendingPyraZones.map((item, index) => {
+                return <CreatorTableItem trendingPyraZone={item} key={index} />;
+              })}
+            {loading && (
+              <div className='loading'>
+                <CircularProgress color='inherit' />
+              </div>
+            )}
           </div>
         </TableWrap>
       </Section>
@@ -287,21 +346,35 @@ const CreatorSection: React.FC = () => {
   );
 };
 
-const CreatorTableItem: React.FC = () => {
+const CreatorTableItem = ({
+  trendingPyraZone,
+}: {
+  trendingPyraZone: TrendingPyraZone;
+}) => {
+  const chainCurrency = useSelector(state => state.global.chainCurrency);
   return (
     <div className='table-row'>
       <div className='table-item'>
         <FlexRow gap='25px'>
-          <div className='avatar'></div>
-          <span>0xfreda.eth</span>
+          <div className='avatar'>
+            {trendingPyraZone.user_info?.profile_image_url && (
+              <img src={trendingPyraZone.user_info.profile_image_url} />
+            )}
+          </div>
+          <span>
+            {trendingPyraZone.user_info?.name ||
+              stringAbbreviation(trendingPyraZone.publisher, 4, 4)}
+          </span>
         </FlexRow>
       </div>
-      <div className='table-item'>$4385.27</div>
-      <div className='table-item'>0.6176</div>
-      <div className='table-item'>344</div>
-      <div className='table-item'>56</div>
-      <div className='table-item'>34</div>
-      <div className='table-item'>590</div>
+      <div className='table-item'>${trendingPyraZone.share_price}</div>
+      <div className='table-item'>
+        {trendingPyraZone.key_price} {chainCurrency}
+      </div>
+      <div className='table-item'>{trendingPyraZone.files_count}</div>
+      <div className='table-item'>{trendingPyraZone.key_sales}</div>
+      <div className='table-item'>{trendingPyraZone.share_holders}</div>
+      <div className='table-item'>{trendingPyraZone.watch_lists}</div>
     </div>
   );
 };

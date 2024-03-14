@@ -3,12 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Media, message } from "@meteor-web3/components";
 import { MirrorFile } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
+import { AvatarGroup, Avatar } from "@mui/material";
 import { PyraZone, PyraZoneRes } from "@pyra-marketplace/pyra-sdk";
 import { ethers } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
-  Avatar,
+  AvatarWrap,
   Banner,
   BlackButton,
   ContentSectionWrap,
@@ -17,6 +18,7 @@ import {
   EmptySectionWrap,
   FinderContainer,
   FinderMaskContainer,
+  LockedSectionWrap,
   PopupButtonWrap,
   UserInfo,
 } from "./styled";
@@ -31,6 +33,7 @@ import SortIconSvg from "@/assets/icons/sort.svg";
 import TwitterIconSvg from "@/assets/icons/twitter.svg";
 import DefaultAvatarPng from "@/assets/images/default-avatar.png";
 import DefaultBannerPng from "@/assets/images/default-banner.png";
+import { FileInfoModal } from "@/components/FileInfoModal";
 import { TabButtons } from "@/components/TabButtons";
 import {
   checkOrCreatePryaZone,
@@ -42,7 +45,7 @@ import {
 } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { FlexRow, GridWrap, Section } from "@/styled";
-import { buildSortedItems, stringAbbreviation } from "@/utils";
+import { buildSortedItems, stringAbbreviation, stringToColor } from "@/utils";
 
 export const Creator: React.FC = () => {
   const tabs: Array<"Share" | "Content"> = ["Share", "Content"];
@@ -168,9 +171,9 @@ export const Creator: React.FC = () => {
             <img src={EditIconSvg} alt='Edit' />
           </div>
         </Banner>
-        <Avatar style={{ marginTop: "-99.5px", marginBottom: "11px" }}>
+        <AvatarWrap style={{ marginTop: "-99.5px", marginBottom: "11px" }}>
           <img className='user-img' src={DefaultAvatarPng} />
-        </Avatar>
+        </AvatarWrap>
         <UserInfo width='100%' alignItems='center' gap='24px'>
           <div className='user-name'>Cathy</div>
           <FlexRow className='account-info' gap='11px'>
@@ -305,42 +308,32 @@ const FinderContentSection = () => {
   );
 
   return (
-    <>
+    <FinderContainer style={{ marginTop: "-49px" }}>
+      <FlexRow className='tool-bar'>
+        {SortButton}
+        <FlexRow gap='14px' flex='0 0 auto' style={{ cursor: "pointer" }}>
+          <span>All</span>
+          <img src={DownArrowIconSvg} alt='Down arrow' />
+        </FlexRow>
+      </FlexRow>
       {contentAccessible && (
-        <FinderContainer style={{ marginTop: "-49px" }}>
-          <FlexRow className='tool-bar'>
-            {SortButton}
-            <FlexRow gap='14px' flex='0 0 auto' style={{ cursor: "pointer" }}>
-              <span>All</span>
-              <img src={DownArrowIconSvg} alt='Down arrow' />
-            </FlexRow>
-          </FlexRow>
-          <Section className='inner-container'>
-            {sortBy === "Date" &&
-              sortedFiles.map(({ title, items }, idx) => {
-                if (items.length > 0) {
-                  return (
-                    <DateSortedSection
-                      files={items}
-                      dateText={title}
-                      key={idx}
-                    />
-                  );
-                }
-              })}
-            {sortBy === "Default" && <DateSortedSection files={files} />}
-            {files.length === 0 && (
-              <EmptySection tip='Nothing here yet, go create your first asset!' />
-            )}
-          </Section>
-        </FinderContainer>
+        <Section className='inner-container'>
+          {sortBy === "Date" &&
+            sortedFiles.map(({ title, items }, idx) => {
+              if (items.length > 0) {
+                return (
+                  <DateSortedSection files={items} dateText={title} key={idx} />
+                );
+              }
+            })}
+          {sortBy === "Default" && <DateSortedSection files={files} />}
+          {files.length === 0 && (
+            <EmptySection tip='Nothing here yet, go create your first asset!' />
+          )}
+        </Section>
       )}
-      {!contentAccessible && (
-        <FinderMaskContainer>
-          Buy cloud key to view {files.length} files
-        </FinderMaskContainer>
-      )}
-    </>
+      {!contentAccessible && <LockedSection />}
+    </FinderContainer>
   );
 };
 
@@ -436,6 +429,9 @@ const ContentSection = ({
             className='file-card'
             key={idx}
             ref={idx === 0 ? cardItemRef : undefined}
+            onClick={async () => {
+              await FileInfoModal.open({ file });
+            }}
           >
             <div className='preview' style={{ background: "#000000" }}>
               <Media
@@ -448,6 +444,101 @@ const ContentSection = ({
         );
       })}
     </ContentSectionWrap>
+  );
+};
+
+const LockedSection = () => {
+  const dispatch = useDispatch();
+  const globalStates = useSelector(state => state.global);
+  const creatorStates = useSelector(state => state.creator);
+  const { connector } = useStore();
+
+  const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
+
+  return (
+    <LockedSectionWrap>
+      <Section
+        width='100%'
+        alignItems='center'
+        justifyContent='center'
+        gap='22px'
+      >
+        <p className='locked-tip'>
+          Unlock{" "}
+          {creatorStates.contentFiles &&
+            Object.values(creatorStates.contentFiles).length + "+ "}
+          curations
+        </p>
+        <BlackButton
+          onClick={async () => {
+            if (!creatorStates.pyraZone || tradeKeyLoading) {
+              message.info("Wait for loading...");
+              return;
+            }
+            setTradeKeyLoading(true);
+            try {
+              const pyraZone = new PyraZone({
+                chainId: globalStates.chainId,
+                assetId: creatorStates.pyraZone.asset_id,
+                connector,
+              });
+              const keyId = await pyraZone.buyTierkey(0);
+              console.log({ keyId });
+              const { unlockedFolder } = await dispatch(
+                unlockCreatorContents({
+                  chainId: globalStates.chainId,
+                  assetId: creatorStates.pyraZone.asset_id,
+                  connector,
+                }),
+              ).unwrap();
+              console.log({ unlockedFolder });
+            } finally {
+              setTradeKeyLoading(false);
+            }
+          }}
+        >
+          Buy key
+        </BlackButton>
+      </Section>
+      <Section
+        width='100%'
+        alignItems='center'
+        padding='120px 0'
+        flex='0 0 auto'
+        gap='22px'
+      >
+        {Object.values(creatorStates.tierKeyHolders || {}).length > 0 && (
+          <>
+            <FlexRow gap='4px'>
+              <AvatarGroup>
+                {Object.values(creatorStates.tierKeyHolders || {})
+                  .slice(0, 5)
+                  .map((holder, idx) => {
+                    return (
+                      <Avatar
+                        key={idx}
+                        sx={{
+                          bgcolor: stringToColor(holder.tierkey_holder),
+                          border: "none !important",
+                        }}
+                      >
+                        {holder.tierkey_holder.slice(-2)}
+                      </Avatar>
+                    );
+                  })}
+              </AvatarGroup>
+              {Object.values(creatorStates.tierKeyHolders || {}).length > 5 && (
+                <span className='locked-bottom-extra-tip'>
+                  +
+                  {Object.values(creatorStates.tierKeyHolders || {}).length - 5}
+                </span>
+              )}
+            </FlexRow>
+            <p className='locked-bottom-tip'>also bought this collection</p>
+          </>
+        )}
+      </Section>
+    </LockedSectionWrap>
   );
 };
 
