@@ -25,8 +25,10 @@ export const loadTrendingPyraZones = createAsyncThunk(
     connector: Connector;
     orderBy?: "block_number" | "tierkey_sales";
     orderType?: "asc" | "desc";
+    page?: number;
+    pageSize?: number;
   }) => {
-    const { chainId, connector, orderBy, orderType } = args;
+    const { chainId, connector, orderBy, orderType, page, pageSize } = args;
     const ONE_WEEK = 3500 * 24 * 7;
     const trendingPyraZones: Array<TrendingPyraZone> =
       await PyraZone.loadPyraZones({
@@ -34,6 +36,8 @@ export const loadTrendingPyraZones = createAsyncThunk(
         recentTime: ONE_WEEK,
         orderBy,
         orderType,
+        page,
+        pageSize,
       });
     for (let i = 0; i < trendingPyraZones.length; i++) {
       const pyraZone = trendingPyraZones[i];
@@ -77,11 +81,17 @@ export const loadTrendingPyraZones = createAsyncThunk(
 export const homeSlice = createSlice({
   name: "home",
   initialState,
-  reducers: {},
+  reducers: {
+    clearTrendingPyraZones: state => {
+      state.trendingPyraZones = [];
+    },
+  },
   extraReducers: builder => {
     builder.addCase(loadTrendingPyraZones.fulfilled, (state, action) => {
       const trendingPyraZones = action.payload;
-      state.trendingPyraZones = trendingPyraZones;
+      state.trendingPyraZones = (state.trendingPyraZones || []).concat(
+        trendingPyraZones,
+      );
     });
   },
 });

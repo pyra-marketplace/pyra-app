@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useStore } from "@meteor-web3/hooks";
 import { CircularProgress } from "@mui/material";
 import { motion, useScroll } from "framer-motion";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 import {
   HomeWrapper,
@@ -21,7 +22,11 @@ import {
 import PlaceholderSvg from "@/assets/icons/placeholder.svg";
 import FeaturedNftPng from "@/assets/images/featured-nft.png";
 import { TabButtons } from "@/components/TabButtons";
-import { TrendingPyraZone, loadTrendingPyraZones } from "@/state/home/slice";
+import {
+  TrendingPyraZone,
+  homeSlice,
+  loadTrendingPyraZones,
+} from "@/state/home/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section, FlexRow, RoundCard } from "@/styled";
 import { stringAbbreviation } from "@/utils";
@@ -275,32 +280,44 @@ const CreatorSection: React.FC = () => {
     "Recent",
   ];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
-  const [loading, setLoading] = useState(false);
+  const [hasMorePage, setHasMorePage] = useState(true);
+  const [nowLoadingPage, setNowLoadingPage] = useState(1);
 
   useEffect(() => {
-    init();
+    dispatch(homeSlice.actions.clearTrendingPyraZones());
+    setNowLoadingPage(1);
+    setHasMorePage(true);
   }, [selectedTab]);
 
-  const init = async () => {
-    setLoading(true);
-    try {
-      const trendingPyraZones = await dispatch(
-        loadTrendingPyraZones({
-          chainId: globalStates.chainId,
-          connector,
-          orderBy:
-            selectedTab === "Top"
-              ? "tierkey_sales"
-              : selectedTab === "Recent"
-                ? "block_number"
-                : undefined,
-          orderType: "desc",
-        }),
-      ).unwrap();
-      console.log({ trendingPyraZones });
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    handleLoadTrendingPyraZones(nowLoadingPage);
+  }, [selectedTab, nowLoadingPage]);
+
+  const handleLoadTrendingPyraZones = async (
+    page: number,
+    pageSize: number = 10,
+  ) => {
+    const trendingPyraZones = await dispatch(
+      loadTrendingPyraZones({
+        chainId: globalStates.chainId,
+        connector,
+        orderBy:
+          selectedTab === "Top"
+            ? "tierkey_sales"
+            : selectedTab === "Recent"
+              ? "block_number"
+              : undefined,
+        orderType: "desc",
+        page,
+        pageSize,
+      }),
+    ).unwrap();
+    if (trendingPyraZones.length < pageSize) {
+      setHasMorePage(false);
+    } else {
+      setHasMorePage(true);
     }
+    console.log({ page, pageSize, trendingPyraZones });
   };
 
   return (
@@ -329,16 +346,29 @@ const CreatorSection: React.FC = () => {
               <div className='table-item'>Holders</div>
               <div className='table-item'>Watchlists</div>
             </div>
-            {!loading &&
-              trendingPyraZones &&
-              trendingPyraZones.map((item, index) => {
-                return <CreatorTableItem trendingPyraZone={item} key={index} />;
-              })}
-            {loading && (
-              <div className='loading'>
-                <CircularProgress color='inherit' />
-              </div>
-            )}
+            <InfiniteScroll
+              dataLength={trendingPyraZones?.length || 0}
+              next={() => setNowLoadingPage(prev => prev + 1)}
+              hasMore={hasMorePage}
+              loader={
+                <div className='loading'>
+                  <CircularProgress color='inherit' />
+                </div>
+              }
+            >
+              {trendingPyraZones &&
+                trendingPyraZones.map((item, index) => {
+                  return (
+                    <CreatorTableItem trendingPyraZone={item} key={index} />
+                  );
+                })}
+              {(!trendingPyraZones ||
+                (trendingPyraZones.length === 0 && !hasMorePage)) && (
+                <div className='loading'>
+                  <CircularProgress color='inherit' />
+                </div>
+              )}
+            </InfiniteScroll>
           </div>
         </TableWrap>
       </Section>
