@@ -16,11 +16,15 @@ export interface GlobalStates {
   chainCurrency: ChainCurrency;
   walletBalance?: string;
   userInfo?: {
-    description: string;
-    id: string;
-    name: string;
-    profile_image_url: string;
-    username: string;
+    address: string;
+    did: string;
+    twitter: {
+      description: string;
+      id: string;
+      name: string;
+      profile_image_url: string;
+      username: string;
+    };
   };
 }
 

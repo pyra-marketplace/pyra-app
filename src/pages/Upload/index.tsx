@@ -23,7 +23,7 @@ import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
 import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { checkOrCreatePryaZone } from "@/state/createor/slice";
+import { createPryaZone } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section } from "@/styled";
 
@@ -111,7 +111,7 @@ export const Upload: React.FC = () => {
       if (!pyraZone) {
         assetId = (
           await dispatch(
-            checkOrCreatePryaZone({
+            createPryaZone({
               chainId: globalStates.chainId,
               address,
               connector,

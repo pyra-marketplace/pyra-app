@@ -62,7 +62,13 @@ export const HomeHeader = (): React.ReactElement => {
           state,
         });
         console.log({ userInfo });
-        dispatch(globalSlice.actions.setUserInfo(userInfo));
+        dispatch(
+          globalSlice.actions.setUserInfo({
+            address: address!,
+            did: pkh!,
+            twitter: userInfo,
+          }),
+        );
         message.success("Bing twitter successfully.");
       } catch (e: any) {
         console.warn(e);

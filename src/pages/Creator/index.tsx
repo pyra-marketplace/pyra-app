@@ -3,7 +3,17 @@ import React, { useEffect, useRef, useState } from "react";
 import { Media, message } from "@meteor-web3/components";
 import { MirrorFile } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
-import { AvatarGroup, Avatar } from "@mui/material";
+import {
+  AvatarGroup,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  LinearProgress,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import { PyraZone, PyraZoneRes } from "@pyra-marketplace/pyra-sdk";
 import { ethers } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
@@ -36,7 +46,7 @@ import DefaultBannerPng from "@/assets/images/default-banner.png";
 import { FileInfoModal } from "@/components/FileInfoModal";
 import { TabButtons } from "@/components/TabButtons";
 import {
-  checkOrCreatePryaZone,
+  createPryaZone,
   creatorSlice,
   loadCreatorBaseInfos,
   loadCreatorContents,
@@ -53,6 +63,7 @@ export const Creator: React.FC = () => {
   const tabs: Array<"Share" | "Content"> = ["Share", "Content"];
   const [selectedTab, setSelectedTab] = useState(tabs[1]);
   const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
+  const [creatingPyraZone, setCreatingPyraZone] = useState(false);
 
   const { address } = useParams<{ address: string }>();
   const navigate = useNavigate();
@@ -96,12 +107,29 @@ export const Creator: React.FC = () => {
           dispatch(loadCreatorUserInfo({ address: address! }));
         }
         pyraZone = await dispatch(
-          checkOrCreatePryaZone({
+          loadPyraZone({
             chainId: globalStates.chainId,
             address: address!,
-            connector,
           }),
         ).unwrap();
+        if (!pyraZone) {
+          // create pyra zone
+          setCreatingPyraZone(true);
+          try {
+            pyraZone = await dispatch(
+              createPryaZone({
+                chainId: globalStates.chainId,
+                address: address!,
+                connector,
+              }),
+            ).unwrap();
+          } catch (e: any) {
+            console.error("Create pyra zone failed: ", e);
+            message.error("Create pyra zone failed: " + (e.message || e));
+            return;
+          }
+          setCreatingPyraZone(false);
+        }
       } else {
         dispatch(loadCreatorUserInfo({ address: address! }));
         pyraZone = await dispatch(
@@ -188,20 +216,23 @@ export const Creator: React.FC = () => {
         <AvatarWrap style={{ marginTop: "-99.5px", marginBottom: "11px" }}>
           <img
             className='user-img'
-            src={creatorStates.userInfo?.profile_image_url || DefaultAvatarPng}
+            src={
+              creatorStates.userInfo?.twitter.profile_image_url ||
+              DefaultAvatarPng
+            }
           />
         </AvatarWrap>
         <UserInfo width='100%' alignItems='center' gap='24px'>
           <div className='user-name'>
-            {creatorStates.userInfo?.name ||
+            {creatorStates.userInfo?.twitter.name ||
               stringAbbreviation(creatorStates.pyraZone?.publisher, 4, 4)}
           </div>
           <FlexRow className='account-info' gap='11px'>
-            {creatorStates.userInfo?.username && (
+            {creatorStates.userInfo?.twitter.username && (
               <>
                 <FlexRow gap='11px'>
                   <img src={TwitterIconSvg} alt='Twitter' />
-                  <span>@{creatorStates.userInfo.username}</span>
+                  <span>@{creatorStates.userInfo.twitter.username}</span>
                 </FlexRow>
                 <hr className='divider' />
               </>
@@ -292,6 +323,22 @@ export const Creator: React.FC = () => {
         />
         {selectedTab === "Content" && <FinderContentSection />}
       </Section>
+      <Dialog open={creatingPyraZone} fullWidth>
+        <DialogTitle>
+          {creatingPyraZone ? "Wait for initializing" : "Finished"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            For your first entering PyraZone, we will create it automatically.
+          </DialogContentText>
+        </DialogContent>
+        {creatingPyraZone && (
+          <DialogContent>
+            <LinearProgress />
+          </DialogContent>
+        )}
+        <DialogActions></DialogActions>
+      </Dialog>
     </CreatorWrapper>
   );
 };

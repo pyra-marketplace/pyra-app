@@ -25,11 +25,15 @@ export interface CreatorStates {
   contentFiles?: MirrorFileRecord;
   contentAccessible?: boolean;
   userInfo?: {
-    description: string;
-    id: string;
-    name: string;
-    profile_image_url: string;
-    username: string;
+    address: string;
+    did: string;
+    twitter: {
+      description: string;
+      id: string;
+      name: string;
+      profile_image_url: string;
+      username: string;
+    };
   };
 }
 
@@ -48,40 +52,31 @@ const initialState: CreatorStates = {
   userInfo: undefined,
 };
 
-export const checkOrCreatePryaZone = createAsyncThunk(
-  "global/checkOrCreatePryaZone",
+export const createPryaZone = createAsyncThunk(
+  "global/createPryaZone",
   async (args: { chainId: number; address: string; connector: Connector }) => {
     const { chainId, address, connector } = args;
-    let _pyraZone: PyraZoneRes;
-    const pyraZones = await PyraZone.loadPyraZones({
+    const pyraZone = new PyraZone({
       chainId,
-      publishers: [address],
+      connector,
     });
-    if (pyraZones.length > 0) {
-      _pyraZone = pyraZones[0];
-    } else {
-      const pyraZone = new PyraZone({
+    await pyraZone.createPyraZone();
+    // TODO: remove auto-create-share when new contract is ready
+    const pyraMarket = new PyraMarket({
+      chainId,
+      connector,
+    });
+    await pyraMarket.createShare({
+      shareName: "Test Share",
+      shareSymbol: "TS",
+      feePoint: 100,
+    });
+    const _pyraZone = (
+      await PyraZone.loadPyraZones({
         chainId,
-        connector,
-      });
-      await pyraZone.createPyraZone();
-      // TODO: remove auto-create-share when new contract is ready
-      const pyraMarket = new PyraMarket({
-        chainId,
-        connector,
-      });
-      await pyraMarket.createShare({
-        shareName: "Test Share",
-        shareSymbol: "TS",
-        feePoint: 100,
-      });
-      _pyraZone = (
-        await PyraZone.loadPyraZones({
-          chainId,
-          publishers: [address],
-        })
-      )[0];
-    }
+        publishers: [address],
+      })
+    )[0];
     return _pyraZone;
   },
 );
@@ -290,7 +285,7 @@ export const creatorSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(checkOrCreatePryaZone.fulfilled, (state, action) => {
+    builder.addCase(createPryaZone.fulfilled, (state, action) => {
       state.pyraZone = action.payload;
     });
     builder.addCase(loadPyraZone.fulfilled, (state, action) => {
