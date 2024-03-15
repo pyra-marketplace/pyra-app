@@ -15,6 +15,13 @@ export interface GlobalStates {
   chainId: ChainId;
   chainCurrency: ChainCurrency;
   walletBalance?: string;
+  userInfo?: {
+    description: string;
+    id: string;
+    name: string;
+    profile_image_url: string;
+    username: string;
+  };
 }
 
 const chainId: ChainId = (process.env.CHAIN_ID as any) || ChainId.PolygonMumbai;
@@ -45,6 +52,9 @@ export const globalSlice = createSlice({
   reducers: {
     setAutoConnecting: (state, action: PayloadAction<boolean>) => {
       state.autoConnecting = action.payload;
+    },
+    setUserInfo: (state, action: PayloadAction<GlobalStates["userInfo"]>) => {
+      state.userInfo = action.payload;
     },
   },
   extraReducers: builder => {

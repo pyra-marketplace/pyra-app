@@ -1,5 +1,6 @@
 import { Connector, MirrorFileRecord } from "@meteor-web3/connector";
 import {
+  Auth as TwitterAuth,
   ChainId,
   PyraMarket,
   PyraMarketShareActivityRes,
@@ -23,6 +24,13 @@ export interface CreatorStates {
   shareActivities?: PyraMarketShareActivityRes[];
   contentFiles?: MirrorFileRecord;
   contentAccessible?: boolean;
+  userInfo?: {
+    description: string;
+    id: string;
+    name: string;
+    profile_image_url: string;
+    username: string;
+  };
 }
 
 const initialState: CreatorStates = {};
@@ -223,6 +231,22 @@ export const unlockCreatorContents = createAsyncThunk(
   },
 );
 
+export const loadCreatorUserInfo = createAsyncThunk(
+  "creator/loadCreatorUserInfo",
+  async (args: { address: string }) => {
+    const { address } = args;
+    try {
+      const userInfo = await TwitterAuth.info({
+        address,
+      });
+      return userInfo;
+    } catch (e) {
+      console.warn(e);
+    }
+    return undefined;
+  },
+);
+
 export const creatorSlice = createSlice({
   name: "creator",
   initialState,
@@ -241,6 +265,12 @@ export const creatorSlice = createSlice({
       action: PayloadAction<PyraMarketShareHolderRes[]>,
     ) => {
       state.shareHolders = action.payload;
+    },
+    setContentAccessible: (state, action: PayloadAction<boolean>) => {
+      state.contentAccessible = action.payload;
+    },
+    setUserInfo: (state, action: PayloadAction<CreatorStates["userInfo"]>) => {
+      state.userInfo = action.payload;
     },
   },
   extraReducers: builder => {
@@ -285,6 +315,9 @@ export const creatorSlice = createSlice({
         state.contentFiles = contentFiles;
         state.contentAccessible = true;
       }
+    });
+    builder.addCase(loadCreatorUserInfo.fulfilled, (state, action) => {
+      state.userInfo = action.payload;
     });
   },
 });

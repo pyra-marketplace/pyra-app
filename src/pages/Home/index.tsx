@@ -4,6 +4,7 @@ import { useStore } from "@meteor-web3/hooks";
 import { CircularProgress } from "@mui/material";
 import { motion, useScroll } from "framer-motion";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useLocation } from "react-router-dom";
 
 import {
   HomeWrapper,

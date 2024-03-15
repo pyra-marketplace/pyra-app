@@ -1,25 +1,35 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { Auth, message } from "@meteor-web3/components";
 import { MeteorContext, useAction, useStore } from "@meteor-web3/hooks";
+import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Wrapper } from "./styled";
 
 import SearchIconSvg from "@/assets/icons/search.svg";
 import PyraSvg from "@/assets/pyra.svg";
-import { useSelector } from "@/state/hook";
+import { globalSlice } from "@/state/global/slice";
+import { useDispatch, useSelector } from "@/state/hook";
 import { stringAbbreviation } from "@/utils";
 
 export const HomeHeader = (): React.ReactElement => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { pkh, address } = useStore();
   const meteorContext = useContext(MeteorContext);
   const autoConnecting = useSelector(state => state.global.autoConnecting);
+  const userInfo = useSelector(state => state.global.userInfo);
+
+  const [authenticating, setAuthenticating] = useState(false);
 
   const handleConnect = async () => {
     if (autoConnecting) {
       message.info("Please wait for auto connecting...");
+      return;
+    }
+    if (authenticating) {
+      message.info("Please wait for authenticating...");
       return;
     }
     const connectRes = await Auth.openModal(
@@ -30,6 +40,54 @@ export const HomeHeader = (): React.ReactElement => {
     );
     console.log(connectRes);
   };
+
+  const handleBindTwitter = async () => {
+    setAuthenticating(true);
+    const { url } = await TwitterAuth.login({
+      connector: meteorContext.connector,
+      redirectUrl: location.href,
+    });
+    location.replace(url);
+  };
+
+  const handleAuth = async () => {
+    const searchParams = new URLSearchParams(location.search);
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    if (code && state) {
+      setAuthenticating(true);
+      try {
+        const userInfo = await TwitterAuth.bind({
+          code,
+          state,
+        });
+        console.log({ userInfo });
+        dispatch(globalSlice.actions.setUserInfo(userInfo));
+        message.success("Bing twitter successfully.");
+      } catch (e: any) {
+        console.warn(e);
+        message.error("Bind twitter failed, please try again.");
+      }
+      setAuthenticating(false);
+      return;
+    }
+    if (address) {
+      try {
+        const userInfo = await TwitterAuth.info({
+          address,
+        });
+        dispatch(globalSlice.actions.setUserInfo(userInfo));
+        console.log({ userInfo });
+      } catch (e: any) {
+        dispatch(globalSlice.actions.setUserInfo(undefined));
+        console.warn(e);
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleAuth();
+  }, [address, location]);
 
   return (
     <Wrapper>
@@ -59,12 +117,25 @@ export const HomeHeader = (): React.ReactElement => {
           >
             Create
           </div>
-          <button className='link' onClick={handleConnect}>
+          <button
+            className='link'
+            onClick={() => {
+              if (pkh && !userInfo) {
+                handleBindTwitter();
+              } else {
+                handleConnect();
+              }
+            }}
+          >
             {autoConnecting
               ? "Connecting..."
-              : pkh
-                ? stringAbbreviation(address, 4, 4)
-                : "Connect Wallet"}
+              : authenticating
+                ? "Authenticating..."
+                : pkh && !userInfo
+                  ? "Bind twitter"
+                  : pkh && userInfo
+                    ? stringAbbreviation(address, 4, 4)
+                    : "Connect Wallet"}
           </button>
         </div>
       </div>

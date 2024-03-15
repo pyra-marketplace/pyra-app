@@ -37,9 +37,11 @@ import { FileInfoModal } from "@/components/FileInfoModal";
 import { TabButtons } from "@/components/TabButtons";
 import {
   checkOrCreatePryaZone,
+  creatorSlice,
   loadCreatorBaseInfos,
   loadCreatorContents,
   loadCreatorShareInfos,
+  loadCreatorUserInfo,
   loadPyraZone,
   unlockCreatorContents,
 } from "@/state/createor/slice";
@@ -83,6 +85,12 @@ export const Creator: React.FC = () => {
     try {
       let pyraZone: PyraZoneRes;
       if (address === userAddress) {
+        dispatch(creatorSlice.actions.setContentAccessible(true));
+        if (globalStates.userInfo) {
+          dispatch(creatorSlice.actions.setUserInfo(globalStates.userInfo));
+        } else {
+          dispatch(loadCreatorUserInfo({ address: address! }));
+        }
         pyraZone = await dispatch(
           checkOrCreatePryaZone({
             chainId: globalStates.chainId,
@@ -91,6 +99,7 @@ export const Creator: React.FC = () => {
           }),
         ).unwrap();
       } else {
+        dispatch(loadCreatorUserInfo({ address: address! }));
         pyraZone = await dispatch(
           loadPyraZone({
             chainId: globalStates.chainId,
@@ -172,16 +181,26 @@ export const Creator: React.FC = () => {
           </div>
         </Banner>
         <AvatarWrap style={{ marginTop: "-99.5px", marginBottom: "11px" }}>
-          <img className='user-img' src={DefaultAvatarPng} />
+          <img
+            className='user-img'
+            src={creatorStates.userInfo?.profile_image_url || DefaultAvatarPng}
+          />
         </AvatarWrap>
         <UserInfo width='100%' alignItems='center' gap='24px'>
-          <div className='user-name'>Cathy</div>
+          <div className='user-name'>
+            {creatorStates.userInfo?.name ||
+              stringAbbreviation(creatorStates.pyraZone?.publisher, 4, 4)}
+          </div>
           <FlexRow className='account-info' gap='11px'>
-            <FlexRow gap='11px'>
-              <img src={TwitterIconSvg} alt='Twitter' />
-              <span>@0xcathy</span>
-            </FlexRow>
-            <hr className='divider' />
+            {creatorStates.userInfo?.username && (
+              <>
+                <FlexRow gap='11px'>
+                  <img src={TwitterIconSvg} alt='Twitter' />
+                  <span>@{creatorStates.userInfo.username}</span>
+                </FlexRow>
+                <hr className='divider' />
+              </>
+            )}
             <FlexRow
               gap='11px'
               style={{ cursor: "pointer" }}
