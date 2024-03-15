@@ -5,10 +5,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { PluginOption, defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    visualizer() as PluginOption,
-  ],
+  plugins: [react(), visualizer() as PluginOption],
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {
@@ -22,7 +19,7 @@ export default defineConfig({
   // },
   build: {
     target: "es2020",
-    sourcemap: true,
+    // sourcemap: true,
   },
   server: {
     port: 1234,
