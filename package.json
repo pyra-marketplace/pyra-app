@@ -19,6 +19,7 @@
     "@meteor-web3/utils": "^1.0.5",
     "@mui/material": "^5.15.13",
     "@mui/styled-engine-sc": "6.0.0-alpha.17",
+    "@pyra-marketplace/pyra-sdk": "^1.0.1",
     "@reduxjs/toolkit": "^2.2.1",
     "buffer": "^6.0.3",
     "ethers": "^5.7.2",
