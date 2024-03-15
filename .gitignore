@@ -26,3 +26,5 @@ scripts/s3-deploy/*
 scripts/upload.js
 
 pnpm-lock.yaml
+
+stats.html
