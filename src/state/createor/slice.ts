@@ -33,7 +33,20 @@ export interface CreatorStates {
   };
 }
 
-const initialState: CreatorStates = {};
+const initialState: CreatorStates = {
+  pyraZone: undefined,
+  shareBuyPrice: undefined,
+  tierKeyBuyPrice: undefined,
+  tierKeyHolders: undefined,
+  shareHolders: undefined,
+  shareTotalValue: undefined,
+  shareTotalSupply: undefined,
+  shareTotalVolume: undefined,
+  shareActivities: undefined,
+  contentFiles: undefined,
+  contentAccessible: undefined,
+  userInfo: undefined,
+};
 
 export const checkOrCreatePryaZone = createAsyncThunk(
   "global/checkOrCreatePryaZone",
@@ -271,6 +284,9 @@ export const creatorSlice = createSlice({
     },
     setUserInfo: (state, action: PayloadAction<CreatorStates["userInfo"]>) => {
       state.userInfo = action.payload;
+    },
+    clearAllInfos: state => {
+      state = { ...initialState };
     },
   },
   extraReducers: builder => {

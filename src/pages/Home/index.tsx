@@ -4,7 +4,7 @@ import { useStore } from "@meteor-web3/hooks";
 import { CircularProgress } from "@mui/material";
 import { motion, useScroll } from "framer-motion";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   HomeWrapper,
@@ -340,7 +340,7 @@ const CreatorSection: React.FC = () => {
           <div className='table-container hideScrollbar'>
             <div className='table-header'>
               <div className='table-item'>Creator name</div>
-              <div className='table-item'>Total Value</div>
+              <div className='table-item'>Total Volumn</div>
               <div className='table-item'>Key price</div>
               <div className='table-item'>Files num</div>
               <div className='table-item'>Key sales</div>
@@ -382,11 +382,17 @@ const CreatorTableItem = ({
 }: {
   trendingPyraZone: TrendingPyraZone;
 }) => {
+  const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
+
   return (
     <div className='table-row'>
       <div className='table-item'>
-        <FlexRow gap='25px'>
+        <FlexRow
+          gap='25px'
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/creator/" + trendingPyraZone.publisher)}
+        >
           <div className='avatar'>
             {trendingPyraZone.user_info?.profile_image_url && (
               <img src={trendingPyraZone.user_info.profile_image_url} />
@@ -398,12 +404,12 @@ const CreatorTableItem = ({
           </span>
         </FlexRow>
       </div>
-      <div className='table-item'>${trendingPyraZone.share_price}</div>
+      <div className='table-item'>{trendingPyraZone.total_volumn}</div>
       <div className='table-item'>
-        {trendingPyraZone.key_price} {chainCurrency}
+        {trendingPyraZone.tierkey_price} {chainCurrency}
       </div>
       <div className='table-item'>{trendingPyraZone.files_count}</div>
-      <div className='table-item'>{trendingPyraZone.key_sales}</div>
+      <div className='table-item'>{trendingPyraZone.tierkey_sales}</div>
       <div className='table-item'>{trendingPyraZone.share_holders}</div>
       <div className='table-item'>{trendingPyraZone.watch_lists}</div>
     </div>

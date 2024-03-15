@@ -1,6 +1,6 @@
 import React from "react";
 
-import { createBrowserRouter } from "react-router-dom";
+import { ScrollRestoration, createBrowserRouter } from "react-router-dom";
 
 import Layout from "@/layout";
 import { Creator } from "@/pages/Creator";
@@ -11,7 +11,12 @@ import { Upload } from "@/pages/Upload";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <>
+        <Layout />
+        <ScrollRestoration />
+      </>
+    ),
     // errorElement: <NotFound />,
     children: [
       { path: "/", element: <Home /> },

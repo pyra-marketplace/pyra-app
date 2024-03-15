@@ -22,6 +22,7 @@ import {
 import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
 import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { checkOrCreatePryaZone } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section } from "@/styled";
@@ -157,14 +158,32 @@ export const Upload: React.FC = () => {
       console.log({ tierFile });
       const createdTierFile = await _pyraZone.createTierFile(tierFile);
       console.log({ createdTierFile });
-      message.success("Publish successfully");
-      navigate(-1);
+      const choose = await ConfirmModal.open({
+        title: "Publish successfully",
+        description: "Continue to publish more files or go to your space page?",
+        type: "success",
+        confirmText: "Publish more",
+        cancelText: "Go to space",
+      });
+      if (choose) {
+        clear();
+      } else {
+        navigate("/creator/" + address);
+      }
     } catch (e) {
       console.error(e);
       message.error(e as any);
     } finally {
       setUploadLoading(false);
     }
+  };
+
+  const clear = () => {
+    setFileList([]);
+    setFileTitle("");
+    setFileDescription("");
+    setFileTags([]);
+    setSelectedTier("All paid members");
   };
 
   return (
@@ -229,17 +248,23 @@ export const Upload: React.FC = () => {
       </UploadSection>
       <FormSection>
         <Section gap='40px' width='100%'>
-          <TextInput type='text' placeholder='Title' onChange={setFileTitle} />
+          <TextInput
+            type='text'
+            placeholder='Title'
+            controlledValue={fileTitle}
+            onChange={setFileTitle}
+          />
           <TextInput
             type='textarea'
             placeholder='Description(optional)'
+            controlledValue={fileDescription}
             onChange={setFileDescription}
           />
-          <TagInput onChange={setFileTags} />
+          <TagInput controlledTags={fileTags} onChange={setFileTags} />
           <Selector
             title='Who can see this?'
             options={["All paid members"]}
-            defaultSelected='All paid members'
+            controlledSelected={selectedTier}
             onChange={(value: any) => setSelectedTier(value)}
           />
         </Section>
@@ -423,22 +448,32 @@ const Selector: React.FC<SelectorProps> = ({
 };
 
 interface TagInputProps {
+  defaultTags?: string[];
+  controlledTags?: string[];
   onChange?: (tags: string[]) => void;
 }
 
-const TagInput: React.FC<TagInputProps> = ({ onChange }: TagInputProps) => {
-  const [tags, setTags] = useState<string[]>([]);
+const TagInput: React.FC<TagInputProps> = ({
+  defaultTags,
+  controlledTags,
+  onChange,
+}: TagInputProps) => {
+  const [tags, setTags] = useState<string[]>(defaultTags || []);
 
   useEffect(() => {
-    onChange?.(tags);
-  }, [tags]);
+    if (controlledTags) {
+      setTags(controlledTags);
+    }
+  }, [controlledTags]);
 
   const handleRemoveTag = (index: number) => {
     setTags(prev => prev.filter((_, i) => i !== index));
+    onChange?.(tags.filter((_, i) => i !== index));
   };
 
   const handleAddTag = (value: string, setValue: React.Dispatch<string>) => {
     setTags(prev => [...prev, value]);
+    onChange?.([...tags, value]);
     setValue("");
   };
 

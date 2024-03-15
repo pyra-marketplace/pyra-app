@@ -62,6 +62,10 @@ export const Creator: React.FC = () => {
   const { connector, address: userAddress } = useStore();
 
   useEffect(() => {
+    dispatch(creatorSlice.actions.clearAllInfos());
+  }, []);
+
+  useEffect(() => {
     if (!address || globalStates.autoConnecting) return;
     init();
   }, [address, userAddress, globalStates.autoConnecting]);
@@ -131,28 +135,29 @@ export const Creator: React.FC = () => {
     try {
       if (selectedTab === "Content") {
         if (!creatorStates.pyraZone) return;
-        await dispatch(
+        const contentInfo = await dispatch(
           loadCreatorContents({
             chainId: globalStates.chainId,
             assetId: creatorStates.pyraZone.asset_id,
             accountAddress: userAddress,
             connector,
           }),
-        )
-          .unwrap()
-          .then(console.log);
-        // try to unlock content folder
-        try {
-          const { unlockedFolder } = await dispatch(
-            unlockCreatorContents({
-              chainId: globalStates.chainId,
-              assetId: creatorStates.pyraZone.asset_id,
-              connector,
-            }),
-          ).unwrap();
-          console.log({ unlockedFolder });
-        } catch (e: any) {
-          console.warn("unlock folder failed: ", e);
+        ).unwrap();
+        console.log({ contentInfo });
+        if (address !== userAddress && contentInfo.isAccessible) {
+          // try to unlock content folder
+          try {
+            const { unlockedFolder } = await dispatch(
+              unlockCreatorContents({
+                chainId: globalStates.chainId,
+                assetId: creatorStates.pyraZone.asset_id,
+                connector,
+              }),
+            ).unwrap();
+            console.log({ unlockedFolder });
+          } catch (e: any) {
+            console.warn("unlock folder failed: ", e);
+          }
         }
       } else {
         await dispatch(
@@ -418,11 +423,13 @@ const ContentSection = ({
         setColumnGap(minColumnGap);
         setRowGap(0);
       } else {
-        const columnGap =
+        let columnGap =
           (sectionWidth - cardItemWidth * columnCount - 1) / (columnCount - 1);
-        const rowGap = columnGap * 1.7;
+        columnGap = columnGap > 80 ? 80 : columnGap;
+        let rowGap = columnGap * 1.7;
+        rowGap = rowGap > 100 ? 100 : rowGap;
         setColumnGap(columnGap);
-        setRowGap(rowGap > 100 ? 100 : rowGap);
+        setRowGap(rowGap);
       }
     }
   };
@@ -467,6 +474,7 @@ const ContentSection = ({
 };
 
 const LockedSection = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const globalStates = useSelector(state => state.global);
   const creatorStates = useSelector(state => state.creator);
@@ -517,6 +525,7 @@ const LockedSection = () => {
           }}
         >
           Buy key
+          {tradeKeyLoading && <img src={LoadingWhiteIconSvg} alt='loading' />}
         </BlackButton>
       </Section>
       <Section
@@ -537,11 +546,21 @@ const LockedSection = () => {
                       <Avatar
                         key={idx}
                         sx={{
-                          bgcolor: stringToColor(holder.tierkey_holder),
+                          bgcolor: stringToColor(
+                            holder.user_info?.name || holder.tierkey_holder,
+                          ),
                           border: "none !important",
+                          cursor: "pointer",
+                        }}
+                        src={holder.user_info?.profile_image_url}
+                        onClick={() => {
+                          dispatch(creatorSlice.actions.clearAllInfos());
+                          navigate("/creator/" + holder.tierkey_holder);
                         }}
                       >
-                        {holder.tierkey_holder.slice(-2)}
+                        {(
+                          holder.user_info?.name || holder.tierkey_holder
+                        ).slice(-2)}
                       </Avatar>
                     );
                   })}

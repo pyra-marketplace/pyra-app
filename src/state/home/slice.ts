@@ -4,12 +4,11 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 
 export type TrendingPyraZone = PyraZoneRes & {
-  share_price?: string;
-  key_price?: string;
+  tierkey_price?: string;
   files_count?: number;
-  key_sales?: number;
   share_holders?: number;
   watch_lists?: number;
+  total_volumn?: string;
 };
 
 export interface HomeStates {
@@ -41,37 +40,23 @@ export const loadTrendingPyraZones = createAsyncThunk(
       });
     for (let i = 0; i < trendingPyraZones.length; i++) {
       const pyraZone = trendingPyraZones[i];
-      const pyraMarket = new PyraMarket({
-        chainId,
-        connector,
-      });
-      const shareBuyPrice = await pyraMarket.loadBuyPrice({
-        creator: pyraZone.publisher,
-        amount: ethers.utils.parseEther("1"),
-      });
-      const _pyraZone = new PyraZone({
-        chainId,
-        assetId: pyraZone.asset_id,
-        connector,
-      });
-      const tierKeyBuyPrice = await _pyraZone.loadBuyPrice(0);
-      const tierKeyHolders = await PyraZone.loadPyraZoneTierkeyHolders({
-        chainId,
-        assetId: pyraZone.asset_id,
-        tier: 0,
-      });
+      const pyraMarket = (
+        await PyraMarket.loadPyraMarkets({
+          chainId,
+          publishers: [pyraZone.publisher],
+        })
+      )[0];
       const shareHolders = await PyraMarket.loadPyraMarketShareHolders({
         chainId,
         publisher: pyraZone.publisher,
       });
       trendingPyraZones[i] = {
         ...pyraZone,
-        share_price: ethers.utils.formatEther(shareBuyPrice),
-        key_price: ethers.utils.formatEther(tierKeyBuyPrice),
         files_count: 0,
-        key_sales: tierKeyHolders.length,
         share_holders: shareHolders.length,
         watch_lists: 0,
+        tierkey_price: ethers.utils.formatEther(pyraZone.tierkey_price!),
+        total_volumn: ethers.utils.formatEther(pyraMarket.total_volume),
       };
     }
     return trendingPyraZones;
