@@ -52,10 +52,9 @@ export const loadTrendingPyraZones = createAsyncThunk(
       });
       trendingPyraZones[i] = {
         ...pyraZone,
-        files_count: 0,
         share_holders: shareHolders.length,
         watch_lists: 0,
-        tierkey_price: ethers.utils.formatEther(pyraZone.tierkey_price!),
+        tierkey_price: ethers.utils.formatEther(pyraZone.tierkey_price),
         total_volumn: ethers.utils.formatEther(pyraMarket.total_volume),
       };
     }
