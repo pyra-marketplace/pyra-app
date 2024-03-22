@@ -62,6 +62,10 @@ export const HomeHeader = (): React.ReactElement => {
           state,
         });
         console.log({ userInfo });
+        const uri = new URL(window.location.href);
+        uri.searchParams.delete("code");
+        uri.searchParams.delete("state");
+        window.history.pushState({}, "", uri);
         dispatch(
           globalSlice.actions.setUserInfo({
             address: address!,
