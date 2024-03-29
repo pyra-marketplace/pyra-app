@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useStore } from "@meteor-web3/hooks";
 import { CircularProgress } from "@mui/material";
-import { motion, useScroll } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -18,6 +18,12 @@ import {
   WhiteButton,
   RoundArrowButton,
   TableWrap,
+  TopTabButtons,
+  HightLightCardText,
+  PlainButton,
+  SpotLightText,
+  SpotLightCardText,
+  SpotLightContentSectionWrap,
 } from "./styled";
 
 import PlaceholderSvg from "@/assets/icons/placeholder.svg";
@@ -29,68 +35,154 @@ import {
   loadTrendingPyraZones,
 } from "@/state/home/slice";
 import { useDispatch, useSelector } from "@/state/hook";
-import { Section, FlexRow, RoundCard } from "@/styled";
+import { Section, FlexRow, RoundCard, AbsoluteSection } from "@/styled";
 import { stringAbbreviation } from "@/utils";
 
 export const Home: React.FC = () => {
   return (
-    <HomeWrapper gap='87px'>
-      <Section
-        flexDirection='row'
-        gap='22px'
-        alignItems='center'
-        justifyContent='space-between'
-        padding='0px 80px'
-      >
-        <Section flexDirection='row' gap='24px' flex='1 0 auto'>
-          <Title big dark>
-            Earn from
-            <br />
-            your data.
-          </Title>
-        </Section>
-        <FlexRow>
-          <BigRightArrow />
-        </FlexRow>
-        <Section flexDirection='column' gap='76px' padding='85px 40px 53px'>
-          <Description>
-            We are laying the groundwork for web3 — the next generation of the
-            internet full of limitless possibilities.
-          </Description>
-          <FlexRow gap='20px'>
-            <LinkButton>Create vault</LinkButton>
-            <img src={PlaceholderSvg} alt='placeholder' />
-          </FlexRow>
-        </Section>
-      </Section>
-      <Section
-        background='#010101'
-        padding='110px 80px'
-        flexDirection='row'
-        gap='32px'
-        alignItems='center'
-      >
-        <Section gap='112px' flex='1 0 auto'>
-          <Title>
-            Earn from
-            <br />
-            your data.
-          </Title>
-          <WhiteButton>MAKE OFFER</WhiteButton>
-        </Section>
-        <img
-          style={{
-            width: "850px",
-            marginTop: "100px",
-            marginBottom: "80px",
-          }}
-          src={FeaturedNftPng}
-          alt='featured-nft'
-        />
-      </Section>
-      {/* <HighLightSection /> */}
+    <HomeWrapper>
+      <TopSection />
       <CreatorSection />
+      <SpotLightSection />
     </HomeWrapper>
+  );
+};
+
+const TopSection: React.FC = () => {
+  const [hideLeftArrow, setHideLeftArrow] = useState(true);
+  const [hideRightArrow, setHideRightArrow] = useState(false);
+  const scrollSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollSectionRef.current) {
+      const handleScroll = () => {
+        if (scrollSectionRef.current) {
+          setHideLeftArrow(scrollSectionRef.current.scrollLeft === 0);
+          setHideRightArrow(
+            scrollSectionRef.current.scrollLeft >=
+              scrollSectionRef.current.scrollWidth -
+                scrollSectionRef.current.clientWidth -
+                5,
+          );
+        }
+      };
+      scrollSectionRef.current.addEventListener("scroll", handleScroll);
+      return () => {
+        scrollSectionRef.current?.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [scrollSectionRef]);
+
+  const handleScroll = (to: number) => {
+    if (scrollSectionRef.current) {
+      scrollSectionRef.current.scroll({
+        left: to,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <Section
+      background='linear-gradient(180deg, #423160 0%, #6D6084 40%, #FFFFFF 91.5%);'
+      padding='94px 32px 0px'
+      gap='32px'
+    >
+      <TopTabButtons>
+        {[
+          "All",
+          "Art",
+          "Gaming",
+          "Memberships",
+          "PFPs",
+          "Photography",
+          "Music",
+        ].map((item, idx) => {
+          return (
+            <div className='tab-button' key={idx}>
+              {item}
+            </div>
+          );
+        })}
+      </TopTabButtons>
+      <Section width='100%' relative>
+        <ScrollableSection
+          className='hideScrollbar'
+          width='100%'
+          gap='16px'
+          flexDirection='row'
+          ref={scrollSectionRef}
+        >
+          <div
+            className='left-arrow-btn'
+            onClick={() => !hideLeftArrow && handleScroll(-800)}
+            data-hidden={hideLeftArrow}
+          >
+            <svg
+              width='16'
+              height='30'
+              viewBox='0 0 16 30'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path
+                d='M2.5 27.4342L13.75 15L2.5 2.5658'
+                stroke='white'
+                strokeWidth='3'
+                strokeLinecap='square'
+              />
+            </svg>
+          </div>
+          <div
+            className='right-arrow-btn'
+            onClick={() => !hideRightArrow && handleScroll(800)}
+            data-hidden={hideRightArrow}
+          >
+            <svg
+              width='16'
+              height='30'
+              viewBox='0 0 16 30'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path
+                d='M2.5 27.4342L13.75 15L2.5 2.5658'
+                stroke='white'
+                strokeWidth='3'
+                strokeLinecap='square'
+              />
+            </svg>
+          </div>
+          <HightLightCard />
+          <HightLightCard />
+          <HightLightCard />
+          <HightLightCard />
+          <HightLightCard />
+          <HightLightCard />
+        </ScrollableSection>
+      </Section>
+    </Section>
+  );
+};
+
+const HightLightCard: React.FC = () => {
+  return (
+    <Section relative width='332px' height='332px'>
+      <RoundCard
+        width='332px'
+        height='332px'
+        borderRadius='12px'
+        background='#6C70C7'
+      ></RoundCard>
+      <AbsoluteSection left='0px' bottom='0px' gap='7px' padding='15px'>
+        <FlexRow width='100%'>
+          <HightLightCardText bold>ZenAcademy</HightLightCardText>
+        </FlexRow>
+        <FlexRow width='100%'>
+          <HightLightCardText>Floor: 0.09 ETH</HightLightCardText>
+        </FlexRow>
+      </AbsoluteSection>
+    </Section>
   );
 };
 
@@ -270,6 +362,7 @@ const CollectionCard: React.FC = () => {
 };
 
 const CreatorSection: React.FC = () => {
+  const TOTAL_ITEM_LIMIT = 5;
   const trendingPyraZones = useSelector(state => state.home.trendingPyraZones);
   const dispatch = useDispatch();
   const globalStates = useSelector(state => state.global);
@@ -296,7 +389,7 @@ const CreatorSection: React.FC = () => {
 
   const handleLoadTrendingPyraZones = async (
     page: number,
-    pageSize: number = 10,
+    pageSize: number = 5,
   ) => {
     const trendingPyraZones = await dispatch(
       loadTrendingPyraZones({
@@ -313,7 +406,10 @@ const CreatorSection: React.FC = () => {
         pageSize,
       }),
     ).unwrap();
-    if (trendingPyraZones.length < pageSize) {
+    if (
+      trendingPyraZones.length < pageSize ||
+      page * pageSize >= TOTAL_ITEM_LIMIT
+    ) {
       setHasMorePage(false);
     } else {
       setHasMorePage(true);
@@ -323,28 +419,57 @@ const CreatorSection: React.FC = () => {
 
   return (
     <Section
-      background='#010101'
-      padding='80px'
+      padding='40px 31px'
       gap='80px'
       width='100%'
-      style={{ marginTop: "-87px" }}
+      // style={{ marginTop: "-87px" }}
     >
-      <Title>Excellent creator.</Title>
       <Section width='100%'>
-        <TabButtons
-          tabs={tabs}
-          controlledSelectedTab={selectedTab}
-          onChange={tab => setSelectedTab(tab as any)}
-        />
+        <FlexRow width='100%' justifyContent='space-between'>
+          <TabButtons
+            tabs={tabs}
+            controlledSelectedTab={selectedTab}
+            onChange={tab => setSelectedTab(tab as any)}
+          />
+          <FlexRow flex='0 0 auto' gap='15px'>
+            <PlainButton style={{ alignItems: "flex-start" }}>
+              <span>All chains</span>
+              <svg
+                width='16'
+                height='16'
+                viewBox='0 0 16 16'
+                fill='none'
+                xmlns='http://www.w3.org/2000/svg'
+              >
+                <g clipPath='url(#clip0_3126_200)'>
+                  <path
+                    d='M13 7L8 12L3 7'
+                    stroke='#121212'
+                    strokeWidth='1.5'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                  />
+                </g>
+                <defs>
+                  <clipPath id='clip0_3126_200'>
+                    <rect width='16' height='16' fill='white' />
+                  </clipPath>
+                </defs>
+              </svg>
+            </PlainButton>
+            <PlainButton>View all</PlainButton>
+          </FlexRow>
+        </FlexRow>
         <TableWrap>
           <div className='table-container hideScrollbar'>
             <div className='table-header'>
-              <div className='table-item'>Creator name</div>
+              <div className='table-item'>Rank</div>
+              <div className='table-item'>Collection</div>
               <div className='table-item'>Total Volumn</div>
-              <div className='table-item'>Key price</div>
-              <div className='table-item'>Files num</div>
-              <div className='table-item'>Key sales</div>
               <div className='table-item'>Holders</div>
+              <div className='table-item'>Files num</div>
+              <div className='table-item'>Key price</div>
+              <div className='table-item'>Key sales</div>
               <div className='table-item'>Watchlists</div>
             </div>
             <InfiniteScroll
@@ -379,14 +504,17 @@ const CreatorSection: React.FC = () => {
 
 const CreatorTableItem = ({
   trendingPyraZone,
+  key,
 }: {
   trendingPyraZone: TrendingPyraZone;
+  key?: React.Key;
 }) => {
   const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
 
   return (
     <div className='table-row'>
+      <div className='table-item'>{String(key || 0)}</div>
       <div className='table-item'>
         <FlexRow
           gap='25px'
@@ -405,13 +533,222 @@ const CreatorTableItem = ({
         </FlexRow>
       </div>
       <div className='table-item'>{trendingPyraZone.total_volumn}</div>
+      <div className='table-item'>{trendingPyraZone.share_holders}</div>
+      <div className='table-item'>{trendingPyraZone.files_count}</div>
       <div className='table-item'>
         {trendingPyraZone.tierkey_price} {chainCurrency}
       </div>
-      <div className='table-item'>{trendingPyraZone.files_count}</div>
       <div className='table-item'>{trendingPyraZone.tierkey_sales}</div>
-      <div className='table-item'>{trendingPyraZone.share_holders}</div>
       <div className='table-item'>{trendingPyraZone.watch_lists}</div>
     </div>
+  );
+};
+
+const SpotLightSection: React.FC = () => {
+  const [hideLeftArrow, setHideLeftArrow] = useState(true);
+  const [hideRightArrow, setHideRightArrow] = useState(false);
+  const scrollSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollSectionRef.current) {
+      const handleScroll = () => {
+        if (scrollSectionRef.current) {
+          setHideLeftArrow(scrollSectionRef.current.scrollLeft === 0);
+          setHideRightArrow(
+            scrollSectionRef.current.scrollLeft >=
+              scrollSectionRef.current.scrollWidth -
+                scrollSectionRef.current.clientWidth -
+                5,
+          );
+        }
+      };
+      scrollSectionRef.current.addEventListener("scroll", handleScroll);
+      return () => {
+        scrollSectionRef.current?.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [scrollSectionRef]);
+
+  const handleScroll = (to: number) => {
+    if (scrollSectionRef.current) {
+      scrollSectionRef.current.scroll({
+        left: to,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <Section width='100%' padding='10px 32px' gap='24px'>
+      <SpotLightText>Memberships spotlight</SpotLightText>
+      {/* <Section width='100%' relative>
+        <ScrollableSection
+          className='hideScrollbar'
+          width='100%'
+          gap='16px'
+          flexDirection='row'
+          darkBackground
+          style={{ overflowY: "visible" }}
+          ref={scrollSectionRef}
+        >
+          <div
+            className='left-arrow-btn'
+            onClick={() => !hideLeftArrow && handleScroll(-800)}
+            data-hidden={hideLeftArrow}
+          >
+            <svg
+              width='16'
+              height='30'
+              viewBox='0 0 16 30'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path
+                d='M2.5 27.4342L13.75 15L2.5 2.5658'
+                stroke='black'
+                strokeWidth='3'
+                strokeLinecap='square'
+              />
+            </svg>
+          </div>
+          <div
+            className='right-arrow-btn'
+            onClick={() => !hideRightArrow && handleScroll(800)}
+            data-hidden={hideRightArrow}
+          >
+            <svg
+              width='16'
+              height='30'
+              viewBox='0 0 16 30'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path
+                d='M2.5 27.4342L13.75 15L2.5 2.5658'
+                stroke='black'
+                strokeWidth='3'
+                strokeLinecap='square'
+              />
+            </svg>
+          </div>
+          <SpotLightCard />
+          <SpotLightCard />
+          <SpotLightCard />
+          <SpotLightCard />
+          <SpotLightCard />
+          <SpotLightCard />
+        </ScrollableSection>
+      </Section> */}
+      <SpotLightContentSection data={[...new Array(10)]} foldItems />
+    </Section>
+  );
+};
+
+const SpotLightContentSection = ({
+  data,
+  foldItems,
+}: {
+  data: any[];
+  foldItems?: boolean;
+}) => {
+  const itemCount = data.length;
+  const minColumnGap = 18;
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const cardItemRef = useRef<HTMLDivElement>(null);
+  const [columnGap, setColumnGap] = useState(minColumnGap);
+  const [rowGap, setRowGap] = useState(minColumnGap * 1.7);
+  const [lineHeight, setLineHeight] = useState(0);
+
+  const handleResize = () => {
+    if (sectionRef.current && cardItemRef.current) {
+      setLineHeight(cardItemRef.current.clientHeight);
+      const sectionWidth = sectionRef.current.clientWidth;
+      const cardItemWidth = cardItemRef.current.clientWidth;
+      const columnCount = Math.floor(
+        sectionWidth / (cardItemWidth + minColumnGap),
+      );
+      if (itemCount < columnCount) {
+        setColumnGap(minColumnGap);
+        setRowGap(0);
+      } else {
+        let columnGap =
+          (sectionWidth - cardItemWidth * columnCount - 1) / (columnCount - 1);
+        columnGap = columnGap > 120 ? 120 : columnGap;
+        let rowGap = columnGap * 1.7;
+        rowGap = rowGap > 100 ? 100 : rowGap;
+        setColumnGap(columnGap);
+        setRowGap(rowGap);
+      }
+    }
+  };
+
+  useEffect(handleResize, [sectionRef.current, cardItemRef.current]);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return (
+    <SpotLightContentSectionWrap
+      ref={sectionRef}
+      onResize={handleResize}
+      rowGap={`${rowGap}px`}
+      columnGap={`${columnGap}px`}
+      foldItems={foldItems}
+      lineHeight={lineHeight}
+    >
+      {data.map((item, idx) => {
+        return (
+          <div
+            className='content-card'
+            key={idx}
+            ref={idx === 0 ? cardItemRef : undefined}
+            onClick={async () => {}}
+          >
+            {/* <div className='preview' style={{ background: "#000000" }}>
+              <Media
+                mediaUrl={file.content.resources[0]}
+                mediaMimeType={"image/png"}
+              />
+            </div>
+            <p className='file-name'>{file.content.title}</p> */}
+            <SpotLightCard />
+          </div>
+        );
+      })}
+    </SpotLightContentSectionWrap>
+  );
+};
+
+const SpotLightCard: React.FC = () => {
+  return (
+    <Section width='264px' height='289px'>
+      <RoundCard
+        width='264px'
+        height='289px'
+        borderRadius='13px'
+        background='#ffffff'
+        style={{ boxShadow: "1px 2px 18.700000762939453px 0px #0000001A" }}
+      >
+        <RoundCard
+          width='100%'
+          height='176px'
+          borderRadius='13px 13px 0px 0px'
+        ></RoundCard>
+        <Section width='100%' padding='18px 16px' gap='18px'>
+          <SpotLightCardText>ETHJETS</SpotLightCardText>
+          <FlexRow width='100%'>
+            <Section gap='4px'>
+              <SpotLightCardText small>Floor</SpotLightCardText>
+              <SpotLightCardText>0.17 ETH</SpotLightCardText>
+            </Section>
+            <Section gap='4px'>
+              <SpotLightCardText small>7 day volume</SpotLightCardText>
+              <SpotLightCardText>0 ETH</SpotLightCardText>
+            </Section>
+          </FlexRow>
+        </Section>
+      </RoundCard>
+    </Section>
   );
 };

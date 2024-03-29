@@ -20,6 +20,35 @@ export const HomeWrapper = styled.main<{
   }
 `;
 
+export const TopTabButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .tab-button {
+    border-radius: 10px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* font */
+    font-family: Inter-SemiBold;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 19.36px;
+    letter-spacing: -0.01em;
+    text-align: left;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+
+    &:hover,
+    &[data-active="true"] {
+      background: #ffffff26;
+    }
+  }
+`;
+
 export const Title = styled.h1<{
   dark?: boolean;
   big?: boolean;
@@ -112,7 +141,9 @@ export const RoundArrowButton = styled.button<{
   `}
 `;
 
-export const ScrollableSection = styled(Section)`
+export const ScrollableSection = styled(Section)<{
+  darkBackground?: boolean;
+}>`
   overflow-x: auto;
 
   &::-webkit-scrollbar {
@@ -134,6 +165,45 @@ export const ScrollableSection = styled(Section)`
     height: 8px;
     background: #e1e2e2;
     border-radius: 4px;
+  }
+
+  .right-arrow-btn,
+  .left-arrow-btn {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    opacity: 0;
+    &:hover {
+      opacity: 1;
+      background: ${prop =>
+        prop.darkBackground
+          ? "rgba(18, 18, 18, 0.08)"
+          : "rgba(18, 18, 18, 0.4)"};
+    }
+    &[data-hidden="true"] {
+      cursor: default;
+      opacity: 0 !important;
+      background: none !important;
+    }
+  }
+  .right-arrow-btn {
+    padding: 0 4px 0 4px;
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%) translateX(100%);
+  }
+  .left-arrow-btn {
+    padding: 0 4px 0 4px;
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%) translateX(-100%) rotate(180deg);
   }
 `;
 
@@ -158,6 +228,29 @@ export const ProgressBar = styled(motion.div)`
   }
 `;
 
+export const PlainButton = styled.button`
+  border-radius: 12px;
+  padding: 12px 24px;
+  background: #f6f6f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  transition: background 0.2s ease-in-out;
+  /* font */
+  font-family: Inter-SemiBold;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 19.36px;
+  letter-spacing: -0.01em;
+  text-align: left;
+  color: #121212;
+
+  &:hover {
+    background: #e1e2e2;
+  }
+`;
+
 export const TableWrap = styled.div`
   flex: 1 1 auto;
   width: 100%;
@@ -176,7 +269,7 @@ export const TableWrap = styled.div`
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
+      color: #000000;
     }
   }
 
@@ -282,22 +375,26 @@ export const TableWrap = styled.div`
       min-width: 120px;
     } */
     .table-item:nth-child(1) {
+      flex: 0 1 5%;
+    }
+    .table-item:nth-child(2) {
       flex: 0 1 20%;
     }
-    .table-item:nth-child(2),
     .table-item:nth-child(3) {
-      flex: 0 1 15% !important;
+      flex: 0 1 15%;
     }
-    .table-item:nth-child(4) {
-      flex: 0 1 10% !important;
+    .table-item {
+      flex: 0 1 12%;
     }
-    .table-item:not(:nth-child(1)) {
-      flex: 0 1 13.3%;
+    .table-item:nth-child(1),
+    .table-item:nth-child(2) {
+      justify-content: left !important;
     }
     .table-item:nth-child(4),
     .table-item:nth-child(5),
     .table-item:nth-child(6),
-    .table-item:nth-child(7) {
+    .table-item:nth-child(7),
+    .table-item:nth-child(8) {
       justify-content: right !important;
     }
   }
@@ -335,3 +432,99 @@ export const BigRightArrow: React.FC = () => (
     <img src={BigRightArrowSvg} alt='Big right arrow' />
   </BigRightArrowWrap>
 );
+
+export const HightLightCardText = styled.span<{
+  bold?: boolean;
+}>`
+  /* font */
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16.94px;
+  letter-spacing: -0.015em;
+  text-align: left;
+  color: #ffffff;
+  ${prop =>
+    prop.bold &&
+    `
+    font-family: Inter-Bold;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 19.36px;
+  `}
+`;
+
+export const SpotLightText = styled.p`
+  /* font */
+  font-family: Inter-SemiBold;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 29.05px;
+  letter-spacing: -0.01em;
+  text-align: left;
+  color: #121212;
+`;
+
+export const SpotLightCardText = styled.p<{
+  small?: boolean;
+}>`
+  /* font */
+  font-family: Inter-SemiBold;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 19.36px;
+  letter-spacing: -0.015em;
+  text-align: left;
+  color: #121212;
+  ${prop =>
+    prop.small &&
+    `
+    font-family: Inter-Medium;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16.94px;
+    color: #545454;
+  `}
+`;
+
+export const SpotLightContentSectionWrap = styled.div<{
+  rowGap?: string;
+  columnGap?: string;
+  foldItems?: boolean;
+  lineHeight?: number;
+}>`
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: ${prop => prop.columnGap || "32px"};
+  row-gap: ${prop => prop.rowGap || "55px"};
+  ${prop =>
+    prop.foldItems &&
+    `
+    height: ${(prop.lineHeight || 0) + 30}px;
+    overflow: hidden;
+  `}
+
+  .content-card {
+    /* width: 262px; */
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    cursor: pointer;
+    > * {
+      position: relative;
+      /* width: 262px;
+      height: 262px; */
+      /* width: 100%;
+      height: 100%; */
+      /* border-radius: 15.92px; */
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15.92px;
+      }
+    }
+  }
+`;

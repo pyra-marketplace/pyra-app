@@ -4,6 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 
 import { CreatorHeader } from "./CreatorHeader";
 import { HomeHeader } from "./HomeHeader";
+import Navbar from "./Navbar";
 import { Container, BodyWrapper } from "./styled";
 import { UploadHeader } from "./UploadHeader";
 
@@ -12,8 +13,8 @@ const Layout: React.FC = (): React.ReactElement => {
 
   return (
     <Container flex={location.pathname === "/upload"}>
-      {location.pathname === "/" && <HomeHeader />}
-      {location.pathname.startsWith("/creator") && <CreatorHeader />}
+      {location.pathname === "/" && <Navbar />}
+      {location.pathname.startsWith("/creator") && <Navbar />}
       {location.pathname === "/upload" && <UploadHeader />}
       <BodyWrapper
         containerFlex={location.pathname === "/upload"}

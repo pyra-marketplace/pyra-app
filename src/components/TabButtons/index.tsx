@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 
 import { TabButtonsWrap } from "./styled";
 
-export interface TabButtonsProps {
-  tabs: string[];
-  defaultSelectedTab?: string | number;
-  controlledSelectedTab?: string | number;
-  onChange?: (tab: string, idx: number) => void;
+export interface TabButtonsProps<T = React.ReactNode> {
+  tabs: T[];
+  defaultSelectedTab?: T | number;
+  controlledSelectedTab?: T | number;
+  onChange?: (tab: T, idx: number) => void;
   className?: string;
   style?: React.CSSProperties;
+  small?: boolean;
 }
 
 export const TabButtons: React.FC<TabButtonsProps> = ({
@@ -18,39 +19,38 @@ export const TabButtons: React.FC<TabButtonsProps> = ({
   onChange,
   className,
   style,
+  small,
 }) => {
-  const [selectedTabButton, setSelectedTabButton] = useState(
+  const [selectedTabIdx, setSelectedTabIdx] = useState<number>(
     (typeof defaultSelectedTab === "number"
-      ? tabs[defaultSelectedTab]
-      : defaultSelectedTab) ||
-      tabs[0] ||
-      "",
+      ? defaultSelectedTab
+      : tabs.indexOf(defaultSelectedTab)) || 0,
   );
 
   useEffect(() => {
     if (controlledSelectedTab) {
-      setSelectedTabButton(
+      setSelectedTabIdx(
         typeof controlledSelectedTab === "number"
-          ? tabs[controlledSelectedTab]
-          : controlledSelectedTab,
+          ? controlledSelectedTab
+          : tabs.indexOf(controlledSelectedTab),
       );
     }
   }, [controlledSelectedTab]);
 
   const handleChangeTab = (idx: number) => {
     if (!controlledSelectedTab) {
-      setSelectedTabButton(tabs[idx]);
+      setSelectedTabIdx(idx);
     }
     onChange?.(tabs[idx], idx);
   };
 
   return (
-    <TabButtonsWrap className={className} style={style}>
+    <TabButtonsWrap className={className} style={style} small={small}>
       {tabs.map((tab, idx) => (
         <button
-          key={tab}
+          key={idx}
           className='tab-button'
-          data-active={selectedTabButton === tab}
+          data-active={selectedTabIdx === idx}
           onClick={() => handleChangeTab(idx)}
         >
           {tab}

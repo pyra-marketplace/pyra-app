@@ -151,6 +151,7 @@ export const Section = styled.section<{
   width?: string;
   height?: string;
   minHeight?: string;
+  relative?: boolean;
 }>`
   display: flex;
   flex-direction: ${prop => prop.flexDirection || "column"};
@@ -165,6 +166,20 @@ export const Section = styled.section<{
   width: ${prop => prop.width || "auto"};
   height: ${prop => prop.height || "auto"};
   min-height: ${prop => prop.minHeight || "auto"};
+  position: ${prop => (prop.relative ? "relative" : "static")};
+`;
+
+export const AbsoluteSection = styled(Section)<{
+  top?: string;
+  right?: string;
+  bottom?: string;
+  left?: string;
+}>`
+  position: absolute;
+  top: ${prop => prop.top || "auto"};
+  right: ${prop => prop.right || "auto"};
+  bottom: ${prop => prop.bottom || "auto"};
+  left: ${prop => prop.left || "auto"};
 `;
 
 export const FlexRow = styled.div<{
@@ -176,6 +191,7 @@ export const FlexRow = styled.div<{
   margin?: string;
   flex?: string;
   width?: string;
+  wrap?: boolean;
 }>`
   display: flex;
   flex-direction: row;
@@ -187,17 +203,19 @@ export const FlexRow = styled.div<{
   margin: ${prop => prop.margin || "0px"};
   flex: ${prop => prop.flex || "1 1 auto"};
   width: ${prop => prop.width || "auto"};
+  flex-wrap: ${prop => (prop.wrap ? "wrap" : "nowrap")};
 `;
 
 export const RoundCard = styled.div<{
   width?: string;
   height?: string;
   borderRadius?: string;
+  background?: string;
 }>`
   width: ${prop => prop.width || "auto"};
   height: ${prop => prop.height || "auto"};
   border-radius: ${prop => prop.borderRadius || "16px"};
-  background: #96ffe5;
+  background: ${prop => prop.background || "#96ffe5"};
   img {
     width: 100%;
     height: 100%;
@@ -219,4 +237,16 @@ export const GridWrap = styled.div<{
   );
   grid-row-gap: ${prop => prop.rowGap || "0px"};
   grid-column-gap: ${prop => prop.columnGap || "0px"};
+`;
+
+export const Divider = styled.hr<{
+  width?: string;
+  height?: string;
+  border?: string;
+  margin?: string;
+}>`
+  width: ${prop => prop.width || "100%"};
+  height: ${prop => prop.height || "100%"};
+  border: ${prop => prop.border || "1px solid #FFFFFF26"};
+  margin: ${prop => prop.margin || "0px"};
 `;
