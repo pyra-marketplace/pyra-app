@@ -209,7 +209,7 @@ export default function Navbar() {
                 message.error("Please connect wallet first");
                 return;
               }
-              navigate("/creator/" + address);
+              navigate("/creator");
             }}
           >
             <img src={NavbarUserIconSvg} />
