@@ -106,23 +106,37 @@ export const Creator: React.FC = () => {
         } else {
           dispatch(loadCreatorUserInfo({ address: address! }));
         }
-        pyraZone = await dispatch(
-          loadPyraZone({
-            chainId: globalStates.chainId,
-            address: address!,
-          }),
-        ).unwrap();
+        pyraZone = (
+          await dispatch(
+            loadPyraZone({
+              chainId: globalStates.chainId,
+              address: address!,
+            }),
+          ).unwrap()
+        ).pyraZone;
         if (!pyraZone) {
           // create pyra zone
           setCreatingPyraZone(true);
           try {
-            pyraZone = await dispatch(
-              createPryaZone({
-                chainId: globalStates.chainId,
-                address: address!,
-                connector,
-              }),
-            ).unwrap();
+            if (
+              !(await dispatch(
+                createPryaZone({
+                  chainId: globalStates.chainId,
+                  address: address!,
+                  connector,
+                }),
+              ).unwrap())
+            ) {
+              throw new Error("failed to create");
+            }
+            pyraZone = (
+              await dispatch(
+                loadPyraZone({
+                  chainId: globalStates.chainId,
+                  address: address!,
+                }),
+              ).unwrap()
+            ).pyraZone;
           } catch (e: any) {
             console.error("Create pyra zone failed: ", e);
             message.error("Create pyra zone failed: " + (e.message || e));
@@ -132,12 +146,14 @@ export const Creator: React.FC = () => {
         }
       } else {
         dispatch(loadCreatorUserInfo({ address: address! }));
-        pyraZone = await dispatch(
-          loadPyraZone({
-            chainId: globalStates.chainId,
-            address: address!,
-          }),
-        ).unwrap();
+        pyraZone = (
+          await dispatch(
+            loadPyraZone({
+              chainId: globalStates.chainId,
+              address: address!,
+            }),
+          ).unwrap()
+        ).pyraZone;
         if (!pyraZone) {
           message.error("Wrong address or empty pyra zone.");
           return;

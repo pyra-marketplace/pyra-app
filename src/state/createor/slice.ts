@@ -8,12 +8,14 @@ import {
   PyraZone,
   PyraZoneRes,
   PyraZoneTierkeyHolderRes,
+  PyraMarketRes,
 } from "@pyra-marketplace/pyra-sdk";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 
 export interface CreatorStates {
   pyraZone?: PyraZoneRes;
+  pyraMarket?: PyraMarketRes;
   shareBuyPrice?: ethers.BigNumber;
   tierKeyBuyPrice?: ethers.BigNumber;
   tierKeyHolders?: PyraZoneTierkeyHolderRes[];
@@ -55,13 +57,20 @@ const initialState: CreatorStates = {
 export const createPryaZone = createAsyncThunk(
   "global/createPryaZone",
   async (args: { chainId: number; address: string; connector: Connector }) => {
-    const { chainId, address, connector } = args;
+    const { chainId, connector } = args;
     const pyraZone = new PyraZone({
       chainId,
       connector,
     });
     await pyraZone.createPyraZone();
-    // TODO: remove auto-create-share when new contract is ready
+    return true;
+  },
+);
+
+export const createShare = createAsyncThunk(
+  "global/createShare",
+  async (args: { chainId: number; connector: Connector }) => {
+    const { chainId, connector } = args;
     const pyraMarket = new PyraMarket({
       chainId,
       connector,
@@ -69,15 +78,8 @@ export const createPryaZone = createAsyncThunk(
     await pyraMarket.createShare({
       shareName: "Test Share",
       shareSymbol: "TS",
-      feePoint: 100,
     });
-    const _pyraZone = (
-      await PyraZone.loadPyraZones({
-        chainId,
-        publishers: [address],
-      })
-    )[0];
-    return _pyraZone;
+    return true;
   },
 );
 
@@ -89,7 +91,14 @@ export const loadPyraZone = createAsyncThunk(
       chainId,
       publishers: [address],
     });
-    return pyraZones[0];
+    const pyraZone = pyraZones[0];
+    const pyraMarket = (
+      await PyraMarket.loadPyraMarkets({
+        chainId,
+        publishers: [address],
+      })
+    )[0];
+    return { pyraZone, pyraMarket };
   },
 );
 
@@ -285,11 +294,10 @@ export const creatorSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(createPryaZone.fulfilled, (state, action) => {
-      state.pyraZone = action.payload;
-    });
     builder.addCase(loadPyraZone.fulfilled, (state, action) => {
-      state.pyraZone = action.payload;
+      const { pyraZone, pyraMarket } = action.payload;
+      state.pyraZone = pyraZone;
+      state.pyraMarket = pyraMarket;
     });
     builder.addCase(loadCreatorBaseInfos.fulfilled, (state, action) => {
       const { shareBuyPrice, tierKeyBuyPrice, tierKeyHolders, shareHolders } =

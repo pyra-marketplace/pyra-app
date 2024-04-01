@@ -9,10 +9,20 @@ export const Currency: Record<ChainId, "MATIC" | "ETH"> = {
   [ChainId.Polygon]: "MATIC",
 };
 export type ChainCurrency = (typeof Currency)[keyof typeof Currency];
+export const ChainName: Record<
+  ChainId,
+  "Ethereum" | "Polygon" | "PolygonMumbai"
+> = {
+  [ChainId.PolygonMumbai]: "PolygonMumbai",
+  [ChainId.Ethereum]: "Ethereum",
+  [ChainId.Polygon]: "Polygon",
+};
+export type ChainNameType = (typeof ChainName)[keyof typeof ChainName];
 
 export interface GlobalStates {
   autoConnecting: boolean;
   chainId: ChainId;
+  chainName: ChainNameType;
   chainCurrency: ChainCurrency;
   walletBalance?: string;
   userInfo?: {
@@ -33,6 +43,7 @@ const chainId: ChainId = (process.env.CHAIN_ID as any) || ChainId.PolygonMumbai;
 const initialState: GlobalStates = {
   autoConnecting: true,
   chainId: chainId,
+  chainName: ChainName[chainId],
   chainCurrency: Currency[chainId],
 };
 

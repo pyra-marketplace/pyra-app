@@ -153,6 +153,11 @@ export const BlackButton = styled.button`
   img {
     max-height: 24px;
   }
+  &[data-disabled="true"] {
+    background: #b1b1b1;
+    color: #ffffff;
+    cursor: not-allowed;
+  }
 `;
 
 export const FinderContainer = styled(Section)`
@@ -606,4 +611,10 @@ export const MainContentContainer = styled(FlexRow)`
       }
     }
   }
+`;
+
+export const GuidePageSection = styled(Section)`
+  /* font */
+  font-family: Poppins;
+  color: #121212;
 `;

@@ -31,7 +31,7 @@ export default defineConfig({
       CHAIN_ID: 80001,
       PYRA_APP_ID: "e104c799-3cb6-4f4d-ba8a-16649cd9701a",
       PYRA_POST_MODEL_ID:
-        "kjzl6hvfrbw6c8nivefcu4rozay0y3rzm8pomdsxl4abfc3n1rokft2m04flbd4",
+        "kjzl6hvfrbw6c9j82o5szeslha49gr03rzjmjcqqg418ccrwliwhcin7uucmfp2",
     },
   },
 });

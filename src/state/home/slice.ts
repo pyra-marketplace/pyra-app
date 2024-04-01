@@ -8,7 +8,7 @@ export type TrendingPyraZone = PyraZoneRes & {
   files_count?: number;
   share_holders?: number;
   watch_lists?: number;
-  total_volumn?: string;
+  total_volume?: string;
 };
 
 export interface HomeStates {
@@ -55,7 +55,7 @@ export const loadTrendingPyraZones = createAsyncThunk(
         share_holders: shareHolders.length,
         watch_lists: 0,
         tierkey_price: ethers.utils.formatEther(pyraZone.tierkey_price),
-        total_volumn: ethers.utils.formatEther(pyraMarket.total_volume),
+        total_volume: ethers.utils.formatEther(pyraMarket.total_volume),
       };
     }
     return trendingPyraZones;

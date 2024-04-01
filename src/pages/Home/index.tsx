@@ -532,7 +532,7 @@ const CreatorTableItem = ({
           </span>
         </FlexRow>
       </div>
-      <div className='table-item'>{trendingPyraZone.total_volumn}</div>
+      <div className='table-item'>{trendingPyraZone.total_volume}</div>
       <div className='table-item'>{trendingPyraZone.share_holders}</div>
       <div className='table-item'>{trendingPyraZone.files_count}</div>
       <div className='table-item'>

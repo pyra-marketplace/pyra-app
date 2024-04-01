@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Auth, message } from "@meteor-web3/components";
+import { MeteorContext, useStore } from "@meteor-web3/hooks";
+import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
 import { useScroll } from "@reactuses/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,6 +18,7 @@ import PyraBrandIconSvg from "@/assets/icons/pyra-brand.svg";
 import { globalSlice } from "@/state/global/slice";
 import { useSelector, useDispatch } from "@/state/hook";
 import { Divider, FlexRow } from "@/styled";
+import { stringAbbreviation } from "@/utils";
 
 const { actions } = globalSlice;
 
@@ -56,40 +60,46 @@ interface SubMenuItem {
 
 interface MenuItem {
   title: string;
-  options: SubMenuItem[];
+  options?: SubMenuItem[];
   disabled?: boolean;
+  onClick?: () => void;
 }
 
-const menuItems: MenuItem[] = [
-  {
-    title: "Drops",
-    options: [],
-  },
-  {
-    title: "Stats",
-    options: [],
-  },
-  {
-    title: "Create",
-    options: [],
-  },
-];
-
 export default function Navbar() {
-  const [isConnectIdentityLoading, setIsConnectIdentityLoading] =
-    useState(false);
   const [hideNavbar, setHideNavbar] = useState(false);
   const [navbarBackground, setNavbarBackground] = useState(false);
   const [navbarAnimate, setNavbarAnimate] = useState<string[]>([
     "hidden",
     "hideBackground",
   ]);
-  const dispatch = useDispatch();
   const htmlRef = useRef(window);
   const [x, y, isScrolling, arrivedState, directions] = useScroll(
     htmlRef.current,
   );
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { pkh, address } = useStore();
+  const meteorContext = useContext(MeteorContext);
+  const autoConnecting = useSelector(state => state.global.autoConnecting);
+
+  const loadUserInfo = async () => {
+    if (address) {
+      try {
+        const userInfo = await TwitterAuth.info({
+          address,
+        });
+        dispatch(globalSlice.actions.setUserInfo(userInfo));
+        console.log({ userInfo });
+      } catch (e: any) {
+        dispatch(globalSlice.actions.setUserInfo(undefined));
+        console.warn(e);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadUserInfo();
+  }, [address]);
 
   // handle navbar scroll animates
   useEffect(() => {
@@ -115,6 +125,39 @@ export default function Navbar() {
     animate.push(navbarBackground ? "showBackground" : "hideBackground");
     setNavbarAnimate(animate);
   }, [hideNavbar, navbarBackground]);
+
+  const handleConnect = async () => {
+    if (autoConnecting) {
+      message.info("Please wait for auto connecting...");
+      return;
+    }
+    const connectRes = await Auth.openModal(
+      {
+        appId: process.env.METEOR_APP_ID!,
+      },
+      meteorContext,
+    );
+    console.log(connectRes);
+  };
+
+  const menuItems: MenuItem[] = [
+    {
+      title: "Drops",
+    },
+    {
+      title: "Stats",
+    },
+    {
+      title: "Create",
+      onClick: () => {
+        if (!address) {
+          message.error("Please connect wallet first");
+          return;
+        }
+        navigate("/upload");
+      },
+    },
+  ];
 
   return (
     <NavbarWrapper variants={navVariants} animate={navbarAnimate}>
@@ -143,11 +186,32 @@ export default function Navbar() {
           </div>
         </FlexRow>
         <FlexRow gap='12px' flex='0 0 auto'>
-          <div className='round-button'>
+          <div
+            className='round-button'
+            onClick={() => {
+              handleConnect();
+            }}
+          >
             <img src={NavbarWalletIconSvg} />
-            <span>Login</span>
+            <span>
+              {" "}
+              {autoConnecting
+                ? "Connecting..."
+                : pkh
+                  ? stringAbbreviation(address, 4, 4)
+                  : "Login"}
+            </span>
           </div>
-          <div className='round-button'>
+          <div
+            className='round-button'
+            onClick={() => {
+              if (!address) {
+                message.error("Please connect wallet first");
+                return;
+              }
+              navigate("/creator/" + address);
+            }}
+          >
             <img src={NavbarUserIconSvg} />
           </div>
           <div className='round-button'>
@@ -188,21 +252,25 @@ const MenuItem = ({ item }: { item: MenuItem }) => {
       onMouseLeave={() => {
         if (showOptions) setShowOptions(false);
       }}
+      onClick={item.onClick}
     >
       {item.title}
       <AnimatePresence>
-        {!item.disabled && item.options.length > 0 && showOptions && (
-          <motion.div className='item-options' {...menuItemStyles}>
-            {item.options.map((item, idx) => (
-              <MenuSubItem
-                subItem={item}
-                key={idx}
-                idx={idx}
-                afterItemClick={() => setShowOptions(false)}
-              />
-            ))}
-          </motion.div>
-        )}
+        {!item.disabled &&
+          item.options &&
+          item.options.length > 0 &&
+          showOptions && (
+            <motion.div className='item-options' {...menuItemStyles}>
+              {item.options.map((item, idx) => (
+                <MenuSubItem
+                  subItem={item}
+                  key={idx}
+                  idx={idx}
+                  afterItemClick={() => setShowOptions(false)}
+                />
+              ))}
+            </motion.div>
+          )}
       </AnimatePresence>
     </div>
   );
