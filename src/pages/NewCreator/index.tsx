@@ -57,6 +57,7 @@ import TwitterIconSvg from "@/assets/icons/twitter-icon.svg";
 import DefaultAvatarPng from "@/assets/images/default-avatar.png";
 import DefaultBannerPng from "@/assets/images/default-banner.png";
 import { FileInfoModal } from "@/components/FileInfoModal";
+import { ShareModal } from "@/components/ShareModal";
 import { TabButtons } from "@/components/TabButtons";
 import {
   createPryaZone,
@@ -84,6 +85,7 @@ export const NewCreator: React.FC = () => {
   const [emptyPyraMarket, setEmptyPyraMarket] = useState(false);
   const [emptyProfile, setEmptyProfile] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
+  const [shareModal, setShareModal] = useState(false);
 
   const { address } = useParams<{ address?: string }>();
   const navigate = useNavigate();
@@ -714,6 +716,7 @@ export const NewCreator: React.FC = () => {
           )}
         </GuidePageSection>
       )}
+      <ShareModal visible={shareModal} setVisible={setShareModal} />
     </CreatorWrapper>
   );
 };
