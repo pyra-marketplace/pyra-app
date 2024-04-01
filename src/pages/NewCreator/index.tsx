@@ -717,7 +717,7 @@ export const NewCreator: React.FC = () => {
                 {!contentAccessible && <LockedSection />}
               </MainContentContainer>
             </Section>
-          ) : (
+          ) : selectedTab === tabs[1] ? (
             <Section width='100%' padding='12px 32px' gap='36px'>
               <ShareContainer>
                 <div className='info-container'>
@@ -823,6 +823,8 @@ export const NewCreator: React.FC = () => {
                 </div>
               </ShareContainer>
             </Section>
+          ) : (
+            <>to do</>
           )}
         </>
       )}
