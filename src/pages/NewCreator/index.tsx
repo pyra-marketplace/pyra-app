@@ -322,10 +322,11 @@ export const NewCreator: React.FC = () => {
   };
 
   const loadUserInfo = async () => {
-    if (address) {
+    const _address = address || userAddress!;
+    if (_address && _address === userAddress) {
       try {
         const userInfo = await TwitterAuth.info({
-          address,
+          address: _address,
         });
         dispatch(globalSlice.actions.setUserInfo(userInfo));
         console.log({ userInfo });
@@ -699,7 +700,7 @@ export const NewCreator: React.FC = () => {
                 <br />
                 3. Create PyraZone.
                 <BlackButton
-                  data-disabled={!emptyPyraZone || !emptyPyraMarket}
+                  data-disabled={!emptyPyraZone && !emptyPyraMarket}
                   onClick={handleCreatePyraZone}
                 >
                   {emptyPyraZone

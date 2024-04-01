@@ -289,14 +289,14 @@ export const TableWrap = styled.div`
       line-height: 17px;
       letter-spacing: 0em;
       text-align: left;
-      color: #ffffff;
+      color: #121212;
       overflow: hidden;
       text-overflow: ellipsis;
 
       .btn {
         border-radius: 8px;
         background-color: #4383f7;
-        color: #ffffff;
+        color: #121212;
         padding: 6px 18px;
         display: flex;
         align-items: center;
@@ -307,7 +307,7 @@ export const TableWrap = styled.div`
         width: 66px;
         height: 66px;
         border-radius: 10px;
-        background: #5990f6;
+        background: #121212;
         img {
           width: 100%;
           height: 100%;
