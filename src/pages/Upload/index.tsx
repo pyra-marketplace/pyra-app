@@ -23,7 +23,7 @@ import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
 import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { createPryaZone } from "@/state/createor/slice";
+import { createPryaZone, loadPyraZone } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section } from "@/styled";
 
@@ -109,15 +109,17 @@ export const Upload: React.FC = () => {
     try {
       let assetId: string;
       if (!pyraZone) {
-        assetId = (
-          await dispatch(
-            createPryaZone({
-              chainId: globalStates.chainId,
-              address,
-              connector,
-            }),
-          ).unwrap()
-        ).asset_id;
+        const { pyraZone: _pyraZone } = await dispatch(
+          loadPyraZone({
+            chainId: globalStates.chainId,
+            address: address!,
+          }),
+        ).unwrap();
+        if (!_pyraZone) {
+          message.error("Please create your PyraZone first.");
+          return;
+        }
+        assetId = _pyraZone.asset_id;
       } else {
         assetId = pyraZone.asset_id;
       }
@@ -168,7 +170,7 @@ export const Upload: React.FC = () => {
       if (choose) {
         clear();
       } else {
-        navigate("/creator/" + address);
+        navigate("/creator");
       }
     } catch (e) {
       console.error(e);

@@ -176,7 +176,7 @@ export const NewCreator: React.FC = () => {
         //     ).pyraZone;
         //   } catch (e: any) {
         //     console.error("Create pyra zone failed: ", e);
-        //     message.error("Create pyra zone failed: " + (e.message || e));
+        //     message.error("Create pyra zone failed: " + (e.reason || e.message || e));
         //     return;
         //   }
         //   setCreatingPyraZone(false);
@@ -225,7 +225,7 @@ export const NewCreator: React.FC = () => {
       console.log({ baseInfos });
     } catch (e: any) {
       console.error("Init failed: ", e);
-      message.error("Init failed: " + (e.message || e));
+      message.error("Init failed: " + (e.reason || e.message || e));
     }
   };
 
@@ -246,7 +246,15 @@ export const NewCreator: React.FC = () => {
             connector,
           }),
         ).unwrap();
-        console.log({ contentInfo });
+        console.log({
+          args: {
+            chainId: globalStates.chainId,
+            assetId: creatorStates.pyraZone.asset_id,
+            accountAddress: userAddress,
+            connector,
+          },
+          contentInfo,
+        });
         if (_address !== userAddress && contentInfo.isAccessible) {
           // try to unlock content folder
           try {
@@ -275,7 +283,7 @@ export const NewCreator: React.FC = () => {
       }
     } catch (e: any) {
       console.error("Content init failed: ", e);
-      message.error("Content init failed: " + (e.message || e));
+      message.error("Content init failed: " + (e.reason || e.message || e));
     }
   };
 
@@ -292,7 +300,7 @@ export const NewCreator: React.FC = () => {
     const searchParams = new URLSearchParams(location.search);
     const code = searchParams.get("code");
     const state = searchParams.get("state");
-    if (code && state) {
+    if (address && code && state) {
       setAuthenticating(true);
       try {
         const userInfo = await TwitterAuth.bind({
@@ -339,8 +347,9 @@ export const NewCreator: React.FC = () => {
   };
 
   useEffect(() => {
+    setIsGuidePage(false);
     loadUserInfo();
-  }, [address]);
+  }, [address, userAddress]);
 
   const handleCreateShare = async () => {
     try {
@@ -349,10 +358,11 @@ export const NewCreator: React.FC = () => {
       ).unwrap();
       if (res) {
         message.success("Create share successfully.");
+        setEmptyPyraMarket(false);
       }
     } catch (e: any) {
       console.warn("Create share failed: ", e);
-      message.error("Create share failed: " + (e.message || e));
+      message.error("Create share failed: " + (e.reason || e.message || e));
     }
   };
 
@@ -367,16 +377,17 @@ export const NewCreator: React.FC = () => {
       ).unwrap();
       if (res) {
         message.success("Create pyra zone successfully.");
+        setEmptyPyraZone(false);
       }
     } catch (e: any) {
       console.warn("Create pyra zone failed: ", e);
-      message.error("Create pyra zone failed: " + (e.message || e));
+      message.error("Create pyra zone failed: " + (e.reason || e.message || e));
     }
   };
 
   useEffect(() => {
     handleAuth();
-  }, [address, location]);
+  }, [address]);
 
   return (
     <CreatorWrapper>
@@ -411,7 +422,7 @@ export const NewCreator: React.FC = () => {
             </div>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                ${creatorStates.pyraMarket?.total_value || 0}
+                ${ethers.utils.formatEther(creatorStates.tierKeyBuyPrice || 0)}
               </p>
               <p className='desc-text'>Share value</p>
             </div>
@@ -678,7 +689,7 @@ export const NewCreator: React.FC = () => {
                 <br />
                 1. Bind your Twitter account.
                 <BlackButton
-                  data-disabled={!!(pkh && userInfo)}
+                  disabled={!!(pkh && userInfo)}
                   onClick={handleBindTwitter}
                 >
                   {authenticating
@@ -692,7 +703,7 @@ export const NewCreator: React.FC = () => {
                 <br />
                 2. Create your first share.
                 <BlackButton
-                  data-disabled={!emptyPyraMarket}
+                  disabled={!emptyPyraMarket}
                   onClick={handleCreateShare}
                 >
                   {emptyPyraMarket ? "Create share" : "Finished"}
@@ -700,7 +711,7 @@ export const NewCreator: React.FC = () => {
                 <br />
                 3. Create PyraZone.
                 <BlackButton
-                  data-disabled={!emptyPyraZone && !emptyPyraMarket}
+                  disabled={!emptyPyraZone && !emptyPyraMarket}
                   onClick={handleCreatePyraZone}
                 >
                   {emptyPyraZone
@@ -711,7 +722,10 @@ export const NewCreator: React.FC = () => {
                 </BlackButton>
                 <br />
                 4. Update your profile.
-                <BlackButton data-disabled={!emptyProfile}>
+                <BlackButton
+                  disabled={!emptyProfile}
+                  onClick={() => message.info("Clicked")}
+                >
                   {emptyProfile ? "Update profile" : "Finished"}
                 </BlackButton>
               </p>
@@ -798,17 +812,26 @@ const FilesContentSection = ({
             </div>
             <div className='file-info'>
               <p>{file.content.title}</p>
-              {file.accessControl?.monetizationProvider?.dataAsset && (
-                <p style={{ marginTop: "15px" }}>
-                  {ethers.utils.formatEther(
-                    (file.accessControl.monetizationProvider.dataAsset as any)
-                      .assetDetail?.amount,
-                  )}{" "}
-                  {getCurrencyNameByCurrencyAddress(
-                    (file.accessControl.monetizationProvider.dataAsset as any)
-                      .assetDetail?.currency,
+              {file.accessControl?.monetizationProvider?.dataAsset?.assetId && (
+                <>
+                  {(file.accessControl.monetizationProvider.dataAsset as any)
+                    .assetDetail && (
+                    <p style={{ marginTop: "15px" }}>
+                      {ethers.utils.formatEther(
+                        (
+                          file.accessControl.monetizationProvider
+                            .dataAsset as any
+                        ).assetDetail?.amount || 0,
+                      )}{" "}
+                      {getCurrencyNameByCurrencyAddress(
+                        (
+                          file.accessControl.monetizationProvider
+                            .dataAsset as any
+                        ).assetDetail?.currency,
+                      )}
+                    </p>
                   )}
-                </p>
+                </>
               )}
               {/* <p style={{ marginTop: "9px" }} className='grey'>
                 Last sale: 1.1 ETH

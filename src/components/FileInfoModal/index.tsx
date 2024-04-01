@@ -58,28 +58,30 @@ export const FileInfoModal = ({
     >
       <FileInfoModalWrap>
         <Section className='content-viewer' gap='18px'>
-          <div className='file-media'>
-            <Media
-              mediaUrl={file.content.resources[selectedMediaIndex]}
-              mediaMimeType={"image/png"}
-            />
-            {selectedMediaIndex > 0 && (
-              <img
-                src={RoundLeftArrowIconSvg}
-                alt='left-arrow'
-                className='left-arrow-btn'
-                onClick={() => handleChangeMedia(selectedMediaIndex - 1)}
+          {visible && (
+            <div className='file-media'>
+              <Media
+                mediaUrl={file.content.resources[selectedMediaIndex]}
+                mediaMimeType={"image/png"}
               />
-            )}
-            {selectedMediaIndex < file.content.resources.length - 1 && (
-              <img
-                src={RoundRightArrowIconSvg}
-                alt='right-arrow'
-                className='right-arrow-btn'
-                onClick={() => handleChangeMedia(selectedMediaIndex + 1)}
-              />
-            )}
-          </div>
+              {selectedMediaIndex > 0 && (
+                <img
+                  src={RoundLeftArrowIconSvg}
+                  alt='left-arrow'
+                  className='left-arrow-btn'
+                  onClick={() => handleChangeMedia(selectedMediaIndex - 1)}
+                />
+              )}
+              {selectedMediaIndex < file.content.resources.length - 1 && (
+                <img
+                  src={RoundRightArrowIconSvg}
+                  alt='right-arrow'
+                  className='right-arrow-btn'
+                  onClick={() => handleChangeMedia(selectedMediaIndex + 1)}
+                />
+              )}
+            </div>
+          )}
           <FlexRow gap='17px' flex='0 0 auto'>
             {(file.content.resources as string[]).map((_, index) => (
               <div

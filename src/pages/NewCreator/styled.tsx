@@ -153,7 +153,7 @@ export const BlackButton = styled.button`
   img {
     max-height: 24px;
   }
-  &[data-disabled="true"] {
+  &:disabled {
     background: #b1b1b1;
     color: #ffffff;
     cursor: not-allowed;
