@@ -5,6 +5,7 @@ import { FullScreenModal } from "@meteor-web3/components";
 import { Wrapper, OutWrapper, SellWrapper, BuyWrapper } from "./styled";
 
 import closeImg from "@/assets/icons/close-btn.svg";
+import { useSelector } from "@/state/hook";
 import { uuid } from "@/utils";
 
 export interface ShareModalProps {
@@ -16,6 +17,8 @@ export const ShareModal = ({ visible, setVisible }: ShareModalProps) => {
   const [value, setValue] = useState("");
   const [options, setOptions] = useState(0);
 
+  const shareBalance = useSelector(state => state.creator.shareBalance);
+  // console.log({ shareBalance });
   return (
     <FullScreenModal
       id={`file-info-modal-${uuid()}`}

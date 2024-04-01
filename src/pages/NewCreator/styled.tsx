@@ -618,3 +618,178 @@ export const GuidePageSection = styled(Section)`
   font-family: Poppins;
   color: #121212;
 `;
+
+export const ShareContainer = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  grid-auto-rows: minmax(100px, auto);
+  .info-container {
+    width: 100%;
+    padding: 25px;
+    border-radius: 24px;
+    border: 1px solid #e2e2e2;
+    .title {
+      color: #545454;
+      font-family: Inter;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      letter-spacing: -0.14px;
+    }
+    .content {
+      padding: 6px 0;
+      color: #121212;
+      font-family: Inter;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      letter-spacing: -0.2px;
+    }
+    .added {
+      color: #545454;
+      font-family: Inter;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      letter-spacing: -0.14px;
+    }
+  }
+  .more-info-container {
+    width: 100%;
+    height: fit-content;
+    padding: 35px 33px 35px;
+    border-radius: 24px;
+    border: 1px solid #e2e2e2;
+    .title {
+      color: #121212;
+      font-family: Inter;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      letter-spacing: -0.16px;
+      margin-bottom: 15px;
+    }
+    .number {
+      padding: 5px 0;
+      color: #121212;
+      font-family: Inter;
+      font-size: 32px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      letter-spacing: -0.32px;
+    }
+    .unit {
+      color: #545454;
+      font-family: Inter;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      letter-spacing: -0.24px;
+    }
+    .added {
+      color: #545454;
+      font-family: Inter;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      letter-spacing: -0.16px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0 0;
+      .buy {
+        width: 48%;
+        padding: 15px;
+        border-radius: 12px;
+        background: #accef6;
+        color: #1b56f1;
+        text-align: center;
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        cursor: pointer;
+      }
+      .sell {
+        width: 48%;
+        padding: 15px;
+        border-radius: 12px;
+        background: #ffeee5;
+        color: #c05621;
+        text-align: center;
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        cursor: pointer;
+      }
+      .stake {
+        width: 48%;
+        padding: 15px;
+        border-radius: 12px;
+        background: #2d7fe3;
+        color: #fff;
+        text-align: center;
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        cursor: pointer;
+      }
+      .unstake {
+        width: 48%;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f95252;
+        color: #fff;
+        text-align: center;
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        cursor: pointer;
+      }
+    }
+
+    .placeholder {
+      height: 20px;
+    }
+    .rewards {
+      padding: 21px 0;
+      color: #545454;
+      font-family: Inter;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      letter-spacing: -0.14px;
+    }
+    .claim {
+      padding: 15px;
+      border-radius: 12px;
+      background: #2d7fe3;
+      color: #fff;
+      text-align: center;
+      font-family: Inter;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      cursor: pointer;
+    }
+  }
+`;

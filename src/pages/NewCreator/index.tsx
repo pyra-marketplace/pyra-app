@@ -35,6 +35,7 @@ import {
   PlainButton,
   PlainTabButton,
   PopupButtonWrap,
+  ShareContainer,
   TopBarContainer,
 } from "./styled";
 
@@ -81,8 +82,12 @@ import {
 } from "@/utils";
 
 export const NewCreator: React.FC = () => {
-  const tabs: Array<"Share" | "Content"> = ["Share", "Content"];
-  const [selectedTab, setSelectedTab] = useState(tabs[1]);
+  const tabs: Array<"Content" | "Share" | "Activity"> = [
+    "Content",
+    "Share",
+    "Activity",
+  ];
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
   const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
   const [creatingPyraZone, setCreatingPyraZone] = useState(false);
   const [isGuidePage, setIsGuidePage] = useState(false);
@@ -212,7 +217,6 @@ export const NewCreator: React.FC = () => {
           return;
         }
       }
-      console.log({ pyraZone });
       setEmptyPyraZone(false);
       const baseInfos = await dispatch(
         loadCreatorBaseInfos({
@@ -505,173 +509,230 @@ export const NewCreator: React.FC = () => {
           </FlexRow>
           <Section width='100%' padding='10px 32px' gap='24px'>
             <FlexRow width='100%' gap='9px'>
-              {["Items", "Offers", "Analytics", "Activity"].map((tab, idx) => (
-                <PlainTabButton key={idx} data-active={idx === 0}>
+              {tabs.map((tab, idx) => (
+                <PlainTabButton
+                  key={idx}
+                  data-active={tab === selectedTab}
+                  onClick={() => setSelectedTab(tab)}
+                >
                   {tab}
                 </PlainTabButton>
               ))}
             </FlexRow>
             <Divider width='100%' border='1px solid #E2E2E2' />
           </Section>
-          <Section width='100%' padding='12px 32px' gap='36px'>
-            <TopBarContainer width='100%' gap='12px'>
-              <PlainButton>
-                <img src={TopbarFilterIconSvg} />
-              </PlainButton>
-              <FlexRow className='live-prompt' flex='0 0 auto'>
-                <span className='bold-text'>Live</span>
-              </FlexRow>
-              <FlexRow className='normal-text' padding='0 12px' flex='0 0 auto'>
-                {creatorStates.pyraZone?.files_count} results
-              </FlexRow>
-              <FlexRow className='search'>
-                <img src={SearchIconSvg} width={20} height={20} />
-                <input
-                  className='search-input'
-                  placeholder='Search by name or trait'
-                />
-              </FlexRow>
-              <FlexRow className='selector' flex='0 0 auto'>
-                <span className='bold-text'>Price low to high</span>
-                <svg
-                  width='16'
-                  height='16'
-                  viewBox='0 0 16 16'
-                  fill='none'
-                  xmlns='http://www.w3.org/2000/svg'
+          {selectedTab === tabs[0] ? (
+            <Section width='100%' padding='12px 32px' gap='36px'>
+              <TopBarContainer width='100%' gap='12px'>
+                <PlainButton>
+                  <img src={TopbarFilterIconSvg} />
+                </PlainButton>
+                <FlexRow className='live-prompt' flex='0 0 auto'>
+                  <span className='bold-text'>Live</span>
+                </FlexRow>
+                <FlexRow
+                  className='normal-text'
+                  padding='0 12px'
+                  flex='0 0 auto'
                 >
-                  <g clipPath='url(#clip0_3246_927)'>
-                    <path
-                      d='M13 7L8 12L3 7'
-                      stroke='#121212'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id='clip0_3246_927'>
-                      <rect width='16' height='16' fill='white' />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </FlexRow>
-              <TabButtons
-                small
-                tabs={[
-                  TopbarListIconSvg,
-                  TopbarGridIconSvg,
-                  TopbarWindowIconSvg,
-                  TopbarFlowIconSvg,
-                ].map((icon, idx) => (
-                  <img key={idx} src={icon} />
-                ))}
-                defaultSelectedTab={2}
-              />
-            </TopBarContainer>
-            <MainContentContainer>
-              <div className='sidebar'>
-                <div className='list-item' data-active={true}>
-                  <div className='list-title'>
-                    <span>Status</span>
-                    <svg
-                      className='down-arrow'
-                      width='16'
-                      height='16'
-                      viewBox='0 0 16 16'
-                      fill='none'
-                      xmlns='http://www.w3.org/2000/svg'
-                    >
-                      <path
-                        d='M3 7L8 12L13 7'
-                        stroke='#545454'
-                        strokeWidth='1.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </div>
-                  <FlexRow
-                    width='100%'
-                    gap='12px'
-                    wrap
-                    style={{ marginBottom: "13px" }}
+                  {creatorStates.pyraZone?.files_count} results
+                </FlexRow>
+                <FlexRow className='search'>
+                  <img src={SearchIconSvg} width={20} height={20} />
+                  <input
+                    className='search-input'
+                    placeholder='Search by name or trait'
+                  />
+                </FlexRow>
+                <FlexRow className='selector' flex='0 0 auto'>
+                  <span className='bold-text'>Price low to high</span>
+                  <svg
+                    width='16'
+                    height='16'
+                    viewBox='0 0 16 16'
+                    fill='none'
+                    xmlns='http://www.w3.org/2000/svg'
                   >
-                    {["All", "Listed", "On auction", "New", "Has offers"].map(
-                      (item, idx) => (
-                        <PlainButton key={idx} small black={idx === 0}>
-                          {idx === 1 && (
-                            <div
-                              style={{
-                                width: "8px",
-                                height: "8px",
-                                borderRadius: "50%",
-                                background: "#3EC574",
-                              }}
-                            />
-                          )}
-                          {item}
-                        </PlainButton>
-                      ),
+                    <g clipPath='url(#clip0_3246_927)'>
+                      <path
+                        d='M13 7L8 12L3 7'
+                        stroke='#121212'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </g>
+                    <defs>
+                      <clipPath id='clip0_3246_927'>
+                        <rect width='16' height='16' fill='white' />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </FlexRow>
+                <TabButtons
+                  small
+                  tabs={[
+                    TopbarListIconSvg,
+                    TopbarGridIconSvg,
+                    TopbarWindowIconSvg,
+                    TopbarFlowIconSvg,
+                  ].map((icon, idx) => (
+                    <img key={idx} src={icon} />
+                  ))}
+                  defaultSelectedTab={2}
+                />
+              </TopBarContainer>
+              <MainContentContainer>
+                <div className='sidebar'>
+                  <div className='list-item' data-active={true}>
+                    <div className='list-title'>
+                      <span>Status</span>
+                      <svg
+                        className='down-arrow'
+                        width='16'
+                        height='16'
+                        viewBox='0 0 16 16'
+                        fill='none'
+                        xmlns='http://www.w3.org/2000/svg'
+                      >
+                        <path
+                          d='M3 7L8 12L13 7'
+                          stroke='#545454'
+                          strokeWidth='1.5'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                    </div>
+                    <FlexRow
+                      width='100%'
+                      gap='12px'
+                      wrap
+                      style={{ marginBottom: "13px" }}
+                    >
+                      {["All", "Listed", "On auction", "New", "Has offers"].map(
+                        (item, idx) => (
+                          <PlainButton key={idx} small black={idx === 0}>
+                            {idx === 1 && (
+                              <div
+                                style={{
+                                  width: "8px",
+                                  height: "8px",
+                                  borderRadius: "50%",
+                                  background: "#3EC574",
+                                }}
+                              />
+                            )}
+                            {item}
+                          </PlainButton>
+                        ),
+                      )}
+                    </FlexRow>
+                  </div>
+                  <div className='list-item'>
+                    <div className='list-title'>
+                      <span>Creator earnings</span>
+                      <svg
+                        className='down-arrow'
+                        width='16'
+                        height='16'
+                        viewBox='0 0 16 16'
+                        fill='none'
+                        xmlns='http://www.w3.org/2000/svg'
+                      >
+                        <path
+                          d='M3 7L8 12L13 7'
+                          stroke='#545454'
+                          strokeWidth='1.5'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className='list-item'>
+                    <div className='list-title'>
+                      <span>Price</span>
+                      <svg
+                        className='down-arrow'
+                        width='16'
+                        height='16'
+                        viewBox='0 0 16 16'
+                        fill='none'
+                        xmlns='http://www.w3.org/2000/svg'
+                      >
+                        <path
+                          d='M3 7L8 12L13 7'
+                          stroke='#545454'
+                          strokeWidth='1.5'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {contentAccessible && (
+                  <>
+                    {files.length > 0 && (
+                      <FilesContentSection files={files} /* foldItems */ />
                     )}
-                  </FlexRow>
+                    {files.length === 0 && (
+                      <EmptySection tip='Nothing here yet, go create your first asset!' />
+                    )}
+                  </>
+                )}
+                {!contentAccessible && <LockedSection />}
+              </MainContentContainer>
+            </Section>
+          ) : (
+            <Section width='100%' padding='12px 32px' gap='36px'>
+              <ShareContainer>
+                <div className='info-container'>
+                  <div className='title'>TVL</div>
+                  <div className='content'>$6,190.19</div>
+                  <div className='added'>2.7899 ETH</div>
                 </div>
-                <div className='list-item'>
-                  <div className='list-title'>
-                    <span>Creator earnings</span>
-                    <svg
-                      className='down-arrow'
-                      width='16'
-                      height='16'
-                      viewBox='0 0 16 16'
-                      fill='none'
-                      xmlns='http://www.w3.org/2000/svg'
-                    >
-                      <path
-                        d='M3 7L8 12L13 7'
-                        stroke='#545454'
-                        strokeWidth='1.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
+                <div className='info-container'>
+                  <div className='title'>Supply</div>
+                  <div className='content'>52.3846</div>
+                  <div className='added'>Shares</div>
+                </div>
+                <div className='info-container'>
+                  <div className='title'>Volume</div>
+                  <div className='content'>$343,314.22</div>
+                  <div className='added'>154.7305 ETH</div>
+                </div>
+                <div className='more-info-container'>
+                  <div className='title'>You own</div>
+                  <div className='number'>
+                    0.65 <span className='unit'>shares</span>
+                  </div>
+                  <div className='added'>0.8347 ETH</div>
+                  {/* <div>25%</div> */}
+                  <div className='buttons'>
+                    <div className='buy'>Buy</div>
+                    <div className='sell'>Sell</div>
                   </div>
                 </div>
-                <div className='list-item'>
-                  <div className='list-title'>
-                    <span>Price</span>
-                    <svg
-                      className='down-arrow'
-                      width='16'
-                      height='16'
-                      viewBox='0 0 16 16'
-                      fill='none'
-                      xmlns='http://www.w3.org/2000/svg'
-                    >
-                      <path
-                        d='M3 7L8 12L13 7'
-                        stroke='#545454'
-                        strokeWidth='1.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
+                <div className='more-info-container'>
+                  <div className='title'>Revenue pool</div>
+                  <div className='number'>
+                    0.65 <span className='unit'>shares</span>
                   </div>
+                  <div className='placeholder'></div>
+                  <div className='buttons'>
+                    <div className='stake'>Stake</div>
+                    <div className='unstake'>Unstake</div>
+                  </div>
+                  <div className='rewards'>
+                    current rewards: 0.01 ETH ($ 21.65)
+                  </div>
+                  <div className='claim'>Claim</div>
                 </div>
-              </div>
-              {contentAccessible && (
-                <>
-                  {files.length > 0 && (
-                    <FilesContentSection files={files} /* foldItems */ />
-                  )}
-                  {files.length === 0 && (
-                    <EmptySection tip='Nothing here yet, go create your first asset!' />
-                  )}
-                </>
-              )}
-              {!contentAccessible && <LockedSection />}
-            </MainContentContainer>
-          </Section>
+              </ShareContainer>
+            </Section>
+          )}
         </>
       )}
       {isGuidePage && (

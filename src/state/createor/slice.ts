@@ -22,6 +22,7 @@ export interface CreatorStates {
   shareHolders?: PyraMarketShareHolderRes[];
   shareTotalValue?: string;
   shareTotalSupply?: ethers.BigNumber;
+  shareBalance?: string;
   shareTotalVolume?: string;
   shareActivities?: PyraMarketShareActivityRes[];
   contentFiles?: MirrorFileRecord;
@@ -47,6 +48,7 @@ const initialState: CreatorStates = {
   shareHolders: undefined,
   shareTotalValue: undefined,
   shareTotalSupply: undefined,
+  shareBalance: undefined,
   shareTotalVolume: undefined,
   shareActivities: undefined,
   contentFiles: undefined,
@@ -167,7 +169,10 @@ export const loadCreatorShareInfos = createAsyncThunk(
       connector,
     });
     const shareTotalSupply = await pyraMarket.loadTotalSupply(shareAddress);
-
+    const shareBalance = await pyraMarket.loadShareBalance({
+      shareAddress,
+      userAddress: address,
+    });
     let shareActivities = await PyraMarket.loadPyraMarketShareActivities({
       chainId,
       publisher: address,
@@ -199,6 +204,7 @@ export const loadCreatorShareInfos = createAsyncThunk(
       shareTotalSupply,
       shareTotalVolume: pyraMarkets[0]?.total_volume,
       shareActivities,
+      shareBalance: ethers.utils.formatEther(shareBalance),
       ethPrice,
     };
   },

@@ -159,7 +159,6 @@ export const Creator: React.FC = () => {
           return;
         }
       }
-      console.log({ pyraZone });
       const baseInfos = await dispatch(
         loadCreatorBaseInfos({
           chainId: globalStates.chainId,
