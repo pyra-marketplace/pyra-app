@@ -72,7 +72,12 @@ import {
 import { globalSlice } from "@/state/global/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Divider, FlexRow, GridWrap, Section } from "@/styled";
-import { buildSortedItems, stringAbbreviation, stringToColor } from "@/utils";
+import {
+  buildSortedItems,
+  getCurrencyNameByCurrencyAddress,
+  stringAbbreviation,
+  stringToColor,
+} from "@/utils";
 
 export const NewCreator: React.FC = () => {
   const tabs: Array<"Share" | "Content"> = ["Share", "Content"];
@@ -789,7 +794,18 @@ const FilesContentSection = ({
             </div>
             <div className='file-info'>
               <p>{file.content.title}</p>
-              <p style={{ marginTop: "15px" }}>1.138 ETH</p>
+              {file.accessControl?.monetizationProvider?.dataAsset && (
+                <p style={{ marginTop: "15px" }}>
+                  {ethers.utils.formatEther(
+                    (file.accessControl.monetizationProvider.dataAsset as any)
+                      .assetDetail?.amount,
+                  )}{" "}
+                  {getCurrencyNameByCurrencyAddress(
+                    (file.accessControl.monetizationProvider.dataAsset as any)
+                      .assetDetail?.currency,
+                  )}
+                </p>
+              )}
               {/* <p style={{ marginTop: "9px" }} className='grey'>
                 Last sale: 1.1 ETH
               </p> */}

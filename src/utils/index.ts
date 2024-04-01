@@ -1,3 +1,5 @@
+import { ChainId, DEPLOYED_ADDRESSES } from "@pyra-marketplace/pyra-sdk";
+
 export * from "./ui";
 
 function getWindowFeatures() {
@@ -118,3 +120,25 @@ export function uuid() {
   const uuid = s.join("");
   return uuid;
 }
+
+export const getCurrencyNameByCurrencyAddress = (
+  currencyAddress: string,
+  chainId: ChainId = ChainId.PolygonMumbai,
+) => {
+  // const map: Record<string, string> = {
+  //   "0x2058A9D7613eEE744279e3856Ef0eAda5FCbaA7e": "USDC",
+  //   "0x001B3B4d0F3714Ca98ba10F6042DaEbF0B1B7b6F": "DAI",
+  //   "0x3C68CE8504087f89c640D02d133646d98e64ddd9": "WETH",
+  //   "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889": "WMATIC",
+  //   "0x0000000000000000000000000000000000000000": "",
+  // };
+  let map = (DEPLOYED_ADDRESSES as any)[chainId];
+  if (map) {
+    map = Object.keys(map).reduce(
+      (r, k) => Object.assign(r, { [map[k]]: k }),
+      {},
+    );
+    return map[currencyAddress] ?? "";
+  }
+  return "";
+};
