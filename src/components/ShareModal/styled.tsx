@@ -208,6 +208,10 @@ export const BuyWrapper = styled.div`
     line-height: normal;
     letter-spacing: -0.24px;
     margin-top: 11px;
+    cursor: pointer;
+    &:hover {
+      background-color: #f6f6f6;
+    }
   }
 
   .input-wrapper {

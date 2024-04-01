@@ -267,7 +267,15 @@ export const Creator: React.FC = () => {
           <FlexRow className='financial-info' gap='48px'>
             <div className='data-item'>
               <span className='item-value'>
-                ${ethers.utils.formatEther(creatorStates.shareBuyPrice || 0)}
+                $
+                {creatorStates.ethPrice &&
+                creatorStates.shareBuyPrice &&
+                parseFloat(creatorStates.shareBuyPrice) !== 0
+                  ? (
+                      parseFloat(creatorStates.shareBuyPrice) *
+                      creatorStates.ethPrice
+                    ).toFixed(4)
+                  : "0.0"}{" "}
               </span>
               <span className='item-title'>Total value</span>
             </div>
@@ -279,7 +287,7 @@ export const Creator: React.FC = () => {
             </div>
             <div className='data-item'>
               <span className='item-value'>
-                {ethers.utils.formatEther(creatorStates.tierKeyBuyPrice || 0)}{" "}
+                {creatorStates.tierKeyBuyPrice || "0.0"}{" "}
                 {globalStates.chainCurrency}
               </span>
               <span className='item-title'>Key price</span>

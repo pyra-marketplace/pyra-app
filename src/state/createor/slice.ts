@@ -9,6 +9,7 @@ import {
   PyraZoneRes,
   PyraZoneTierkeyHolderRes,
   PyraMarketRes,
+  RevenuePool,
 } from "@pyra-marketplace/pyra-sdk";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
@@ -16,13 +17,17 @@ import { ethers } from "ethers";
 export interface CreatorStates {
   pyraZone?: PyraZoneRes;
   pyraMarket?: PyraMarketRes;
-  shareBuyPrice?: ethers.BigNumber;
-  tierKeyBuyPrice?: ethers.BigNumber;
+  shareBuyPrice?: string;
+  shareSellPrice?: string;
+  tierKeyBuyPrice?: string;
   tierKeyHolders?: PyraZoneTierkeyHolderRes[];
   shareHolders?: PyraMarketShareHolderRes[];
   shareTotalValue?: string;
-  shareTotalSupply?: ethers.BigNumber;
-  shareBalance?: string;
+  shareTotalSupply?: string;
+  userShareBalance?: string;
+  revenuePoolShareBalance?: string;
+  revenue?: string;
+  ethPrice?: number;
   shareTotalVolume?: string;
   shareActivities?: PyraMarketShareActivityRes[];
   contentFiles?: MirrorFileRecord;
@@ -48,7 +53,10 @@ const initialState: CreatorStates = {
   shareHolders: undefined,
   shareTotalValue: undefined,
   shareTotalSupply: undefined,
-  shareBalance: undefined,
+  userShareBalance: undefined,
+  revenuePoolShareBalance: undefined,
+  revenue: undefined,
+  ethPrice: undefined,
   shareTotalVolume: undefined,
   shareActivities: undefined,
   contentFiles: undefined,
@@ -80,6 +88,48 @@ export const createShare = createAsyncThunk(
     await pyraMarket.createShare({
       shareName: "Test Share",
       shareSymbol: "TS",
+    });
+    return true;
+  },
+);
+
+export const buyShares = createAsyncThunk(
+  "creator/buyShares",
+  async (args: {
+    chainId: number;
+    connector: Connector;
+    creator: string;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, connector, creator, amount } = args;
+    const pyraMarket = new PyraMarket({
+      chainId,
+      connector,
+    });
+    await pyraMarket.buyShares({
+      creator,
+      amount,
+    });
+    return true;
+  },
+);
+
+export const sellShares = createAsyncThunk(
+  "creator/sellShares",
+  async (args: {
+    chainId: number;
+    connector: Connector;
+    creator: string;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, connector, creator, amount } = args;
+    const pyraMarket = new PyraMarket({
+      chainId,
+      connector,
+    });
+    await pyraMarket.sellShares({
+      creator,
+      amount,
     });
     return true;
   },
@@ -140,11 +190,55 @@ export const loadCreatorBaseInfos = createAsyncThunk(
     });
     console.log({ tierKeyHolders, shareHolders });
     return {
-      shareBuyPrice,
-      tierKeyBuyPrice,
+      shareBuyPrice: ethers.utils.formatEther(shareBuyPrice),
+      tierKeyBuyPrice: ethers.utils.formatEther(tierKeyBuyPrice),
       tierKeyHolders,
       shareHolders,
     };
+  },
+);
+
+export const loadShareSellPrice = createAsyncThunk(
+  "creator/loadShareSellPrice",
+  async (args: {
+    chainId: number;
+    address: string;
+    connector: Connector;
+    amount: string;
+  }) => {
+    const { chainId, address, connector, amount } = args;
+    const pyraMarket = new PyraMarket({
+      chainId,
+      connector,
+    });
+    const shareSellPrice = await pyraMarket.loadSellPrice({
+      creator: address,
+      amount: ethers.utils.parseEther(amount),
+    });
+
+    return ethers.utils.formatEther(shareSellPrice);
+  },
+);
+
+export const loadShareBuyPrice = createAsyncThunk(
+  "creator/loadShareBuyPrice",
+  async (args: {
+    chainId: number;
+    address: string;
+    connector: Connector;
+    amount: string;
+  }) => {
+    const { chainId, address, connector, amount } = args;
+    const pyraMarket = new PyraMarket({
+      chainId,
+      connector,
+    });
+    const shareBuyPrice = await pyraMarket.loadBuyPrice({
+      creator: address,
+      amount: ethers.utils.parseEther(amount),
+    });
+
+    return ethers.utils.formatEther(shareBuyPrice);
   },
 );
 
@@ -156,23 +250,35 @@ export const loadCreatorShareInfos = createAsyncThunk(
       chainId,
       publishers: [address],
     });
-
     pyraMarkets = pyraMarkets.map(item => ({
       ...item,
       total_value: ethers.utils.formatEther(item.total_value),
+      total_supply: ethers.utils.formatEther(item.total_supply),
+      total_volume: ethers.utils.formatEther(item.total_volume),
     }));
 
     const shareAddress = pyraMarkets[0]?.share;
+    const revenuePoolAddress = pyraMarkets[0]?.revenue_pool;
 
     const pyraMarket = new PyraMarket({
       chainId,
       connector,
     });
     const shareTotalSupply = await pyraMarket.loadTotalSupply(shareAddress);
-    const shareBalance = await pyraMarket.loadShareBalance({
+    const userShareBalance = await pyraMarket.loadShareBalance({
       shareAddress,
-      userAddress: address,
+      address,
     });
+    const revenuePoolShareBalance = await pyraMarket.loadShareBalance({
+      shareAddress,
+      address: revenuePoolAddress,
+    });
+    const revenuePool = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    const revenue = await revenuePool.loadClaimableRevenue();
     let shareActivities = await PyraMarket.loadPyraMarketShareActivities({
       chainId,
       publisher: address,
@@ -194,17 +300,25 @@ export const loadCreatorShareInfos = createAsyncThunk(
     }));
 
     const ethPrice = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&precision=2`,
+      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"}&vs_currencies=usd&precision=2`,
     )
       .then(r => r.json())
-      .then(r => r.ethereum.usd as number);
+      .then(
+        r =>
+          r[chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"]
+            .usd as number,
+      );
 
     return {
       shareTotalValue: pyraMarkets[0]?.total_value,
-      shareTotalSupply,
+      shareTotalSupply: ethers.utils.formatEther(shareTotalSupply),
       shareTotalVolume: pyraMarkets[0]?.total_volume,
       shareActivities,
-      shareBalance: ethers.utils.formatEther(shareBalance),
+      userShareBalance: ethers.utils.formatEther(userShareBalance),
+      revenuePoolShareBalance: ethers.utils.formatEther(
+        revenuePoolShareBalance,
+      ),
+      revenue: ethers.utils.formatEther(revenue),
       ethPrice,
     };
   },
@@ -277,10 +391,10 @@ export const creatorSlice = createSlice({
     setPyraZone: (state, action: PayloadAction<PyraZoneRes>) => {
       state.pyraZone = action.payload;
     },
-    setShareBuyPrice: (state, action: PayloadAction<ethers.BigNumber>) => {
+    setShareBuyPrice: (state, action: PayloadAction<string>) => {
       state.shareBuyPrice = action.payload;
     },
-    setTierKeyBuyPrice: (state, action: PayloadAction<ethers.BigNumber>) => {
+    setTierKeyBuyPrice: (state, action: PayloadAction<string>) => {
       state.tierKeyBuyPrice = action.payload;
     },
     setShareHolders: (
@@ -313,17 +427,28 @@ export const creatorSlice = createSlice({
       state.tierKeyHolders = tierKeyHolders;
       state.shareHolders = shareHolders;
     });
+    builder.addCase(loadShareSellPrice.fulfilled, (state, action) => {
+      state.shareSellPrice = action.payload;
+    });
     builder.addCase(loadCreatorShareInfos.fulfilled, (state, action) => {
       const {
         shareTotalValue,
         shareTotalSupply,
         shareTotalVolume,
         shareActivities,
+        userShareBalance,
+        revenuePoolShareBalance,
+        revenue,
+        ethPrice,
       } = action.payload;
       state.shareTotalValue = shareTotalValue;
       state.shareTotalSupply = shareTotalSupply;
       state.shareTotalVolume = shareTotalVolume;
       state.shareActivities = shareActivities;
+      state.userShareBalance = userShareBalance;
+      state.revenuePoolShareBalance = revenuePoolShareBalance;
+      state.revenue = revenue;
+      state.ethPrice = ethPrice;
     });
     builder.addCase(loadCreatorContents.fulfilled, (state, action) => {
       const { files, isAccessible } = action.payload;

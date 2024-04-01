@@ -14,8 +14,11 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import { PyraZone, PyraZoneRes } from "@pyra-marketplace/pyra-sdk";
-import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
+import {
+  PyraZone,
+  PyraZoneRes,
+  Auth as TwitterAuth,
+} from "@pyra-marketplace/pyra-sdk";
 import { ethers } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -69,6 +72,7 @@ import {
   loadCreatorShareInfos,
   loadCreatorUserInfo,
   loadPyraZone,
+  loadShareSellPrice,
   unlockCreatorContents,
 } from "@/state/createor/slice";
 import { globalSlice } from "@/state/global/slice";
@@ -96,7 +100,7 @@ export const NewCreator: React.FC = () => {
   const [emptyProfile, setEmptyProfile] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const [shareModal, setShareModal] = useState(false);
-
+  const [option, setOption] = useState(0);
   const { address } = useParams<{ address?: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -109,6 +113,20 @@ export const NewCreator: React.FC = () => {
     state => state.creator.contentAccessible,
   );
   const userInfo = useSelector(state => state.global.userInfo);
+  console.log({ creatorStates });
+
+  useEffect(() => {
+    creatorStates.userShareBalance &&
+      (address || userAddress) &&
+      dispatch(
+        loadShareSellPrice({
+          chainId: globalStates.chainId,
+          address: (address || userAddress)!,
+          connector,
+          amount: creatorStates.userShareBalance,
+        }),
+      );
+  }, [creatorStates.userShareBalance]);
 
   useEffect(() => {
     dispatch(creatorSlice.actions.clearAllInfos());
@@ -418,15 +436,29 @@ export const NewCreator: React.FC = () => {
           <div className='user-extra-info'>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                {ethers.utils.formatEther(
-                  creatorStates.pyraMarket?.total_volume || 0,
-                )}
+                $
+                {creatorStates.ethPrice &&
+                creatorStates?.shareTotalVolume &&
+                parseFloat(creatorStates.shareTotalVolume) !== 0
+                  ? (
+                      parseFloat(creatorStates.shareTotalVolume) *
+                      creatorStates.ethPrice
+                    ).toFixed(4)
+                  : "0.0"}
               </p>
               <p className='desc-text'>Total volume</p>
             </div>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                ${ethers.utils.formatEther(creatorStates.tierKeyBuyPrice || 0)}
+                $
+                {creatorStates.ethPrice &&
+                creatorStates?.shareTotalValue &&
+                parseFloat(creatorStates.shareTotalValue) !== 0
+                  ? (
+                      parseFloat(creatorStates?.shareTotalValue) *
+                      creatorStates.ethPrice
+                    ).toFixed(4)
+                  : "0.0"}{" "}
               </p>
               <p className='desc-text'>Share value</p>
             </div>
@@ -438,7 +470,7 @@ export const NewCreator: React.FC = () => {
             </div>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                {ethers.utils.formatEther(creatorStates.tierKeyBuyPrice || 0)}{" "}
+                {creatorStates.tierKeyBuyPrice || "0.0"}{" "}
                 {globalStates.chainCurrency}
               </p>
               <p className='desc-text'>Key price</p>
@@ -689,36 +721,84 @@ export const NewCreator: React.FC = () => {
             <Section width='100%' padding='12px 32px' gap='36px'>
               <ShareContainer>
                 <div className='info-container'>
-                  <div className='title'>TVL</div>
-                  <div className='content'>$6,190.19</div>
-                  <div className='added'>2.7899 ETH</div>
+                  <div className='title'>TV</div>
+                  <div className='content'>
+                    $
+                    {creatorStates.ethPrice &&
+                    creatorStates?.shareTotalValue &&
+                    parseFloat(creatorStates.shareTotalValue) !== 0
+                      ? (
+                          parseFloat(creatorStates?.shareTotalValue) *
+                          creatorStates.ethPrice
+                        ).toFixed(4)
+                      : "0.0"}{" "}
+                  </div>
+                  <div className='added'>
+                    {creatorStates.shareTotalValue || 0}{" "}
+                    {globalStates.chainCurrency}
+                  </div>
                 </div>
                 <div className='info-container'>
                   <div className='title'>Supply</div>
-                  <div className='content'>52.3846</div>
+                  <div className='content'>
+                    {creatorStates.shareTotalSupply || "0.0"}
+                  </div>
                   <div className='added'>Shares</div>
                 </div>
                 <div className='info-container'>
                   <div className='title'>Volume</div>
-                  <div className='content'>$343,314.22</div>
-                  <div className='added'>154.7305 ETH</div>
+                  <div className='content'>
+                    $
+                    {creatorStates.ethPrice &&
+                    creatorStates?.shareTotalVolume &&
+                    parseFloat(creatorStates.shareTotalVolume) !== 0
+                      ? (
+                          parseFloat(creatorStates.shareTotalVolume) *
+                          creatorStates.ethPrice
+                        ).toFixed(4)
+                      : "0.0"}
+                  </div>
+                  <div className='added'>
+                    {creatorStates.shareTotalVolume || "0.0"}{" "}
+                    {globalStates.chainCurrency}
+                  </div>
                 </div>
                 <div className='more-info-container'>
                   <div className='title'>You own</div>
                   <div className='number'>
-                    0.65 <span className='unit'>shares</span>
+                    {creatorStates.userShareBalance || "0.0"}{" "}
+                    <span className='unit'>shares</span>
                   </div>
-                  <div className='added'>0.8347 ETH</div>
-                  {/* <div>25%</div> */}
+                  <div className='added'>
+                    {creatorStates.shareSellPrice || "0.0"}{" "}
+                    {globalStates.chainCurrency}
+                  </div>
                   <div className='buttons'>
-                    <div className='buy'>Buy</div>
-                    <div className='sell'>Sell</div>
+                    <div
+                      className='buy'
+                      onClick={() => {
+                        setOption(1);
+                        setShareModal(true);
+                      }}
+                    >
+                      Buy
+                    </div>
+                    <div
+                      className='sell'
+                      onClick={() => {
+                        setOption(2);
+                        setShareModal(true);
+                      }}
+                    >
+                      Sell
+                    </div>
                   </div>
                 </div>
                 <div className='more-info-container'>
                   <div className='title'>Revenue pool</div>
                   <div className='number'>
-                    0.65 <span className='unit'>shares</span>
+                    {creatorStates.revenuePoolShareBalance || "0.0"}{" "}
+                    <span className='unit'>shares</span>
                   </div>
                   <div className='placeholder'></div>
                   <div className='buttons'>
@@ -726,7 +806,18 @@ export const NewCreator: React.FC = () => {
                     <div className='unstake'>Unstake</div>
                   </div>
                   <div className='rewards'>
-                    current rewards: 0.01 ETH ($ 21.65)
+                    current revenue: {creatorStates.revenue || "0.0"}{" "}
+                    {globalStates.chainCurrency}
+                    (${" "}
+                    {creatorStates.ethPrice &&
+                    creatorStates?.revenue &&
+                    parseFloat(creatorStates.revenue) !== 0
+                      ? (
+                          parseFloat(creatorStates.revenue) *
+                          creatorStates.ethPrice
+                        ).toFixed(4)
+                      : "0.0"}
+                    )
                   </div>
                   <div className='claim'>Claim</div>
                 </div>
@@ -797,7 +888,11 @@ export const NewCreator: React.FC = () => {
           )}
         </GuidePageSection>
       )}
-      <ShareModal visible={shareModal} setVisible={setShareModal} />
+      <ShareModal
+        option={option}
+        visible={shareModal}
+        setVisible={setShareModal}
+      />
     </CreatorWrapper>
   );
 };
@@ -895,7 +990,7 @@ const FilesContentSection = ({
                 </>
               )}
               {/* <p style={{ marginTop: "9px" }} className='grey'>
-                Last sale: 1.1 ETH
+                Last sale: 1.1 {globalStates.chainCurrency}
               </p> */}
             </div>
           </div>
