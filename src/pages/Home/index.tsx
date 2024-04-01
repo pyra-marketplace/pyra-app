@@ -470,7 +470,7 @@ const CreatorSection: React.FC = () => {
               <div className='table-item'>Files num</div>
               <div className='table-item'>Key price</div>
               <div className='table-item'>Key sales</div>
-              <div className='table-item'>Watchlists</div>
+              {/* <div className='table-item'>Watchlists</div> */}
             </div>
             <InfiniteScroll
               dataLength={trendingPyraZones?.length || 0}
@@ -485,7 +485,11 @@ const CreatorSection: React.FC = () => {
               {trendingPyraZones &&
                 trendingPyraZones.map((item, index) => {
                   return (
-                    <CreatorTableItem trendingPyraZone={item} key={index} />
+                    <CreatorTableItem
+                      trendingPyraZone={item}
+                      key={index}
+                      idx={index + 1}
+                    />
                   );
                 })}
               {(!trendingPyraZones ||
@@ -504,17 +508,17 @@ const CreatorSection: React.FC = () => {
 
 const CreatorTableItem = ({
   trendingPyraZone,
-  key,
+  idx,
 }: {
   trendingPyraZone: TrendingPyraZone;
-  key?: React.Key;
+  idx: number;
 }) => {
   const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
 
   return (
     <div className='table-row'>
-      <div className='table-item'>{String(key || 0)}</div>
+      <div className='table-item'>{idx}</div>
       <div className='table-item'>
         <FlexRow
           gap='25px'
@@ -539,7 +543,7 @@ const CreatorTableItem = ({
         {trendingPyraZone.tierkey_price} {chainCurrency}
       </div>
       <div className='table-item'>{trendingPyraZone.tierkey_sales}</div>
-      <div className='table-item'>{trendingPyraZone.watch_lists}</div>
+      {/* <div className='table-item'>{trendingPyraZone.watch_lists}</div> */}
     </div>
   );
 };
