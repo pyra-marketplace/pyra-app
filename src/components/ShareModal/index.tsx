@@ -232,7 +232,7 @@ export const ShareModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price ?? 0} {globalStates.chainCurrency}
+                  {price || "0.0"} {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='buy-button' onClick={buy}>
@@ -288,7 +288,7 @@ export const ShareModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price ?? 0} {globalStates.chainCurrency}
+                  {price || "0.0"} {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='sell-button' onClick={sell}>
