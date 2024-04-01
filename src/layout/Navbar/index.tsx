@@ -141,12 +141,12 @@ export default function Navbar() {
   };
 
   const menuItems: MenuItem[] = [
-    {
-      title: "Drops",
-    },
-    {
-      title: "Stats",
-    },
+    // {
+    //   title: "Drops",
+    // },
+    // {
+    //   title: "Stats",
+    // },
     {
       title: "Create",
       onClick: () => {
@@ -178,13 +178,13 @@ export default function Navbar() {
             ))}
           </FlexRow>
         </FlexRow>
-        <FlexRow justifyContent='center'>
+        {/* <FlexRow justifyContent='center'>
           <div className='round-button search'>
             <img src={NavbarSearchIconSvg} />
             <input className='search-input' type='text' placeholder='Search' />
             <div className='hint-btn'>{"/"}</div>
           </div>
-        </FlexRow>
+        </FlexRow> */}
         <FlexRow gap='12px' flex='0 0 auto'>
           <div
             className='round-button'
@@ -214,9 +214,9 @@ export default function Navbar() {
           >
             <img src={NavbarUserIconSvg} />
           </div>
-          <div className='round-button'>
+          {/* <div className='round-button'>
             <img src={NavbarShopIconSvg} />
-          </div>
+          </div> */}
         </FlexRow>
       </motion.div>
     </NavbarWrapper>

@@ -25,16 +25,20 @@ export const UploadHeader = (): React.ReactElement => {
           <div className='link' onClick={() => navigate("/")}>
             Home
           </div>
-          <button className='link' onClick={() => navigate("/creator")}>
+          <div className='link' onClick={() => navigate("/creator")}>
+            Creator
+          </div>
+          <div className='link'></div>
+          {/* <button className='link' onClick={() => navigate("/creator")}>
             <span>Create</span>
             <img src={PlusIconSvg} alt='Create' />
-          </button>
-          <div className='link'>
+          </button> */}
+          {/* <div className='link'>
             <img src={BookmarkIconSvg} alt='Bookmark' />
           </div>
           <div className='avatar'>
             <img src={DefaultAvatarUploadPng} alt='Avatar' />
-          </div>
+          </div> */}
         </div>
       </div>
     </Wrapper>

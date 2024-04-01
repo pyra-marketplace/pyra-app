@@ -51,6 +51,7 @@ export const DropzoneSection = styled(Section)`
     .preview-img {
       width: 600px;
       height: 600px;
+      object-fit: contain;
       border-radius: 18.75px;
     }
   }
@@ -66,6 +67,7 @@ export const DropzoneSection = styled(Section)`
       .preview-img {
         width: 188px;
         height: 188px;
+        object-fit: contain;
         border-radius: 18.75px;
       }
     }
