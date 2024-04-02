@@ -10,8 +10,8 @@ import { Wrapper, OutWrapper, SellWrapper, BuyWrapper } from "./styled";
 import closeImg from "@/assets/icons/close-btn.svg";
 import {
   buyTierkey,
+  loadClaimableRevenue,
   loadCreatorBaseInfos,
-  loadCreatorShareInfos,
   sellTierkey,
 } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
@@ -28,27 +28,18 @@ export const KeyModal = ({
   visible,
   setVisible,
 }: KeyModalProps) => {
-  const [value, setValue] = useState("");
-  const [price, setPrice] = useState("");
   const [buying, setBuying] = useState(false);
   const [selling, setSelling] = useState(false);
   const [option, setOption] = useState(defaultOption);
-  const userTierKeyBalance = useSelector(
-    state => state.creator.userTierKeyBalance,
-  );
   const globalStates = useSelector(state => state.global);
   const dispatch = useDispatch();
   const { address } = useParams<{ address?: string }>();
-  const { connector, address: userAddress, pkh } = useStore();
+  const { connector, address: userAddress } = useStore();
   const creatorStates = useSelector(state => state.creator);
 
   useEffect(() => {
     setOption(defaultOption);
   }, [defaultOption]);
-
-  useEffect(() => {
-    setValue("");
-  }, [option]);
 
   const cancel = () => {
     if (defaultOption !== 0) {
@@ -80,6 +71,14 @@ export const KeyModal = ({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
             assetId: creatorStates.pyraZone.asset_id,
+            connector,
+          }),
+        );
+        dispatch(
+          loadClaimableRevenue({
+            chainId: globalStates.chainId,
+            revenuePoolAddress: creatorStates.revenuePoolAddress!,
+            address: (address || userAddress)!,
             connector,
           }),
         );
@@ -115,6 +114,14 @@ export const KeyModal = ({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
             assetId: creatorStates.pyraZone.asset_id,
+            connector,
+          }),
+        );
+        dispatch(
+          loadClaimableRevenue({
+            chainId: globalStates.chainId,
+            revenuePoolAddress: creatorStates.revenuePoolAddress!,
+            address: (address || userAddress)!,
             connector,
           }),
         );
@@ -155,9 +162,6 @@ export const KeyModal = ({
           <BuyWrapper>
             <div
               className='option'
-              onClick={() => {
-                setValue("0.01");
-              }}
               style={{
                 backgroundColor: "#f6f6f6",
               }}
@@ -178,7 +182,8 @@ export const KeyModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {creatorStates.tierKeyBuyPrice
+                  {creatorStates.tierKeyBuyPrice &&
+                  parseFloat(creatorStates.tierKeyBuyPrice) !== 0
                     ? parseFloat(creatorStates.tierKeyBuyPrice).toFixed(8)
                     : "0.0"}{" "}
                   {globalStates.chainCurrency}
@@ -219,7 +224,8 @@ export const KeyModal = ({
                 : "0.0"}{" "}
               <span className='eth'>
                 (
-                {creatorStates.tierKeySellPrice
+                {creatorStates.tierKeySellPrice &&
+                parseFloat(creatorStates.tierKeySellPrice) !== 0
                   ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
                   : "0.0"}
                 {globalStates.chainCurrency})
@@ -239,7 +245,8 @@ export const KeyModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {creatorStates.tierKeySellPrice
+                  {creatorStates.tierKeySellPrice &&
+                  parseFloat(creatorStates.tierKeySellPrice) !== 0
                     ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
                     : "0.0"}
                   {globalStates.chainCurrency}

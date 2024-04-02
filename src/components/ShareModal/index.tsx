@@ -232,7 +232,10 @@ export const ShareModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price || "0.0"} {globalStates.chainCurrency}
+                  {price && parseFloat(price) !== 0
+                    ? parseFloat(price).toFixed(8)
+                    : "0.0"}{" "}
+                  {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='buy-button' onClick={buy}>
@@ -263,7 +266,11 @@ export const ShareModal = ({
                   ).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
-                ( {creatorStates.shareSellPrice || "0.0"}{" "}
+                ({" "}
+                {creatorStates.shareSellPrice &&
+                parseFloat(creatorStates.shareSellPrice) !== 0
+                  ? parseFloat(creatorStates.shareSellPrice).toFixed(8)
+                  : "0.0"}{" "}
                 {globalStates.chainCurrency})
               </span>
             </div>
@@ -290,7 +297,10 @@ export const ShareModal = ({
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price || "0.0"} {globalStates.chainCurrency}
+                  {price && parseFloat(price) !== 0
+                    ? parseFloat(price).toFixed(8)
+                    : "0.0"}{" "}
+                  {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='sell-button' onClick={sell}>

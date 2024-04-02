@@ -24,6 +24,8 @@ export interface CreatorStates {
   userTierKeyBalance?: string;
   tierKeyHolders?: PyraZoneTierkeyHolderRes[];
   shareHolders?: PyraMarketShareHolderRes[];
+  shareAddress?: string;
+  revenuePoolAddress?: string;
   shareTotalValue?: string;
   shareTotalSupply?: string;
   userShareBalance?: string;
@@ -55,6 +57,8 @@ const initialState: CreatorStates = {
   userTierKeyBalance: undefined,
   tierKeyHolders: undefined,
   shareHolders: undefined,
+  shareAddress: undefined,
+  revenuePoolAddress: undefined,
   shareTotalValue: undefined,
   shareTotalSupply: undefined,
   userShareBalance: undefined,
@@ -176,6 +180,86 @@ export const sellTierkey = createAsyncThunk(
       connector,
     });
     await pyraZone.sellTierkey({ tier, keyId });
+  },
+);
+
+export const stake = createAsyncThunk(
+  "creator/stake",
+  async (args: {
+    chainId: number;
+    shareAddress: string;
+    revenuePoolAddress: string;
+    address: string;
+    connector: Connector;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, shareAddress, revenuePoolAddress, connector, amount } =
+      args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      shareAddress,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.stake(amount);
+  },
+);
+
+export const unstake = createAsyncThunk(
+  "creator/unstake",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    address: string;
+    connector: Connector;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, revenuePoolAddress, connector, amount } = args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.unstake(amount);
+  },
+);
+
+export const claim = createAsyncThunk(
+  "creator/claim",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    address: string;
+    connector: Connector;
+  }) => {
+    const { chainId, revenuePoolAddress, connector } = args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.claim();
+  },
+);
+
+export const loadClaimableRevenue = createAsyncThunk(
+  "creator/loadClaimableRevenue",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    address: string;
+    connector: Connector;
+  }) => {
+    const { chainId, revenuePoolAddress, connector } = args;
+    const revenuePool = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    const revenue = await revenuePool.loadClaimableRevenue();
+    console.log({revenue});
+    console.log(ethers.utils.formatEther(revenue));
+    return ethers.utils.formatEther(revenue);
   },
 );
 
@@ -377,6 +461,8 @@ export const loadCreatorShareInfos = createAsyncThunk(
       shareTotalSupply: ethers.utils.formatEther(shareTotalSupply),
       shareTotalVolume: pyraMarkets[0]?.total_volume,
       shareActivities,
+      shareAddress,
+      revenuePoolAddress,
       userShareBalance: ethers.utils.formatEther(userShareBalance),
       revenuePoolShareBalance: ethers.utils.formatEther(
         revenuePoolShareBalance,
@@ -501,12 +587,17 @@ export const creatorSlice = createSlice({
     builder.addCase(loadShareSellPrice.fulfilled, (state, action) => {
       state.shareSellPrice = action.payload;
     });
+    builder.addCase(loadClaimableRevenue.fulfilled, (state, action) => {
+      state.revenue = action.payload;
+    });
     builder.addCase(loadCreatorShareInfos.fulfilled, (state, action) => {
       const {
         shareTotalValue,
         shareTotalSupply,
         shareTotalVolume,
         shareActivities,
+        shareAddress,
+        revenuePoolAddress,
         userShareBalance,
         revenuePoolShareBalance,
         revenue,
@@ -516,6 +607,8 @@ export const creatorSlice = createSlice({
       state.shareTotalSupply = shareTotalSupply;
       state.shareTotalVolume = shareTotalVolume;
       state.shareActivities = shareActivities;
+      state.shareAddress = shareAddress;
+      state.revenuePoolAddress = revenuePoolAddress;
       state.userShareBalance = userShareBalance;
       state.revenuePoolShareBalance = revenuePoolShareBalance;
       state.revenue = revenue;
