@@ -38,8 +38,11 @@ import {
   PlainButton,
   PlainTabButton,
   PopupButtonWrap,
+  SelectorContainer,
+  ShareCardSection,
   ShareContainer,
   TopBarContainer,
+  TwitterIcon,
 } from "./styled";
 
 import BrowserIconSvg from "@/assets/icons/browser-icon.svg";
@@ -99,8 +102,6 @@ export const NewCreator: React.FC = () => {
   const [emptyPyraMarket, setEmptyPyraMarket] = useState(false);
   const [emptyProfile, setEmptyProfile] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
-  const [shareModal, setShareModal] = useState(false);
-  const [option, setOption] = useState(0);
   const { address } = useParams<{ address?: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -362,7 +363,7 @@ export const NewCreator: React.FC = () => {
         console.log({ userInfo });
       } catch (e: any) {
         dispatch(globalSlice.actions.setUserInfo(undefined));
-        setIsGuidePage(true);
+        // setIsGuidePage(true);
         console.warn(e);
       }
     }
@@ -424,10 +425,24 @@ export const NewCreator: React.FC = () => {
                 DefaultAvatarPng
               }
             />
-            <p className='title-text'>
-              {creatorStates.userInfo?.twitter.name ||
-                stringAbbreviation(creatorStates.pyraZone?.publisher, 4, 4)}
-            </p>
+            {creatorStates.userInfo && (
+              <FlexRow gap='12px'>
+                <p className='title-text'>
+                  {creatorStates.userInfo?.twitter.name ||
+                    stringAbbreviation(creatorStates.pyraZone?.publisher, 4, 4)}
+                </p>
+                <TwitterIcon
+                  onClick={() => {
+                    window.open(
+                      `https://twitter.com/${creatorStates.userInfo?.twitter.username}`,
+                      "_blank",
+                    );
+                  }}
+                >
+                  <img src={TwitterIconSvg} />
+                </TwitterIcon>
+              </FlexRow>
+            )}
             <p className='desc-text'>
               {(address || userAddress) &&
                 stringAbbreviation(address || userAddress, 4, 4)}
@@ -488,59 +503,11 @@ export const NewCreator: React.FC = () => {
         <>
           <FlexRow
             width='100%'
-            alignItems='flex-start'
+            alignItems='center'
             justifyContent='space-between'
             padding='26px 32px'
           >
-            <ContentInfoContainer>
-              {/* <p className='content-desc'>
-                Lil Pudgys is a collection of 22,222 NFTs originating from Pudgy
-                ...
-              </p> */}
-              <p className='item-desc'>
-                {[
-                  {
-                    title: "Items",
-                    data: creatorStates.pyraZone?.files_count,
-                  },
-                  {
-                    title: "Created",
-                    data: creatorStates.pyraZone?.publish_at
-                      ? new Date(
-                          Number(creatorStates.pyraZone.publish_at) * 1000,
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "--",
-                  },
-                  // {
-                  //   title: "Creator earnings",
-                  //   data: "5%",
-                  // },
-                  {
-                    title: "Chain",
-                    data: globalStates.chainName,
-                  },
-                ].map((item, idx) => {
-                  return (
-                    <>
-                      {idx !== 0 && <span>{"  ·  "}</span>}
-                      <span>{item.title}</span>{" "}
-                      <span className='bold'>{item.data}</span>
-                    </>
-                  );
-                })}
-              </p>
-            </ContentInfoContainer>
-            <FlexRow gap='21px' flex='0 0 auto'>
-              <img src={BrowserIconSvg} style={{ cursor: "pointer" }} />
-              <img src={TwitterIconSvg} style={{ cursor: "pointer" }} />
-              <img src={MoreIconSvg} style={{ cursor: "pointer" }} />
-            </FlexRow>
-          </FlexRow>
-          <Section width='100%' padding='10px 32px' gap='24px'>
-            <FlexRow width='100%' gap='9px'>
+            <FlexRow flex='0 0 auto' gap='9px'>
               {tabs.map((tab, idx) => (
                 <PlainTabButton
                   key={idx}
@@ -551,280 +518,16 @@ export const NewCreator: React.FC = () => {
                 </PlainTabButton>
               ))}
             </FlexRow>
+          </FlexRow>
+          <Section width='100%' padding='0px 32px' gap='24px'>
             <Divider width='100%' border='1px solid #E2E2E2' />
           </Section>
           {selectedTab === tabs[0] ? (
-            <Section width='100%' padding='12px 32px' gap='36px'>
-              <TopBarContainer width='100%' gap='12px'>
-                <PlainButton>
-                  <img src={TopbarFilterIconSvg} />
-                </PlainButton>
-                <FlexRow className='live-prompt' flex='0 0 auto'>
-                  <span className='bold-text'>Live</span>
-                </FlexRow>
-                <FlexRow
-                  className='normal-text'
-                  padding='0 12px'
-                  flex='0 0 auto'
-                >
-                  {creatorStates.pyraZone?.files_count} results
-                </FlexRow>
-                <FlexRow className='search'>
-                  <img src={SearchIconSvg} width={20} height={20} />
-                  <input
-                    className='search-input'
-                    placeholder='Search by name or trait'
-                  />
-                </FlexRow>
-                <FlexRow className='selector' flex='0 0 auto'>
-                  <span className='bold-text'>Price low to high</span>
-                  <svg
-                    width='16'
-                    height='16'
-                    viewBox='0 0 16 16'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
-                  >
-                    <g clipPath='url(#clip0_3246_927)'>
-                      <path
-                        d='M13 7L8 12L3 7'
-                        stroke='#121212'
-                        strokeWidth='1.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </g>
-                    <defs>
-                      <clipPath id='clip0_3246_927'>
-                        <rect width='16' height='16' fill='white' />
-                      </clipPath>
-                    </defs>
-                  </svg>
-                </FlexRow>
-                <TabButtons
-                  small
-                  tabs={[
-                    TopbarListIconSvg,
-                    TopbarGridIconSvg,
-                    TopbarWindowIconSvg,
-                    TopbarFlowIconSvg,
-                  ].map((icon, idx) => (
-                    <img key={idx} src={icon} />
-                  ))}
-                  defaultSelectedTab={2}
-                />
-              </TopBarContainer>
-              <MainContentContainer>
-                <div className='sidebar'>
-                  <div className='list-item' data-active={true}>
-                    <div className='list-title'>
-                      <span>Status</span>
-                      <svg
-                        className='down-arrow'
-                        width='16'
-                        height='16'
-                        viewBox='0 0 16 16'
-                        fill='none'
-                        xmlns='http://www.w3.org/2000/svg'
-                      >
-                        <path
-                          d='M3 7L8 12L13 7'
-                          stroke='#545454'
-                          strokeWidth='1.5'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        />
-                      </svg>
-                    </div>
-                    <FlexRow
-                      width='100%'
-                      gap='12px'
-                      wrap
-                      style={{ marginBottom: "13px" }}
-                    >
-                      {["All", "Listed", "On auction", "New", "Has offers"].map(
-                        (item, idx) => (
-                          <PlainButton key={idx} small black={idx === 0}>
-                            {idx === 1 && (
-                              <div
-                                style={{
-                                  width: "8px",
-                                  height: "8px",
-                                  borderRadius: "50%",
-                                  background: "#3EC574",
-                                }}
-                              />
-                            )}
-                            {item}
-                          </PlainButton>
-                        ),
-                      )}
-                    </FlexRow>
-                  </div>
-                  <div className='list-item'>
-                    <div className='list-title'>
-                      <span>Creator earnings</span>
-                      <svg
-                        className='down-arrow'
-                        width='16'
-                        height='16'
-                        viewBox='0 0 16 16'
-                        fill='none'
-                        xmlns='http://www.w3.org/2000/svg'
-                      >
-                        <path
-                          d='M3 7L8 12L13 7'
-                          stroke='#545454'
-                          strokeWidth='1.5'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className='list-item'>
-                    <div className='list-title'>
-                      <span>Price</span>
-                      <svg
-                        className='down-arrow'
-                        width='16'
-                        height='16'
-                        viewBox='0 0 16 16'
-                        fill='none'
-                        xmlns='http://www.w3.org/2000/svg'
-                      >
-                        <path
-                          d='M3 7L8 12L13 7'
-                          stroke='#545454'
-                          strokeWidth='1.5'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                {contentAccessible && (
-                  <>
-                    {files.length > 0 && (
-                      <FilesContentSection files={files} /* foldItems */ />
-                    )}
-                    {files.length === 0 && (
-                      <EmptySection tip='Nothing here yet, go create your first asset!' />
-                    )}
-                  </>
-                )}
-                {!contentAccessible && <LockedSection />}
-              </MainContentContainer>
-            </Section>
+            <FinderContentSection />
           ) : selectedTab === tabs[1] ? (
-            <Section width='100%' padding='12px 32px' gap='36px'>
-              <ShareContainer>
-                <div className='info-container'>
-                  <div className='title'>TV</div>
-                  <div className='content'>
-                    $
-                    {creatorStates.ethPrice &&
-                    creatorStates?.shareTotalValue &&
-                    parseFloat(creatorStates.shareTotalValue) !== 0
-                      ? (
-                          parseFloat(creatorStates?.shareTotalValue) *
-                          creatorStates.ethPrice
-                        ).toFixed(4)
-                      : "0.0"}{" "}
-                  </div>
-                  <div className='added'>
-                    {creatorStates.shareTotalValue || 0}{" "}
-                    {globalStates.chainCurrency}
-                  </div>
-                </div>
-                <div className='info-container'>
-                  <div className='title'>Supply</div>
-                  <div className='content'>
-                    {creatorStates.shareTotalSupply || "0.0"}
-                  </div>
-                  <div className='added'>Shares</div>
-                </div>
-                <div className='info-container'>
-                  <div className='title'>Volume</div>
-                  <div className='content'>
-                    $
-                    {creatorStates.ethPrice &&
-                    creatorStates?.shareTotalVolume &&
-                    parseFloat(creatorStates.shareTotalVolume) !== 0
-                      ? (
-                          parseFloat(creatorStates.shareTotalVolume) *
-                          creatorStates.ethPrice
-                        ).toFixed(4)
-                      : "0.0"}
-                  </div>
-                  <div className='added'>
-                    {creatorStates.shareTotalVolume || "0.0"}{" "}
-                    {globalStates.chainCurrency}
-                  </div>
-                </div>
-                <div className='more-info-container'>
-                  <div className='title'>You own</div>
-                  <div className='number'>
-                    {creatorStates.userShareBalance || "0.0"}{" "}
-                    <span className='unit'>shares</span>
-                  </div>
-                  <div className='added'>
-                    {creatorStates.shareSellPrice || "0.0"}{" "}
-                    {globalStates.chainCurrency}
-                  </div>
-                  <div className='buttons'>
-                    <div
-                      className='buy'
-                      onClick={() => {
-                        setOption(1);
-                        setShareModal(true);
-                      }}
-                    >
-                      Buy
-                    </div>
-                    <div
-                      className='sell'
-                      onClick={() => {
-                        setOption(2);
-                        setShareModal(true);
-                      }}
-                    >
-                      Sell
-                    </div>
-                  </div>
-                </div>
-                <div className='more-info-container'>
-                  <div className='title'>Revenue pool</div>
-                  <div className='number'>
-                    {creatorStates.revenuePoolShareBalance || "0.0"}{" "}
-                    <span className='unit'>shares</span>
-                  </div>
-                  <div className='placeholder'></div>
-                  <div className='buttons'>
-                    <div className='stake'>Stake</div>
-                    <div className='unstake'>Unstake</div>
-                  </div>
-                  <div className='rewards'>
-                    current revenue: {creatorStates.revenue || "0.0"}{" "}
-                    {globalStates.chainCurrency}
-                    (${" "}
-                    {creatorStates.ethPrice &&
-                    creatorStates?.revenue &&
-                    parseFloat(creatorStates.revenue) !== 0
-                      ? (
-                          parseFloat(creatorStates.revenue) *
-                          creatorStates.ethPrice
-                        ).toFixed(4)
-                      : "0.0"}
-                    )
-                  </div>
-                  <div className='claim'>Claim</div>
-                </div>
-              </ShareContainer>
-            </Section>
+            <ShareSection />
           ) : (
-            <>to do</>
+            <ActivitySection />
           )}
         </>
       )}
@@ -890,11 +593,6 @@ export const NewCreator: React.FC = () => {
           )}
         </GuidePageSection>
       )}
-      <ShareModal
-        option={option}
-        visible={shareModal}
-        setVisible={setShareModal}
-      />
     </CreatorWrapper>
   );
 };
@@ -970,7 +668,7 @@ const FilesContentSection = ({
             </div>
             <div className='file-info'>
               <p>{file.content.title}</p>
-              {file.accessControl?.monetizationProvider?.dataAsset?.assetId && (
+              {/* {file.accessControl?.monetizationProvider?.dataAsset?.assetId && (
                 <>
                   {(file.accessControl.monetizationProvider.dataAsset as any)
                     .assetDetail && (
@@ -990,7 +688,7 @@ const FilesContentSection = ({
                     </p>
                   )}
                 </>
-              )}
+              )} */}
               {/* <p style={{ marginTop: "9px" }} className='grey'>
                 Last sale: 1.1 {globalStates.chainCurrency}
               </p> */}
@@ -1003,67 +701,164 @@ const FilesContentSection = ({
 };
 
 const FinderContentSection = () => {
-  const [sortBy, setSortBy] = useState<"Date" | "Default">("Date");
+  const [sortBy, setSortBy] = useState<"latest" | "oldest">("latest");
 
+  const globalStates = useSelector(state => state.global);
+  const creatorStates = useSelector(state => state.creator);
   const contentAccessible = useSelector(
     state => state.creator.contentAccessible,
   );
   const fileRecord = useSelector(state => state.creator.contentFiles);
   const files = Object.values(fileRecord || {});
-  const sortedFiles = buildSortedItems(
-    files,
-    file => new Date(file.content.updatedAt),
-  );
+  // const sortedFiles = buildSortedItems(
+  //   files,
+  //   file => new Date(file.content.updatedAt),
+  // );
 
-  const SortButton = (
-    <PopupButtonWrap>
-      <img src={SortIconSvg} alt='Sort' />
-      <div className='popup-list'>
-        <span
-          className='list-item'
-          data-active={sortBy === "Default"}
-          onClick={() => setSortBy("Default")}
-        >
-          Default
-        </span>
-        <span
-          className='list-item'
-          data-active={sortBy === "Date"}
-          onClick={() => setSortBy("Date")}
-        >
-          by date
-        </span>
-      </div>
-    </PopupButtonWrap>
-  );
+  // return (
+  //   <FinderContainer /* style={{ marginTop: "-49px" }} */>
+  //     <FlexRow className='tool-bar'>
+  //       {SortButton}
+  //       <FlexRow gap='14px' flex='0 0 auto' style={{ cursor: "pointer" }}>
+  //         <span>All</span>
+  //         <img src={DownArrowIconSvg} alt='Down arrow' />
+  //       </FlexRow>
+  //     </FlexRow>
+  //     {contentAccessible && (
+  //       <Section className='inner-container'>
+  //         {sortBy === "Date" &&
+  //           sortedFiles.map(({ title, items }, idx) => {
+  //             if (items.length > 0) {
+  //               return (
+  //                 <DateSortedSection files={items} dateText={title} key={idx} />
+  //               );
+  //             }
+  //           })}
+  //         {sortBy === "Default" && <DateSortedSection files={files} />}
+  //         {files.length === 0 && (
+  //           <EmptySection tip='Nothing here yet, go create your first asset!' />
+  //         )}
+  //       </Section>
+  //     )}
+  //     {!contentAccessible && <LockedSection />}
+  //   </FinderContainer>
+  // );
 
   return (
-    <FinderContainer style={{ marginTop: "-49px" }}>
-      <FlexRow className='tool-bar'>
-        {SortButton}
-        <FlexRow gap='14px' flex='0 0 auto' style={{ cursor: "pointer" }}>
+    <Section width='100%' padding='12px 32px' gap='36px'>
+      <TopBarContainer width='100%' gap='12px'>
+        <ContentInfoContainer style={{ flex: "1 1 auto" }}>
+          <p className='item-desc'>
+            {[
+              {
+                title: "Items",
+                data: creatorStates.pyraZone?.files_count,
+              },
+              {
+                title: "Created",
+                data: creatorStates.pyraZone?.publish_at
+                  ? new Date(
+                      Number(creatorStates.pyraZone.publish_at) * 1000,
+                    ).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "--",
+              },
+              // {
+              //   title: "Creator earnings",
+              //   data: "5%",
+              // },
+              {
+                title: "Chain",
+                data: globalStates.chainName,
+              },
+            ].map((item, idx) => {
+              return (
+                <>
+                  {idx !== 0 && <span>{"  ·  "}</span>}
+                  <span>{item.title}</span>{" "}
+                  <span className='bold'>{item.data}</span>
+                </>
+              );
+            })}
+          </p>
+        </ContentInfoContainer>
+        <Selector
+          options={["latest", "oldest"]}
+          defaultSelectedItem
+          onChange={item => setSortBy(item as any)}
+        />
+        {/* <FlexRow className='selector' flex='0 0 auto'>
+          <span className='bold-text'>latest</span>
+          <svg
+            width='16'
+            height='16'
+            viewBox='0 0 16 16'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <g clipPath='url(#clip0_3246_927)'>
+              <path
+                d='M13 7L8 12L3 7'
+                stroke='#121212'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </g>
+            <defs>
+              <clipPath id='clip0_3246_927'>
+                <rect width='16' height='16' fill='white' />
+              </clipPath>
+            </defs>
+          </svg>
+        </FlexRow> */}
+        {/* <TabButtons
+          small
+          tabs={[
+            TopbarListIconSvg,
+            TopbarGridIconSvg,
+            TopbarWindowIconSvg,
+            TopbarFlowIconSvg,
+          ].map((icon, idx) => (
+            <img key={idx} src={icon} />
+          ))}
+          defaultSelectedTab={2}
+        /> */}
+        {/* <FlexRow gap='14px' flex='0 0 auto' style={{ cursor: "pointer" }}>
           <span>All</span>
           <img src={DownArrowIconSvg} alt='Down arrow' />
-        </FlexRow>
-      </FlexRow>
-      {contentAccessible && (
-        <Section className='inner-container'>
-          {sortBy === "Date" &&
-            sortedFiles.map(({ title, items }, idx) => {
-              if (items.length > 0) {
-                return (
-                  <DateSortedSection files={items} dateText={title} key={idx} />
-                );
-              }
-            })}
-          {sortBy === "Default" && <DateSortedSection files={files} />}
-          {files.length === 0 && (
-            <EmptySection tip='Nothing here yet, go create your first asset!' />
-          )}
-        </Section>
-      )}
-      {!contentAccessible && <LockedSection />}
-    </FinderContainer>
+        </FlexRow> */}
+      </TopBarContainer>
+      <MainContentContainer>
+        {contentAccessible && (
+          <>
+            {files.length > 0 && (
+              <FilesContentSection
+                files={files.sort((a, b) => {
+                  if (sortBy === "latest") {
+                    return (
+                      new Date(b.updatedAt || Date.now()).getTime() -
+                      new Date(a.updatedAt || Date.now()).getTime()
+                    );
+                  } else {
+                    return (
+                      new Date(a.updatedAt || Date.now()).getTime() -
+                      new Date(b.updatedAt || Date.now()).getTime()
+                    );
+                  }
+                })}
+              />
+            )}
+            {files.length === 0 && (
+              <EmptySection tip='Nothing here yet, go create your first asset!' />
+            )}
+          </>
+        )}
+        {!contentAccessible && <LockedSection />}
+      </MainContentContainer>
+    </Section>
   );
 };
 
@@ -1097,7 +892,7 @@ const DateSortedSection = ({
           )}
         </FlexRow>
       </FlexRow>
-      <ContentSection files={files} foldItems={folded} />
+      <FilesContentSection files={files} foldItems={folded} />
     </DateSortedSectionWrap>
   );
 };
@@ -1292,5 +1087,281 @@ const EmptySection = ({ tip }: { tip: string }) => {
       <img src={EmptySectionIconSvg} />
       <p className='empty-tip'>{tip}</p>
     </EmptySectionWrap>
+  );
+};
+
+const ShareSection = () => {
+  const globalStates = useSelector(state => state.global);
+  const creatorStates = useSelector(state => state.creator);
+
+  const [shareModal, setShareModal] = useState(false);
+  const [option, setOption] = useState(0);
+
+  return (
+    <Section width='100%' padding='12px 32px' gap='36px'>
+      <ShareContainer>
+        <div className='info-container'>
+          <div className='title'>TV</div>
+          <div className='content'>
+            $
+            {creatorStates.ethPrice &&
+            creatorStates?.shareTotalValue &&
+            parseFloat(creatorStates.shareTotalValue) !== 0
+              ? (
+                  parseFloat(creatorStates?.shareTotalValue) *
+                  creatorStates.ethPrice
+                ).toFixed(4)
+              : "0.0"}{" "}
+          </div>
+          <div className='added'>
+            {creatorStates.shareTotalValue || 0} {globalStates.chainCurrency}
+          </div>
+        </div>
+        <div className='info-container'>
+          <div className='title'>Supply</div>
+          <div className='content'>
+            {creatorStates.shareTotalSupply || "0.0"}
+          </div>
+          <div className='added'>Shares</div>
+        </div>
+        <div className='info-container'>
+          <div className='title'>Volume</div>
+          <div className='content'>
+            $
+            {creatorStates.ethPrice &&
+            creatorStates?.shareTotalVolume &&
+            parseFloat(creatorStates.shareTotalVolume) !== 0
+              ? (
+                  parseFloat(creatorStates.shareTotalVolume) *
+                  creatorStates.ethPrice
+                ).toFixed(4)
+              : "0.0"}
+          </div>
+          <div className='added'>
+            {creatorStates.shareTotalVolume || "0.0"}{" "}
+            {globalStates.chainCurrency}
+          </div>
+        </div>
+        <div className='more-info-container'>
+          <div className='title'>You own</div>
+          <div className='number'>
+            {creatorStates.userShareBalance || "0.0"}{" "}
+            <span className='unit'>shares</span>
+          </div>
+          <div className='added'>
+            {creatorStates.shareSellPrice || "0.0"} {globalStates.chainCurrency}
+          </div>
+          <div className='buttons'>
+            <div
+              className='buy'
+              onClick={() => {
+                setOption(1);
+                setShareModal(true);
+              }}
+            >
+              Buy
+            </div>
+            <div
+              className='sell'
+              onClick={() => {
+                setOption(2);
+                setShareModal(true);
+              }}
+            >
+              Sell
+            </div>
+          </div>
+        </div>
+        <div className='more-info-container'>
+          <div className='title'>Revenue pool</div>
+          <div className='number'>
+            {creatorStates.revenuePoolShareBalance || "0.0"}{" "}
+            <span className='unit'>shares</span>
+          </div>
+          <div className='placeholder'></div>
+          <div className='buttons'>
+            <div className='stake'>Stake</div>
+            <div className='unstake'>Unstake</div>
+          </div>
+          <div className='rewards'>
+            current revenue: {creatorStates.revenue || "0.0"}{" "}
+            {globalStates.chainCurrency}
+            (${" "}
+            {creatorStates.ethPrice &&
+            creatorStates?.revenue &&
+            parseFloat(creatorStates.revenue) !== 0
+              ? (
+                  parseFloat(creatorStates.revenue) * creatorStates.ethPrice
+                ).toFixed(4)
+              : "0.0"}
+            )
+          </div>
+          <div className='claim'>Claim</div>
+        </div>
+      </ShareContainer>
+      <ShareModal
+        option={option}
+        visible={shareModal}
+        setVisible={setShareModal}
+      />
+    </Section>
+  );
+};
+
+const ActivitySection = () => {
+  return (
+    <Section width='100%' padding='50px 40px' gap='50px'>
+      <FlexRow width='100%' gap='16px' alignItems='flex-start'>
+        <ShareCardSection>
+          <p className='title-text'>Trades</p>
+          <div className='trade-activity-section'>
+            <div className='activity-item'>
+              <div className='avatar'></div>
+              <div className='user-name'>Nemarluk Lilly</div>
+              <div className='activity-info'>
+                <span>bought 0.01 share for </span>
+                <span className='green'>0.0016 ETH</span>
+              </div>
+            </div>
+            <div className='activity-item'>
+              <div className='avatar'></div>
+              <div className='user-name'>Menashd vafacaearnsearm</div>
+              <div className='activity-info'>
+                <span>sold 0.1 share for </span>
+                <span className='orange'>0.025 ETH</span>
+              </div>
+            </div>
+            <div className='activity-item'>
+              <div className='avatar'></div>
+              <div className='user-name'>Nemarluk Lilly</div>
+              <div className='activity-info'>
+                <span>bought 0.01 share for </span>
+                <span className='green'>0.0016 ETH</span>
+              </div>
+            </div>
+            <div className='activity-item'>
+              <div className='avatar'></div>
+              <div className='user-name'>Nemarluk Lilly</div>
+              <div className='activity-info'>
+                <span>bought 0.01 share for </span>
+                <span className='green'>0.0016 ETH</span>
+              </div>
+            </div>
+            <div className='activity-item'>
+              <div className='avatar'></div>
+              <div className='user-name'>Menashd vafacaearnsearm</div>
+              <div className='activity-info'>
+                <span>sold 0.1 share for </span>
+                <span className='orange'>0.025 ETH</span>
+              </div>
+            </div>
+          </div>
+        </ShareCardSection>
+        <ShareCardSection>
+          <p className='title-text'>Holders</p>
+          <div className='holders-section'>
+            {[...new Array(20)].map((_, idx) => (
+              <div className='holder-item' key={idx}>
+                <div className='avatar'></div>
+                <div className='user-name'>lasksaen2531</div>
+              </div>
+            ))}
+          </div>
+        </ShareCardSection>
+      </FlexRow>
+    </Section>
+  );
+};
+
+const Selector = ({
+  options,
+  defaultSelectedItem,
+  controlledSelectedItem,
+  onChange,
+}: {
+  options: string[];
+  defaultSelectedItem?: string | number | boolean;
+  controlledSelectedItem?: string | number | boolean;
+  onChange?: (selectedItem: string, idx: number) => void;
+}) => {
+  const [selectedIdx, setSelectedIdx] = useState(
+    typeof defaultSelectedItem === "string"
+      ? options.indexOf(defaultSelectedItem)
+      : typeof defaultSelectedItem === "number"
+        ? defaultSelectedItem
+        : typeof defaultSelectedItem === "boolean"
+          ? defaultSelectedItem
+            ? 0
+            : -1
+          : -1,
+  );
+  const [popupActive, setPopupActive] = useState(false);
+
+  useEffect(() => {
+    if (controlledSelectedItem) {
+      setSelectedIdx(
+        typeof controlledSelectedItem === "string"
+          ? options.indexOf(controlledSelectedItem)
+          : typeof controlledSelectedItem === "number"
+            ? controlledSelectedItem
+            : typeof controlledSelectedItem === "boolean"
+              ? controlledSelectedItem
+                ? 0
+                : -1
+              : -1,
+      );
+    }
+  }, [controlledSelectedItem]);
+
+  return (
+    <SelectorContainer
+      data-active={popupActive}
+      onClick={() => {
+        setPopupActive(v => !v);
+      }}
+      onBlur={() => {
+        setPopupActive(false);
+      }}
+    >
+      <span>{selectedIdx >= 0 && options[selectedIdx]}</span>
+      <svg
+        className='selector-down-arrow'
+        width='16'
+        height='16'
+        viewBox='0 0 16 16'
+        fill='none'
+        xmlns='http://www.w3.org/2000/svg'
+      >
+        <g clipPath='url(#clip0_3246_927)'>
+          <path
+            d='M13 7L8 12L3 7'
+            stroke='#121212'
+            strokeWidth='1.5'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </g>
+        <defs>
+          <clipPath id='clip0_3246_927'>
+            <rect width='16' height='16' fill='white' />
+          </clipPath>
+        </defs>
+      </svg>
+      <div className='popup-list'>
+        {options.map((option, idx) => (
+          <span
+            key={idx}
+            className='list-item'
+            // data-active={selectedIdx === idx}
+            onClick={() => {
+              setSelectedIdx(idx);
+              onChange?.(option, idx);
+            }}
+          >
+            {option}
+          </span>
+        ))}
+      </div>
+    </SelectorContainer>
   );
 };

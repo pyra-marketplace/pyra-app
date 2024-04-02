@@ -515,6 +515,7 @@ const CreatorTableItem = ({
 }) => {
   const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
+  const ethPrice = useSelector(state => state.global.ethPrice);
 
   return (
     <div className='table-row'>
@@ -536,7 +537,12 @@ const CreatorTableItem = ({
           </span>
         </FlexRow>
       </div>
-      <div className='table-item'>{trendingPyraZone.total_volume}</div>
+      <div className='table-item'>
+        $
+        {ethPrice && trendingPyraZone.total_volume
+          ? (parseFloat(trendingPyraZone.total_volume) * ethPrice).toFixed(4)
+          : "0.0"}
+      </div>
       <div className='table-item'>{trendingPyraZone.share_holders}</div>
       <div className='table-item'>{trendingPyraZone.files_count}</div>
       <div className='table-item'>

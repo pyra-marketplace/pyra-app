@@ -43,7 +43,7 @@ export const Upload: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { connector, address } = useStore();
+  const { connector, address, pkh } = useStore();
   const globalStates = useSelector(state => state.global);
   const pyraZone = useSelector(state => state.creator.pyraZone);
 
@@ -123,12 +123,12 @@ export const Upload: React.FC = () => {
       } else {
         assetId = pyraZone.asset_id;
       }
-      await connector.runOS({
-        method: SYSTEM_CALL.createCapability,
-        params: {
-          appId: process.env.PYRA_APP_ID!,
-        },
-      });
+      // await connector.runOS({
+      //   method: SYSTEM_CALL.createCapability,
+      //   params: {
+      //     appId: process.env.PYRA_APP_ID!,
+      //   },
+      // });
       const uploadedFileUrls = await Promise.all(
         fileList.map(file => connector.uploadFile(file).then(ipfs.getFileLink)),
       );
@@ -187,6 +187,13 @@ export const Upload: React.FC = () => {
     setFileTags([]);
     setSelectedTier("All paid members");
   };
+
+  useEffect(() => {
+    if (!globalStates.autoConnecting && !pkh) {
+      navigate("/");
+      return;
+    }
+  }, [globalStates.autoConnecting, pkh]);
 
   return (
     <UploadWrapper>

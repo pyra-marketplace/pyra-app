@@ -25,6 +25,7 @@ export interface GlobalStates {
   chainName: ChainNameType;
   chainCurrency: ChainCurrency;
   walletBalance?: string;
+  ethPrice?: number;
   userInfo?: {
     address: string;
     did: string;
@@ -61,6 +62,19 @@ export const getWalletBalance = createAsyncThunk(
   },
 );
 
+export const getEthPrice = createAsyncThunk("global/getEthPrice", async () => {
+  const ethPrice = await fetch(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"}&vs_currencies=usd&precision=2`,
+  )
+    .then(r => r.json())
+    .then(
+      r =>
+        r[chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"]
+          .usd as number,
+    );
+  return ethPrice;
+});
+
 export const globalSlice = createSlice({
   name: "global",
   initialState,
@@ -76,6 +90,10 @@ export const globalSlice = createSlice({
     builder.addCase(getWalletBalance.fulfilled, (state, action) => {
       const balance = action.payload;
       state.walletBalance = balance;
+    });
+    builder.addCase(getEthPrice.fulfilled, (state, action) => {
+      const ethPrice = action.payload;
+      state.ethPrice = ethPrice;
     });
   },
 });
