@@ -2,9 +2,12 @@ import styled, { createGlobalStyle } from "styled-components";
 
 import InterBold from "@/assets/fonts/Inter/Inter-Bold.ttf";
 import InterExtraBold from "@/assets/fonts/Inter/Inter-ExtraBold.ttf";
+import InterExtraLight from "@/assets/fonts/Inter/Inter-ExtraLight.ttf";
+import InterLight from "@/assets/fonts/Inter/Inter-Light.ttf";
 import InterMedium from "@/assets/fonts/Inter/Inter-Medium.ttf";
 import InterRegular from "@/assets/fonts/Inter/Inter-Regular.ttf";
 import InterSemiBold from "@/assets/fonts/Inter/Inter-SemiBold.ttf";
+import InterThin from "@/assets/fonts/Inter/Inter-Thin.ttf";
 import LatoBold from "@/assets/fonts/Lato/Lato-Bold.ttf";
 import LatoExtraBold from "@/assets/fonts/Lato/Lato-ExtraBold.ttf";
 import LatoMedium from "@/assets/fonts/Lato/Lato-Medium.ttf";
@@ -127,6 +130,21 @@ export const GlobalStyle = createGlobalStyle`
     font-family: Inter-ExtraBold;
     font-style: normal;
     src: url(${InterExtraBold});
+  }
+  @font-face {
+    font-family: Inter-ExtraLight;
+    font-style: normal;
+    src: url(${InterExtraLight});
+  }
+  @font-face {
+    font-family: Inter-Light;
+    font-style: normal;
+    src: url(${InterLight});
+  }
+  @font-face {
+    font-family: Inter-Thin;
+    font-style: normal;
+    src: url(${InterThin});
   }
 `;
 

@@ -807,7 +807,7 @@ export const SelectorContainer = styled(FlexRow)`
   padding: 14px 16px;
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s;
@@ -829,7 +829,7 @@ export const SelectorContainer = styled(FlexRow)`
 
   &[data-active="true"] {
     .selector-down-arrow {
-      transform: rotate(180deg) translateY(-4px);
+      transform: rotate(180deg) translateY(-2px) translateY(50%);
     }
     .popup-list {
       display: flex;
@@ -842,6 +842,10 @@ export const SelectorContainer = styled(FlexRow)`
   }
 
   .selector-down-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-1px) translateY(-50%);
     transition: all 0.3s;
   }
 

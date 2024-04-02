@@ -19,7 +19,18 @@ import {
   PyraZoneRes,
   Auth as TwitterAuth,
 } from "@pyra-marketplace/pyra-sdk";
-import { ethers } from "ethers";
+import { BarChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DatasetComponent,
+  TransformComponent,
+} from "echarts/components";
+import * as echarts from "echarts/core";
+import { LabelLayout, UniversalTransition } from "echarts/features";
+import { CanvasRenderer } from "echarts/renderers";
+import ReactECharts from "echarts-for-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -45,21 +56,18 @@ import {
   TwitterIcon,
 } from "./styled";
 
-import BrowserIconSvg from "@/assets/icons/browser-icon.svg";
-import CopyIconSvg from "@/assets/icons/copy.svg";
+import type { BarSeriesOption, LineSeriesOption } from "echarts/charts";
+import type {
+  TitleComponentOption,
+  TooltipComponentOption,
+  GridComponentOption,
+  DatasetComponentOption,
+} from "echarts/components";
+import type { ComposeOption } from "echarts/core";
+
 import DoubleDownArrowIconSvg from "@/assets/icons/double-down-arrow.svg";
-import DownArrowIconSvg from "@/assets/icons/down-arrow.svg";
-import EditIconSvg from "@/assets/icons/edit.svg";
 import EmptySectionIconSvg from "@/assets/icons/empty-section.svg";
 import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
-import MoreIconSvg from "@/assets/icons/more-icon.svg";
-import SearchIconSvg from "@/assets/icons/search.svg";
-import SortIconSvg from "@/assets/icons/sort.svg";
-import TopbarFilterIconSvg from "@/assets/icons/topbar-filter.svg";
-import TopbarFlowIconSvg from "@/assets/icons/topbar-flow.svg";
-import TopbarGridIconSvg from "@/assets/icons/topbar-grid.svg";
-import TopbarListIconSvg from "@/assets/icons/topbar-list.svg";
-import TopbarWindowIconSvg from "@/assets/icons/topbar-window.svg";
 import TwitterIconSvg from "@/assets/icons/twitter-icon.svg";
 import DefaultAvatarPng from "@/assets/images/default-avatar.png";
 import DefaultBannerPng from "@/assets/images/default-banner.png";
@@ -67,7 +75,6 @@ import { FileInfoModal } from "@/components/FileInfoModal";
 import { KeyModal } from "@/components/KeyModal";
 import { RevenueModal } from "@/components/RevenueModal";
 import { ShareModal } from "@/components/ShareModal";
-import { TabButtons } from "@/components/TabButtons";
 import {
   createPryaZone,
   createShare,
@@ -82,13 +89,33 @@ import {
 } from "@/state/createor/slice";
 import { globalSlice } from "@/state/global/slice";
 import { useDispatch, useSelector } from "@/state/hook";
-import { Divider, FlexRow, GridWrap, Section } from "@/styled";
+import { Divider, FlexRow, Section } from "@/styled";
 import {
   buildSortedItems,
   getCurrencyNameByCurrencyAddress,
   stringAbbreviation,
   stringToColor,
 } from "@/utils";
+
+type ECOption = ComposeOption<
+  | BarSeriesOption
+  | LineSeriesOption
+  | TitleComponentOption
+  | TooltipComponentOption
+  | GridComponentOption
+  | DatasetComponentOption
+>;
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DatasetComponent,
+  TransformComponent,
+  BarChart,
+  LabelLayout,
+  UniversalTransition,
+  CanvasRenderer,
+]);
 
 export const NewCreator: React.FC = () => {
   const tabs: Array<"Content" | "Share" | "Activity"> = [
@@ -1273,8 +1300,158 @@ const ShareSection = () => {
 };
 
 const ActivitySection = () => {
+  const chartOption: ECOption = {
+    grid: {
+      left: 80,
+      top: 25,
+      right: 80,
+      bottom: 30,
+    },
+    // visualMap: [
+    //   {
+    //     show: false,
+    //     type: "continuous",
+    //     seriesIndex: 0,
+    //     min: 0,
+    //     max: 250,
+    //   },
+    // ],
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "cross",
+        // crossStyle: {
+        //   color: "#999",
+        // },
+      },
+    },
+    xAxis: [
+      {
+        type: "category",
+        data: [
+          "Nov 28",
+          "Dec 5",
+          "Dec 12",
+          "Dec 19",
+          "Dec 26",
+          "Jan 2",
+          "Jan 9",
+          "Jan 16",
+          "Jan 23",
+          "Jan 30",
+          "Feb 6",
+          "Feb 13",
+          "Feb 20",
+          "Feb 27",
+          "Mar 6",
+          "Mar 13",
+          "Mar 20",
+        ],
+        axisPointer: {
+          type: "shadow",
+        },
+        axisLabel: {
+          fontFamily: "Inter-ExtraLight",
+          fontWeight: 200,
+          fontSize: "14px",
+          color: "#545454",
+        },
+      },
+    ],
+    yAxis: [
+      {
+        type: "value",
+        name: "Volume (ETH)",
+        min: 0,
+        max: 1.25,
+        interval: 0.25,
+        axisLabel: {
+          fontFamily: "Inter-ExtraLight",
+          fontWeight: 200,
+          fontSize: "14px",
+          color: "#545454",
+        },
+        axisLine: {
+          lineStyle: {
+            color: "#C8C8C8",
+          },
+        },
+        nameLocation: "middle",
+        nameGap: 60,
+        nameTextStyle: {
+          fontFamily: "Inter-SemiBold",
+          fontWeight: 600,
+          fontSize: "14px",
+          color: "#121212",
+        },
+      },
+      {
+        type: "value",
+        name: "Average price (ETH)",
+        min: 0,
+        max: 0.125,
+        interval: 0.025,
+        axisLabel: {
+          fontFamily: "Inter-ExtraLight",
+          fontWeight: 200,
+          fontSize: "14px",
+          color: "#545454",
+        },
+        axisLine: {
+          lineStyle: {
+            color: "#C8C8C8",
+          },
+        },
+        nameLocation: "middle",
+        nameGap: 60,
+        nameTextStyle: {
+          fontFamily: "Inter-SemiBold",
+          fontWeight: 600,
+          fontSize: "14px",
+          color: "#121212",
+        },
+      },
+    ],
+    series: [
+      {
+        name: "Volume",
+        type: "bar",
+        data: [
+          0.4, 1.1, 0.25, 0.1, 0.05, 0.1, 0.07, 0.02, 0, 0, 0, 0, 0, 0, 0.1,
+          0.25, 0,
+        ],
+        itemStyle: {
+          color: "#E7E8EC",
+          borderColor: "#C8C8C8",
+          borderWidth: 1,
+          borderRadius: [4, 4, 0, 0],
+        },
+      },
+      {
+        name: "Average price",
+        type: "line",
+        yAxisIndex: 1,
+        data: [
+          0.11, 0.025, 0.01, 0.015, 0.02, 0.005, 0.006, 0.006, 0.006, 0.006,
+          0.006, 0.006, 0.006, 0.006, 0.006, 0.02, 0.02,
+        ],
+        symbol: "circle",
+        symbolSize: 11,
+        showSymbol: false,
+        lineStyle: {
+          color: "#0086DC",
+        },
+      },
+    ],
+  };
+
   return (
     <Section width='100%' padding='50px 40px' gap='50px'>
+      <ReactECharts
+        style={{ width: "100%", height: "391px" }}
+        echarts={echarts}
+        option={chartOption}
+      />
       <FlexRow width='100%' gap='16px' alignItems='flex-start'>
         <ShareCardSection>
           <p className='title-text'>Trades</p>
@@ -1360,6 +1537,7 @@ const Selector = ({
           : -1,
   );
   const [popupActive, setPopupActive] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (controlledSelectedItem) {
@@ -1377,14 +1555,25 @@ const Selector = ({
     }
   }, [controlledSelectedItem]);
 
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setPopupActive(false);
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [setPopupActive, containerRef]);
+
   return (
     <SelectorContainer
+      ref={containerRef}
       data-active={popupActive}
       onClick={() => {
         setPopupActive(v => !v);
-      }}
-      onBlur={() => {
-        setPopupActive(false);
       }}
     >
       <span>{selectedIdx >= 0 && options[selectedIdx]}</span>
