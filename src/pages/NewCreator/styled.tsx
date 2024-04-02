@@ -281,18 +281,11 @@ export const FilesContentSectionWrap = styled.div<{
   foldItems?: boolean;
   lineHeight?: number;
 }>`
-  flex: 1 1 auto;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: ${prop => prop.columnGap || "32px"};
-  row-gap: ${prop => prop.rowGap || "55px"};
-  ${prop =>
-    prop.foldItems &&
-    `
-    height: ${(prop.lineHeight || 0) + 30}px;
-    overflow: hidden;
-  `}
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, auto));
+  justify-content: space-around;
+  gap: 24px 14px;
 
   .file-card {
     /* width: 262px; */
