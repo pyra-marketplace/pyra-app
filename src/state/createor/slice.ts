@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import { Connector, MirrorFileRecord } from "@meteor-web3/connector";
 import {
   Auth as TwitterAuth,
@@ -148,11 +149,10 @@ export const buyTierkey = createAsyncThunk(
   async (args: {
     chainId: number;
     assetId: string;
-    address: string;
     connector: Connector;
     tier: number;
   }) => {
-    const { chainId, assetId, address, connector, tier } = args;
+    const { chainId, assetId, connector, tier } = args;
     const pyraZone = new PyraZone({
       chainId,
       assetId,
@@ -168,12 +168,11 @@ export const sellTierkey = createAsyncThunk(
   async (args: {
     chainId: number;
     assetId: string;
-    address: string;
     connector: Connector;
     tier: number;
     keyId: string;
   }) => {
-    const { chainId, assetId, address, connector, tier, keyId } = args;
+    const { chainId, assetId, connector, tier, keyId } = args;
     const pyraZone = new PyraZone({
       chainId,
       assetId,
@@ -189,7 +188,6 @@ export const stake = createAsyncThunk(
     chainId: number;
     shareAddress: string;
     revenuePoolAddress: string;
-    address: string;
     connector: Connector;
     amount: ethers.BigNumber;
   }) => {
@@ -210,7 +208,6 @@ export const unstake = createAsyncThunk(
   async (args: {
     chainId: number;
     revenuePoolAddress: string;
-    address: string;
     connector: Connector;
     amount: ethers.BigNumber;
   }) => {
@@ -229,7 +226,6 @@ export const claim = createAsyncThunk(
   async (args: {
     chainId: number;
     revenuePoolAddress: string;
-    address: string;
     connector: Connector;
   }) => {
     const { chainId, revenuePoolAddress, connector } = args;
@@ -257,8 +253,6 @@ export const loadClaimableRevenue = createAsyncThunk(
       connector,
     });
     const revenue = await revenuePool.loadClaimableRevenue();
-    console.log({revenue});
-    console.log(ethers.utils.formatEther(revenue));
     return ethers.utils.formatEther(revenue);
   },
 );
@@ -287,11 +281,12 @@ export const loadCreatorBaseInfos = createAsyncThunk(
   async (args: {
     chainId: number;
     address: string;
+    userAddress?: string;
     assetId: string;
     connector: Connector;
     tier?: number;
   }) => {
-    const { chainId, address, assetId, connector, tier } = args;
+    const { chainId, address, userAddress, assetId, connector, tier } = args;
     const pyraMarket = new PyraMarket({
       chainId,
       connector,
@@ -312,16 +307,15 @@ export const loadCreatorBaseInfos = createAsyncThunk(
     } catch (error) {
       console.warn(error);
     }
-    console.log({
-      tier: tier || 0,
-      address,
-    });
-    const userTierKeyBalance = await pyraZone.loadTierkeyBalance({
-      tier: tier || 0,
-      address,
-    });
-    console.log({ userTierKeyBalance });
-    console.log({ shareBuyPrice, tierKeyBuyPrice, tierKeySellPrice });
+    let userTierKeyBalance;
+    try {
+      if (userAddress) {
+        userTierKeyBalance = await pyraZone.loadTierkeyBalance({
+          tier: tier || 0,
+          address: userAddress,
+        });
+      }
+    } catch (error) {}
     const tierKeyHolders = await PyraZone.loadPyraZoneTierkeyHolders({
       chainId,
       assetId,
@@ -338,7 +332,9 @@ export const loadCreatorBaseInfos = createAsyncThunk(
       tierKeySellPrice: tierKeySellPrice
         ? ethers.utils.formatEther(tierKeySellPrice)
         : "0",
-      userTierKeyBalance: userTierKeyBalance.toString(),
+      userTierKeyBalance: userTierKeyBalance
+        ? userTierKeyBalance.toString()
+        : "0",
       tierKeyHolders,
       shareHolders,
     };
@@ -391,8 +387,13 @@ export const loadShareBuyPrice = createAsyncThunk(
 
 export const loadCreatorShareInfos = createAsyncThunk(
   "creator/loadCreatorShareInfos",
-  async (args: { chainId: number; address: string; connector: Connector }) => {
-    const { chainId, address, connector } = args;
+  async (args: {
+    chainId: number;
+    address: string;
+    userAddress?: string;
+    connector: Connector;
+  }) => {
+    const { chainId, address, userAddress, connector } = args;
     let pyraMarkets = await PyraMarket.loadPyraMarkets({
       chainId,
       publishers: [address],
@@ -412,10 +413,15 @@ export const loadCreatorShareInfos = createAsyncThunk(
       connector,
     });
     const shareTotalSupply = await pyraMarket.loadTotalSupply(shareAddress);
-    const userShareBalance = await pyraMarket.loadShareBalance({
-      shareAddress,
-      address,
-    });
+    let userShareBalance;
+    try {
+      if (userAddress) {
+        userShareBalance = await pyraMarket.loadShareBalance({
+          shareAddress,
+          address: userAddress,
+        });
+      }
+    } catch (error) {}
     const revenuePoolShareBalance = await pyraMarket.loadShareBalance({
       shareAddress,
       address: revenuePoolAddress,
@@ -425,7 +431,10 @@ export const loadCreatorShareInfos = createAsyncThunk(
       revenuePoolAddress,
       connector,
     });
-    const revenue = await revenuePool.loadClaimableRevenue();
+    let revenue;
+    try {
+      revenue = await revenuePool.loadClaimableRevenue();
+    } catch (error) {}
     let shareActivities = await PyraMarket.loadPyraMarketShareActivities({
       chainId,
       publisher: address,
@@ -463,11 +472,13 @@ export const loadCreatorShareInfos = createAsyncThunk(
       shareActivities,
       shareAddress,
       revenuePoolAddress,
-      userShareBalance: ethers.utils.formatEther(userShareBalance),
+      userShareBalance: userShareBalance
+        ? ethers.utils.formatEther(userShareBalance)
+        : "0",
       revenuePoolShareBalance: ethers.utils.formatEther(
         revenuePoolShareBalance,
       ),
-      revenue: ethers.utils.formatEther(revenue),
+      revenue: revenue ? ethers.utils.formatEther(revenue) : "0",
       ethPrice,
     };
   },

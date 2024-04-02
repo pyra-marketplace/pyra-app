@@ -3,17 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Media, message } from "@meteor-web3/components";
 import { MirrorFile } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
-import {
-  AvatarGroup,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  LinearProgress,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { AvatarGroup, Avatar } from "@mui/material";
 import {
   PyraZone,
   PyraZoneRes,
@@ -273,6 +263,7 @@ export const NewCreator: React.FC = () => {
         loadCreatorBaseInfos({
           chainId: globalStates.chainId,
           address: _address,
+          userAddress,
           assetId: pyraZone.asset_id,
           connector,
         }),
@@ -293,24 +284,27 @@ export const NewCreator: React.FC = () => {
       const _address = address || userAddress!;
       if (selectedTab === "Content") {
         if (!creatorStates.pyraZone) return;
-        const contentInfo = await dispatch(
-          loadCreatorContents({
-            chainId: globalStates.chainId,
-            assetId: creatorStates.pyraZone.asset_id,
-            accountAddress: userAddress,
-            connector,
-          }),
-        ).unwrap();
-        console.log({
-          args: {
-            chainId: globalStates.chainId,
-            assetId: creatorStates.pyraZone.asset_id,
-            accountAddress: userAddress,
-            connector,
-          },
-          contentInfo,
-        });
-        if (_address !== userAddress && contentInfo.isAccessible) {
+        let contentInfo;
+        if (userAddress) {
+          contentInfo = await dispatch(
+            loadCreatorContents({
+              chainId: globalStates.chainId,
+              assetId: creatorStates.pyraZone.asset_id,
+              accountAddress: userAddress,
+              connector,
+            }),
+          ).unwrap();
+          console.log({
+            args: {
+              chainId: globalStates.chainId,
+              assetId: creatorStates.pyraZone.asset_id,
+              accountAddress: userAddress,
+              connector,
+            },
+            contentInfo,
+          });
+        }
+        if (_address !== userAddress && contentInfo?.isAccessible) {
           // try to unlock content folder
           try {
             const { unlockedFolder } = await dispatch(
@@ -330,6 +324,7 @@ export const NewCreator: React.FC = () => {
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: _address,
+            userAddress,
             connector,
           }),
         )
@@ -1014,8 +1009,7 @@ const LockedSection = () => {
   const dispatch = useDispatch();
   const globalStates = useSelector(state => state.global);
   const creatorStates = useSelector(state => state.creator);
-  const { connector } = useStore();
-
+  const { connector, address: userAddress } = useStore();
   const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
 
   return (
@@ -1027,13 +1021,15 @@ const LockedSection = () => {
         gap='22px'
       >
         <p className='locked-tip'>
-          Unlock{" "}
-          {creatorStates.contentFiles &&
-            Object.values(creatorStates.contentFiles).length + "+ "}
-          curations
+          Unlock {creatorStates.pyraZone?.files_count || ""}{" "}
+          {creatorStates.pyraZone?.files_count === 1 ? "curation" : "curations"}
         </p>
         <BlackButton
           onClick={async () => {
+            if (!userAddress) {
+              message.info("Please login first");
+              return;
+            }
             if (!creatorStates.pyraZone || tradeKeyLoading) {
               message.info("Wait for loading...");
               return;
@@ -1292,21 +1288,31 @@ const ShareSection = () => {
               Unstake Shares
             </div>
           </div>
-          <div className='rewards'>
-            current revenue:{" "}
-            {creatorStates.revenue && parseFloat(creatorStates.revenue) !== 0
-              ? parseFloat(creatorStates.revenue).toFixed(8)
-              : "0.0"}{" "}
-            {globalStates.chainCurrency}
-            (${" "}
-            {creatorStates.ethPrice &&
-            creatorStates?.revenue &&
-            parseFloat(creatorStates.revenue) !== 0
-              ? (
-                  parseFloat(creatorStates.revenue) * creatorStates.ethPrice
-                ).toFixed(4)
-              : "0.0"}
-            )
+          <div className='tip'>
+            <div className='staked'>
+              You staked:{" "}
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
+              Shares
+            </div>
+            <div className='rewards'>
+              current revenue:{" "}
+              {creatorStates.revenue && parseFloat(creatorStates.revenue) !== 0
+                ? parseFloat(creatorStates.revenue).toFixed(8)
+                : "0.0"}{" "}
+              {globalStates.chainCurrency}
+              (${" "}
+              {creatorStates.ethPrice &&
+              creatorStates?.revenue &&
+              parseFloat(creatorStates.revenue) !== 0
+                ? (
+                    parseFloat(creatorStates.revenue) * creatorStates.ethPrice
+                  ).toFixed(4)
+                : "0.0"}
+              )
+            </div>
           </div>
           <div
             className='claim'
@@ -1323,7 +1329,6 @@ const ShareSection = () => {
                   claim({
                     chainId: globalStates.chainId,
                     revenuePoolAddress: creatorStates.revenuePoolAddress,
-                    address: (address || userAddress)!,
                     connector,
                   }),
                 );

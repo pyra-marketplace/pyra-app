@@ -105,7 +105,6 @@ export const RevenueModal = ({
           chainId: globalStates.chainId,
           shareAddress: creatorStates.shareAddress,
           revenuePoolAddress: creatorStates.revenuePoolAddress,
-          address: (address || userAddress)!,
           connector,
           amount: ethers.utils.parseEther(value),
         }),
@@ -116,6 +115,7 @@ export const RevenueModal = ({
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             connector,
           }),
         );
@@ -138,7 +138,6 @@ export const RevenueModal = ({
         unstake({
           chainId: globalStates.chainId,
           revenuePoolAddress: creatorStates.revenuePoolAddress,
-          address: (address || userAddress)!,
           connector,
           amount: ethers.utils.parseEther(value),
         }),
@@ -149,6 +148,7 @@ export const RevenueModal = ({
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             connector,
           }),
         );
@@ -189,7 +189,10 @@ export const RevenueModal = ({
           <StakeWrapper>
             <div className='title'>You own</div>
             <div className='share-number'>
-              {creatorStates.userShareBalance || 0}{" "}
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
               <span className='unit'>share</span>
             </div>
             <div className='share-price'>
@@ -256,7 +259,10 @@ export const RevenueModal = ({
           <UnstakeWrapper>
             <div className='title'>You staked</div>
             <div className='share-number'>
-              {creatorStates.userShareBalance || "0"}{" "}
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
               <span className='unit'>shares</span>
             </div>
             <div className='share-price'>

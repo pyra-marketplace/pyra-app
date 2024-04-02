@@ -115,6 +115,7 @@ export const ShareModal = ({
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             connector,
           }),
         );
@@ -144,6 +145,7 @@ export const ShareModal = ({
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             connector,
           }),
         );

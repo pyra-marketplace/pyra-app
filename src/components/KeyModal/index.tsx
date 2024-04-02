@@ -59,7 +59,6 @@ export const KeyModal = ({
         buyTierkey({
           chainId: globalStates.chainId,
           assetId: creatorStates.pyraZone.asset_id,
-          address: (address || userAddress)!,
           connector,
           tier: 0,
         }),
@@ -70,6 +69,7 @@ export const KeyModal = ({
           loadCreatorBaseInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             assetId: creatorStates.pyraZone.asset_id,
             connector,
           }),
@@ -101,7 +101,6 @@ export const KeyModal = ({
         sellTierkey({
           chainId: globalStates.chainId,
           assetId: creatorStates.pyraZone.asset_id,
-          address: (address || userAddress)!,
           connector,
           keyId: "0",
           tier: 0,
@@ -113,6 +112,7 @@ export const KeyModal = ({
           loadCreatorBaseInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            userAddress,
             assetId: creatorStates.pyraZone.asset_id,
             connector,
           }),

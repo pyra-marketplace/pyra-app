@@ -163,6 +163,7 @@ export const Creator: React.FC = () => {
         loadCreatorBaseInfos({
           chainId: globalStates.chainId,
           address: address!,
+          userAddress,
           assetId: pyraZone.asset_id,
           connector,
         }),
@@ -207,6 +208,7 @@ export const Creator: React.FC = () => {
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: address!,
+            userAddress,
             connector,
           }),
         )
