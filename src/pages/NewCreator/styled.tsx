@@ -957,11 +957,15 @@ export const ShareCardSection = styled(Section)`
   }
 
   .holders-section {
-    flex: 1 1 auto;
+    /* flex: 1 1 auto;
     display: flex;
     flex-wrap: wrap;
     row-gap: 20px;
-    column-gap: 39px;
+    column-gap: 39px; */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, auto));
+    width: 100%;
+    gap: 20px;
 
     .holder-item {
       display: flex;
