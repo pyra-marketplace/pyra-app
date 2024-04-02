@@ -538,15 +538,17 @@ const CreatorTableItem = ({
         </FlexRow>
       </div>
       <div className='table-item'>
-        $
-        {ethPrice && trendingPyraZone.total_volume
-          ? (parseFloat(trendingPyraZone.total_volume) * ethPrice).toFixed(4)
-          : "0.0"}
+        {trendingPyraZone.total_volume
+          ? parseFloat(trendingPyraZone.total_volume).toFixed(8)
+          : "0.0"}{" "}
       </div>
       <div className='table-item'>{trendingPyraZone.share_holders}</div>
       <div className='table-item'>{trendingPyraZone.files_count}</div>
       <div className='table-item'>
-        {trendingPyraZone.tierkey_price} {chainCurrency}
+        {trendingPyraZone.tierkey_price
+          ? parseFloat(trendingPyraZone.tierkey_price).toFixed(8)
+          : "0.0"}{" "}
+        {chainCurrency}
       </div>
       <div className='table-item'>{trendingPyraZone.tierkey_sales}</div>
       {/* <div className='table-item'>{trendingPyraZone.watch_lists}</div> */}
