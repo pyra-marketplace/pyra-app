@@ -281,18 +281,11 @@ export const FilesContentSectionWrap = styled.div<{
   foldItems?: boolean;
   lineHeight?: number;
 }>`
-  flex: 1 1 auto;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: ${prop => prop.columnGap || "32px"};
-  row-gap: ${prop => prop.rowGap || "55px"};
-  ${prop =>
-    prop.foldItems &&
-    `
-    height: ${(prop.lineHeight || 0) + 30}px;
-    overflow: hidden;
-  `}
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, auto));
+  justify-content: space-around;
+  gap: 24px 14px;
 
   .file-card {
     /* width: 262px; */
@@ -961,11 +954,15 @@ export const ShareCardSection = styled(Section)`
   }
 
   .holders-section {
-    flex: 1 1 auto;
+    /* flex: 1 1 auto;
     display: flex;
     flex-wrap: wrap;
     row-gap: 20px;
-    column-gap: 39px;
+    column-gap: 39px; */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, auto));
+    width: 100%;
+    gap: 20px;
 
     .holder-item {
       display: flex;
