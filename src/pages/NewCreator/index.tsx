@@ -61,6 +61,8 @@ import TwitterIconSvg from "@/assets/icons/twitter-icon.svg";
 import DefaultAvatarPng from "@/assets/images/default-avatar.png";
 import DefaultBannerPng from "@/assets/images/default-banner.png";
 import { FileInfoModal } from "@/components/FileInfoModal";
+import { KeyModal } from "@/components/KeyModal";
+import { RevenueModal } from "@/components/RevenueModal";
 import { ShareModal } from "@/components/ShareModal";
 import { TabButtons } from "@/components/TabButtons";
 import {
@@ -100,7 +102,11 @@ export const NewCreator: React.FC = () => {
   const [emptyProfile, setEmptyProfile] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const [shareModal, setShareModal] = useState(false);
-  const [option, setOption] = useState(0);
+  const [keyModal, setKeyModal] = useState(false);
+  const [revenueModal, setRevenueModal] = useState(false);
+  const [shareModalOption, setShareModalOption] = useState(0);
+  const [keyModalOption, setKeyModalOption] = useState(0);
+  const [revenueModalOption, setRevenueModalOption] = useState(0);
   const { address } = useParams<{ address?: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -470,7 +476,9 @@ export const NewCreator: React.FC = () => {
             </div>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                {creatorStates.tierKeyBuyPrice || "0.0"}{" "}
+                {creatorStates.tierKeyBuyPrice
+                  ? parseFloat(creatorStates.tierKeyBuyPrice).toFixed(8)
+                  : "0.0"}{" "}
                 {globalStates.chainCurrency}
               </p>
               <p className='desc-text'>Key price</p>
@@ -734,7 +742,9 @@ export const NewCreator: React.FC = () => {
                       : "0.0"}{" "}
                   </div>
                   <div className='added'>
-                    {creatorStates.shareTotalValue || 0}{" "}
+                    {creatorStates.shareTotalValue
+                      ? parseFloat(creatorStates.shareTotalValue).toFixed(8)
+                      : "0.0"}{" "}
                     {globalStates.chainCurrency}
                   </div>
                 </div>
@@ -759,7 +769,9 @@ export const NewCreator: React.FC = () => {
                       : "0.0"}
                   </div>
                   <div className='added'>
-                    {creatorStates.shareTotalVolume || "0.0"}{" "}
+                    {creatorStates.shareTotalVolume
+                      ? parseFloat(creatorStates.shareTotalVolume).toFixed(8)
+                      : "0.0"}{" "}
                     {globalStates.chainCurrency}
                   </div>
                 </div>
@@ -770,27 +782,67 @@ export const NewCreator: React.FC = () => {
                     <span className='unit'>shares</span>
                   </div>
                   <div className='added'>
-                    {creatorStates.shareSellPrice || "0.0"}{" "}
+                    {creatorStates.shareSellPrice
+                      ? parseFloat(creatorStates.shareSellPrice).toFixed(8)
+                      : "0.0"}{" "}
                     {globalStates.chainCurrency}
                   </div>
                   <div className='buttons'>
                     <div
                       className='buy'
                       onClick={() => {
-                        setOption(1);
+                        setShareModalOption(1);
                         setShareModal(true);
                       }}
                     >
-                      Buy
+                      Buy Share
                     </div>
                     <div
                       className='sell'
                       onClick={() => {
-                        setOption(2);
+                        setShareModalOption(2);
                         setShareModal(true);
                       }}
                     >
-                      Sell
+                      Sell Share
+                    </div>
+                  </div>
+                </div>
+                <div className='more-info-container'>
+                  <div className='title'>You own</div>
+                  <div className='number'>
+                    {creatorStates.userTierKeyBalance || "0"}{" "}
+                    <span className='unit'>
+                      {creatorStates.userTierKeyBalance === "0" ||
+                      creatorStates.userTierKeyBalance === "1"
+                        ? "key"
+                        : "keys"}
+                    </span>
+                  </div>
+                  <div className='added'>
+                    {creatorStates.tierKeySellPrice
+                      ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
+                      : "0.0"}{" "}
+                    {globalStates.chainCurrency}
+                  </div>
+                  <div className='buttons'>
+                    <div
+                      className='buy'
+                      onClick={() => {
+                        setKeyModalOption(1);
+                        setKeyModal(true);
+                      }}
+                    >
+                      Buy Key
+                    </div>
+                    <div
+                      className='sell'
+                      onClick={() => {
+                        setKeyModalOption(2);
+                        setKeyModal(true);
+                      }}
+                    >
+                      Sell Key
                     </div>
                   </div>
                 </div>
@@ -891,9 +943,19 @@ export const NewCreator: React.FC = () => {
         </GuidePageSection>
       )}
       <ShareModal
-        option={option}
+        option={shareModalOption}
         visible={shareModal}
         setVisible={setShareModal}
+      />
+      <KeyModal
+        option={keyModalOption}
+        visible={keyModal}
+        setVisible={setKeyModal}
+      />
+      <RevenueModal
+        option={revenueModalOption}
+        visible={revenueModal}
+        setVisible={setRevenueModal}
       />
     </CreatorWrapper>
   );

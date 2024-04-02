@@ -20,6 +20,8 @@ export interface CreatorStates {
   shareBuyPrice?: string;
   shareSellPrice?: string;
   tierKeyBuyPrice?: string;
+  tierKeySellPrice?: string;
+  userTierKeyBalance?: string;
   tierKeyHolders?: PyraZoneTierkeyHolderRes[];
   shareHolders?: PyraMarketShareHolderRes[];
   shareTotalValue?: string;
@@ -49,6 +51,8 @@ const initialState: CreatorStates = {
   pyraZone: undefined,
   shareBuyPrice: undefined,
   tierKeyBuyPrice: undefined,
+  tierKeySellPrice: undefined,
+  userTierKeyBalance: undefined,
   tierKeyHolders: undefined,
   shareHolders: undefined,
   shareTotalValue: undefined,
@@ -135,6 +139,46 @@ export const sellShares = createAsyncThunk(
   },
 );
 
+export const buyTierkey = createAsyncThunk(
+  "creator/buyTierkey",
+  async (args: {
+    chainId: number;
+    assetId: string;
+    address: string;
+    connector: Connector;
+    tier: number;
+  }) => {
+    const { chainId, assetId, address, connector, tier } = args;
+    const pyraZone = new PyraZone({
+      chainId,
+      assetId,
+      connector,
+    });
+    const keyId = await pyraZone.buyTierkey(tier);
+    return keyId;
+  },
+);
+
+export const sellTierkey = createAsyncThunk(
+  "creator/sellTierkey",
+  async (args: {
+    chainId: number;
+    assetId: string;
+    address: string;
+    connector: Connector;
+    tier: number;
+    keyId: string;
+  }) => {
+    const { chainId, assetId, address, connector, tier, keyId } = args;
+    const pyraZone = new PyraZone({
+      chainId,
+      assetId,
+      connector,
+    });
+    await pyraZone.sellTierkey({ tier, keyId });
+  },
+);
+
 export const loadPyraZone = createAsyncThunk(
   "creator/loadPyraZone",
   async (args: { chainId: number; address: string }) => {
@@ -178,7 +222,22 @@ export const loadCreatorBaseInfos = createAsyncThunk(
       connector,
     });
     const tierKeyBuyPrice = await pyraZone.loadBuyPrice(tier || 0);
-    console.log({ shareBuyPrice, tierKeyBuyPrice });
+    let tierKeySellPrice;
+    try {
+      tierKeySellPrice = await pyraZone.loadSellPrice(tier || 0);
+    } catch (error) {
+      console.warn(error);
+    }
+    console.log({
+      tier: tier || 0,
+      address,
+    });
+    const userTierKeyBalance = await pyraZone.loadTierkeyBalance({
+      tier: tier || 0,
+      address,
+    });
+    console.log({ userTierKeyBalance });
+    console.log({ shareBuyPrice, tierKeyBuyPrice, tierKeySellPrice });
     const tierKeyHolders = await PyraZone.loadPyraZoneTierkeyHolders({
       chainId,
       assetId,
@@ -192,6 +251,10 @@ export const loadCreatorBaseInfos = createAsyncThunk(
     return {
       shareBuyPrice: ethers.utils.formatEther(shareBuyPrice),
       tierKeyBuyPrice: ethers.utils.formatEther(tierKeyBuyPrice),
+      tierKeySellPrice: tierKeySellPrice
+        ? ethers.utils.formatEther(tierKeySellPrice)
+        : "0",
+      userTierKeyBalance: userTierKeyBalance.toString(),
       tierKeyHolders,
       shareHolders,
     };
@@ -420,10 +483,18 @@ export const creatorSlice = createSlice({
       state.pyraMarket = pyraMarket;
     });
     builder.addCase(loadCreatorBaseInfos.fulfilled, (state, action) => {
-      const { shareBuyPrice, tierKeyBuyPrice, tierKeyHolders, shareHolders } =
-        action.payload;
+      const {
+        shareBuyPrice,
+        tierKeyBuyPrice,
+        tierKeySellPrice,
+        userTierKeyBalance,
+        tierKeyHolders,
+        shareHolders,
+      } = action.payload;
       state.shareBuyPrice = shareBuyPrice;
       state.tierKeyBuyPrice = tierKeyBuyPrice;
+      state.tierKeySellPrice = tierKeySellPrice;
+      state.userTierKeyBalance = userTierKeyBalance;
       state.tierKeyHolders = tierKeyHolders;
       state.shareHolders = shareHolders;
     });

@@ -133,7 +133,7 @@ export default function Navbar() {
     }
     const connectRes = await Auth.openModal(
       {
-        appId: process.env.METEOR_APP_ID!,
+        appId: process.env.PYRA_APP_ID!,
       },
       meteorContext,
     );

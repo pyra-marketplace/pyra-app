@@ -282,6 +282,7 @@ export const TableWrap = styled.div`
     .table-item {
       display: flex;
       align-items: center;
+      justify-content: center;
       /* font */
       font-family: Inter-Bold;
       font-size: 20px;
@@ -342,6 +343,7 @@ export const TableWrap = styled.div`
     .table-item {
       display: flex;
       align-items: center;
+      justify-content: center;
       /* font */
       font-family: Inter-Medium;
       font-size: 16px;
@@ -386,17 +388,16 @@ export const TableWrap = styled.div`
     .table-item {
       flex: 0 1 12%;
     }
-    .table-item:nth-child(1),
     .table-item:nth-child(2) {
       justify-content: left !important;
     }
-    .table-item:nth-child(4),
+    /* .table-item:nth-child(4),
     .table-item:nth-child(5),
     .table-item:nth-child(6),
     .table-item:nth-child(7),
     .table-item:nth-child(8) {
       justify-content: right !important;
-    }
+    } */
   }
 
   .table-header {

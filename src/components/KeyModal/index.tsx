@@ -9,32 +9,33 @@ import { Wrapper, OutWrapper, SellWrapper, BuyWrapper } from "./styled";
 
 import closeImg from "@/assets/icons/close-btn.svg";
 import {
-  buyShares,
+  buyTierkey,
+  loadCreatorBaseInfos,
   loadCreatorShareInfos,
-  loadShareBuyPrice,
-  loadShareSellPrice,
-  sellShares,
+  sellTierkey,
 } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { uuid } from "@/utils";
 
-export interface ShareModalProps {
+export interface KeyModalProps {
   option: number;
   visible: boolean;
   setVisible: (visible: boolean) => void;
 }
 
-export const ShareModal = ({
+export const KeyModal = ({
   option: defaultOption,
   visible,
   setVisible,
-}: ShareModalProps) => {
+}: KeyModalProps) => {
   const [value, setValue] = useState("");
   const [price, setPrice] = useState("");
   const [buying, setBuying] = useState(false);
   const [selling, setSelling] = useState(false);
   const [option, setOption] = useState(defaultOption);
-  const userShareBalance = useSelector(state => state.creator.userShareBalance);
+  const userTierKeyBalance = useSelector(
+    state => state.creator.userTierKeyBalance,
+  );
   const globalStates = useSelector(state => state.global);
   const dispatch = useDispatch();
   const { address } = useParams<{ address?: string }>();
@@ -46,49 +47,8 @@ export const ShareModal = ({
   }, [defaultOption]);
 
   useEffect(() => {
-    if (value) {
-      if (parseFloat(value) < 0) {
-        setValue("");
-        return;
-      }
-
-      if (!creatorStates.userShareBalance) {
-        creatorStates.userShareBalance = "10000";
-      }
-
-      if (
-        option === 2 &&
-        parseFloat(value) > parseFloat(creatorStates.userShareBalance)
-      ) {
-        setValue(creatorStates.userShareBalance);
-        return;
-      }
-
-      dispatch(
-        (option === 1 ? loadShareBuyPrice : loadShareSellPrice)({
-          chainId: globalStates.chainId,
-          address: (address || userAddress)!,
-          connector,
-          amount: value,
-        }),
-      ).then(res => {
-        if (res.meta.requestStatus === "fulfilled") {
-          setPrice(res.payload as string);
-        }
-      });
-    } else {
-      setPrice("");
-    }
-  }, [value]);
-
-  useEffect(() => {
     setValue("");
   }, [option]);
-
-  const onInput = async (e: { target: { value: any } }) => {
-    const v = e.target.value;
-    setValue(v);
-  };
 
   const cancel = () => {
     if (defaultOption !== 0) {
@@ -101,20 +61,25 @@ export const ShareModal = ({
   const buy = async () => {
     setBuying(true);
     try {
+      if (!creatorStates.pyraZone?.asset_id) {
+        return;
+      }
       const res = await dispatch(
-        buyShares({
+        buyTierkey({
           chainId: globalStates.chainId,
-          creator: (address || userAddress)!,
+          assetId: creatorStates.pyraZone.asset_id,
+          address: (address || userAddress)!,
           connector,
-          amount: ethers.utils.parseEther(value),
+          tier: 0,
         }),
       );
       if (res.meta.requestStatus === "fulfilled") {
-        message.success("Buy shares successfully");
+        message.success("Buy tier key successfully");
         dispatch(
-          loadCreatorShareInfos({
+          loadCreatorBaseInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            assetId: creatorStates.pyraZone.asset_id,
             connector,
           }),
         );
@@ -130,20 +95,26 @@ export const ShareModal = ({
   const sell = async () => {
     setSelling(true);
     try {
+      if (!creatorStates.pyraZone?.asset_id) {
+        return;
+      }
       const res = await dispatch(
-        sellShares({
+        sellTierkey({
           chainId: globalStates.chainId,
-          creator: (address || userAddress)!,
+          assetId: creatorStates.pyraZone.asset_id,
+          address: (address || userAddress)!,
           connector,
-          amount: ethers.utils.parseEther(value),
+          keyId: "0",
+          tier: 0,
         }),
       );
       if (res.meta.requestStatus === "fulfilled") {
-        message.success("Sell shares successfully");
+        message.success("Sell tier key successfully");
         dispatch(
-          loadCreatorShareInfos({
+          loadCreatorBaseInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
+            assetId: creatorStates.pyraZone.asset_id,
             connector,
           }),
         );
@@ -156,7 +127,6 @@ export const ShareModal = ({
     return;
   };
 
-  // console.log({ userShareBalance });
   return (
     <FullScreenModal
       id={`file-info-modal-${uuid()}`}
@@ -175,70 +145,50 @@ export const ShareModal = ({
         {option === 0 ? (
           <OutWrapper>
             <div className='sell-button' onClick={() => setOption(1)}>
-              Sell Share
+              Sell Key
             </div>
             <div className='buy-button' onClick={() => setOption(2)}>
-              Buy Share
+              Buy Key
             </div>
           </OutWrapper>
         ) : option === 1 ? (
           <BuyWrapper>
-            <div className='title'>Own Creator’s share and start earning!</div>
             <div
               className='option'
               onClick={() => {
                 setValue("0.01");
               }}
               style={{
-                backgroundColor: value === "0.01" ? "#f6f6f6" : "unset",
+                backgroundColor: "#f6f6f6",
               }}
             >
-              0.01 Share
-            </div>
-            <div
-              className='option'
-              onClick={() => setValue("0.1")}
-              style={{
-                backgroundColor: value === "0.1" ? "#f6f6f6" : "unset",
-              }}
-            >
-              0.1 Share
-            </div>
-            <div
-              className='option'
-              onClick={() => setValue("1")}
-              style={{
-                backgroundColor: value === "1" ? "#f6f6f6" : "unset",
-              }}
-            >
-              1 Share
-            </div>
-            <div className='input-wrapper'>
-              Amount of Shares
-              <input
-                type='number'
-                className='input'
-                value={value}
-                placeholder='Set custom amount'
-                onChange={onInput}
-              />
+              1 Key
             </div>
             <div className='buy-wrapper'>
               <div className='buy-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
-                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
+                  {creatorStates.ethPrice &&
+                  creatorStates.tierKeyBuyPrice &&
+                  parseFloat(creatorStates.tierKeyBuyPrice) !== 0
+                    ? (
+                        parseFloat(creatorStates.tierKeyBuyPrice) *
+                        creatorStates.ethPrice
+                      ).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price || "0.0"} {globalStates.chainCurrency}
+                  {creatorStates.tierKeyBuyPrice
+                    ? parseFloat(creatorStates.tierKeyBuyPrice).toFixed(8)
+                    : "0.0"}{" "}
+                  {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='buy-button' onClick={buy}>
                 {buying ? "Buying..." : "Buy"}
               </div>
             </div>
+
             <div className='cancel-wrapper'>
               <div className='cancel' onClick={cancel}>
                 cancel
@@ -248,49 +198,51 @@ export const ShareModal = ({
         ) : (
           <SellWrapper>
             <div className='title'>You own</div>
-            <div className='share-number'>
-              {creatorStates.userShareBalance || 0}{" "}
-              <span className='unit'>share</span>
+            <div className='key-number'>
+              {creatorStates.userTierKeyBalance || "0"}{" "}
+              <span className='unit'>
+                {creatorStates.userTierKeyBalance === "0" ||
+                creatorStates.userTierKeyBalance === "1"
+                  ? "key"
+                  : "keys"}
+              </span>
             </div>
-            <div className='share-price'>
+            <div className='key-price'>
               = $
               {creatorStates.ethPrice &&
-              creatorStates.shareSellPrice &&
-              parseFloat(creatorStates.shareSellPrice) !== 0
+              creatorStates.tierKeySellPrice &&
+              parseFloat(creatorStates.tierKeySellPrice) !== 0
                 ? (
-                    parseFloat(creatorStates.shareSellPrice) *
+                    parseFloat(creatorStates.tierKeySellPrice) *
                     creatorStates.ethPrice
                   ).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
-                ( {creatorStates.shareSellPrice || "0.0"}{" "}
+                (
+                {creatorStates.tierKeySellPrice
+                  ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
+                  : "0.0"}
                 {globalStates.chainCurrency})
               </span>
-            </div>
-            <div className='input-wrapper'>
-              <input
-                type='number'
-                className='input'
-                value={value}
-                onChange={e => setValue(e.target.value)}
-              />
-              <div
-                className='max'
-                onClick={() => setValue(creatorStates.userShareBalance ?? "")}
-              >
-                Max
-              </div>
             </div>
             <div className='sell-wrapper'>
               <div className='sell-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
-                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
+                  {creatorStates.ethPrice &&
+                  creatorStates.tierKeySellPrice &&
+                  parseFloat(creatorStates.tierKeySellPrice) !== 0
+                    ? (
+                        parseFloat(creatorStates.tierKeySellPrice) *
+                        creatorStates.ethPrice
+                      ).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {price || "0.0"} {globalStates.chainCurrency}
+                  {creatorStates.tierKeySellPrice
+                    ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
+                    : "0.0"}
+                  {globalStates.chainCurrency}
                 </div>
               </div>
               <div className='sell-button' onClick={sell}>

@@ -132,6 +132,7 @@ export const SellWrapper = styled.div`
   }
 
   .sell-wrapper {
+    margin-top: 20px;
     border-radius: 12px;
     border: 1px solid #ebebeb;
     .sell-info {
@@ -172,6 +173,7 @@ export const SellWrapper = styled.div`
       cursor: pointer;
     }
   }
+
   .cancel-wrapper {
     display: flex;
     justify-content: center;
@@ -212,7 +214,7 @@ export const BuyWrapper = styled.div`
     font-weight: 600;
     line-height: normal;
     letter-spacing: -0.24px;
-    margin-top: 11px;
+    margin: 11px 0 20px;
     cursor: pointer;
     &:hover {
       background-color: #f6f6f6;
@@ -297,7 +299,7 @@ export const BuyWrapper = styled.div`
     display: flex;
     justify-content: center;
     .cancel {
-      display: flex;
+      display: inline-flex;
       justify-content: center;
       color: #1380de;
       font-family: Inter;
