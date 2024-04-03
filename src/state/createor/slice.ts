@@ -438,6 +438,8 @@ export const loadCreatorShareInfos = createAsyncThunk(
     let shareActivities = await PyraMarket.loadPyraMarketShareActivities({
       chainId,
       publisher: address,
+      orderBy: "block_number",
+      orderType: "desc",
     });
     shareActivities = shareActivities.map(item => ({
       ...item,
@@ -451,7 +453,7 @@ export const loadCreatorShareInfos = createAsyncThunk(
         sell_amount: ethers.utils.formatEther(item.sell_amount),
       }),
       ...(item.sell_price && {
-        sell_amount: ethers.utils.formatEther(item.sell_price),
+        sell_price: ethers.utils.formatEther(item.sell_price),
       }),
     }));
 

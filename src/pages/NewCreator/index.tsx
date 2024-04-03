@@ -244,17 +244,26 @@ export const NewCreator: React.FC = () => {
         }
       } else {
         dispatch(loadCreatorUserInfo({ address: _address }));
-        pyraZone = (
-          await dispatch(
-            loadPyraZone({
-              chainId: globalStates.chainId,
-              address: _address,
-            }),
-          ).unwrap()
-        ).pyraZone;
-        if (!pyraZone) {
-          message.error("Wrong address or empty pyra zone.");
+        const { pyraZone: _pyraZone, pyraMarket: _pyraMarket } = await dispatch(
+          loadPyraZone({
+            chainId: globalStates.chainId,
+            address: _address,
+          }),
+        ).unwrap();
+        pyraZone = _pyraZone;
+        if (!_pyraMarket) {
+          setEmptyPyraMarket(true);
+        } else {
+          setEmptyPyraMarket(false);
+        }
+        if (!_pyraZone) {
           setEmptyPyraZone(true);
+        } else {
+          setEmptyPyraZone(false);
+        }
+        if (!_pyraZone || !_pyraMarket) {
+          message.error("Wrong address or empty pyra zone.");
+          setIsGuidePage(true);
           return;
         }
       }
@@ -598,7 +607,10 @@ export const NewCreator: React.FC = () => {
                 <br />
                 3. Create PyraZone.
                 <BlackButton
-                  disabled={!emptyPyraZone && !emptyPyraMarket}
+                  disabled={
+                    (emptyPyraZone && emptyPyraMarket) ||
+                    (!emptyPyraZone && !emptyPyraMarket)
+                  }
                   onClick={handleCreatePyraZone}
                 >
                   {emptyPyraZone
@@ -619,7 +631,9 @@ export const NewCreator: React.FC = () => {
             </Section>
           )}
           {address && address !== userAddress && (
-            <p>Wrong address or empty pyra zone.</p>
+            <p style={{ fontSize: "24px" }}>
+              Wrong address or empty pyra zone.
+            </p>
           )}
         </GuidePageSection>
       )}
@@ -1375,6 +1389,10 @@ const ShareSection = () => {
 };
 
 const ActivitySection = () => {
+  const navigate = useNavigate();
+  const globalStates = useSelector(state => state.global);
+  const creatorStates = useSelector(state => state.creator);
+
   const chartOption: ECOption = {
     grid: {
       left: 80,
@@ -1548,55 +1566,47 @@ const ActivitySection = () => {
         <ShareCardSection>
           <p className='title-text'>Trades</p>
           <div className='trade-activity-section'>
-            <div className='activity-item'>
-              <div className='avatar'></div>
-              <div className='user-name'>Nemarluk Lilly</div>
-              <div className='activity-info'>
-                <span>bought 0.01 share for </span>
-                <span className='green'>0.0016 ETH</span>
+            {creatorStates.shareActivities?.map((activity, idx) => (
+              <div
+                key={idx}
+                className='activity-item'
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/creator/" + activity.shareholder)}
+              >
+                <div className='avatar'>
+                  <img src={activity.user_info?.profile_image_url} />
+                </div>
+                <div className='user-name'>{activity.user_info?.name}</div>
+                <div className='activity-info'>
+                  <span>
+                    {activity.type === "Buy" ? "bought" : "sold"}{" "}
+                    {activity.buy_amount || activity.sell_amount} share for{" "}
+                  </span>
+                  <span
+                    className={activity.type === "Buy" ? "green" : "orange"}
+                  >
+                    {activity.buy_price || activity.sell_price}{" "}
+                    {globalStates.chainCurrency}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className='activity-item'>
-              <div className='avatar'></div>
-              <div className='user-name'>Menashd vafacaearnsearm</div>
-              <div className='activity-info'>
-                <span>sold 0.1 share for </span>
-                <span className='orange'>0.025 ETH</span>
-              </div>
-            </div>
-            <div className='activity-item'>
-              <div className='avatar'></div>
-              <div className='user-name'>Nemarluk Lilly</div>
-              <div className='activity-info'>
-                <span>bought 0.01 share for </span>
-                <span className='green'>0.0016 ETH</span>
-              </div>
-            </div>
-            <div className='activity-item'>
-              <div className='avatar'></div>
-              <div className='user-name'>Nemarluk Lilly</div>
-              <div className='activity-info'>
-                <span>bought 0.01 share for </span>
-                <span className='green'>0.0016 ETH</span>
-              </div>
-            </div>
-            <div className='activity-item'>
-              <div className='avatar'></div>
-              <div className='user-name'>Menashd vafacaearnsearm</div>
-              <div className='activity-info'>
-                <span>sold 0.1 share for </span>
-                <span className='orange'>0.025 ETH</span>
-              </div>
-            </div>
+            ))}
           </div>
         </ShareCardSection>
         <ShareCardSection>
           <p className='title-text'>Holders</p>
           <div className='holders-section'>
-            {[...new Array(20)].map((_, idx) => (
-              <div className='holder-item' key={idx}>
-                <div className='avatar'></div>
-                <div className='user-name'>lasksaen2531</div>
+            {creatorStates.shareHolders?.map((holder, idx) => (
+              <div
+                key={idx}
+                className='holder-item'
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/creator/" + holder.shareholder)}
+              >
+                <div className='avatar'>
+                  <img src={holder.user_info?.profile_image_url} />
+                </div>
+                <div className='user-name'>{holder.user_info?.name}</div>
               </div>
             ))}
           </div>
