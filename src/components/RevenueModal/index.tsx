@@ -56,7 +56,7 @@ export const RevenueModal = ({
       }
 
       if (!creatorStates.userShareBalance) {
-        creatorStates.userShareBalance = "10000";
+        return;
       }
 
       if (parseFloat(value) > parseFloat(creatorStates.userShareBalance)) {

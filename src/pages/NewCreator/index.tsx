@@ -437,6 +437,7 @@ export const NewCreator: React.FC = () => {
       if (res) {
         message.success("Create pyra zone successfully.");
         setEmptyPyraZone(false);
+        setIsGuidePage(false);
       }
     } catch (e: any) {
       console.warn("Create pyra zone failed: ", e);

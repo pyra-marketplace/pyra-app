@@ -77,11 +77,15 @@ export const createPryaZone = createAsyncThunk(
   "global/createPryaZone",
   async (args: { chainId: number; address: string; connector: Connector }) => {
     const { chainId, connector } = args;
-    const pyraZone = new PyraZone({
-      chainId,
-      connector,
-    });
-    await pyraZone.createPyraZone();
+    try {
+      const pyraZone = new PyraZone({
+        chainId,
+        connector,
+      });
+      await pyraZone.createPyraZone();
+    } catch (error: any) {
+      throw new Error(error.reason ?? error.message);
+    }
     return true;
   },
 );
@@ -100,7 +104,7 @@ export const createShare = createAsyncThunk(
         shareSymbol: "TS",
       });
     } catch (error: any) {
-      throw new Error(error.reason);
+      throw new Error(error.reason ?? error.message);
     }
     return true;
   },

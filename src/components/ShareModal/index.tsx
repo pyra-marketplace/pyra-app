@@ -53,7 +53,7 @@ export const ShareModal = ({
       }
 
       if (!creatorStates.userShareBalance) {
-        creatorStates.userShareBalance = "10000";
+        return;
       }
 
       if (
