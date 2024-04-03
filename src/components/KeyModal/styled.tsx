@@ -59,7 +59,7 @@ export const SellWrapper = styled.div`
     line-height: normal;
     letter-spacing: -0.14px;
   }
-  .share-number {
+  .key-number {
     color: #121212;
     font-family: Inter;
     font-size: 24px;
@@ -77,7 +77,7 @@ export const SellWrapper = styled.div`
     }
   }
 
-  .share-price {
+  .key-price {
     color: #121212;
     font-family: Inter;
     font-size: 20px;

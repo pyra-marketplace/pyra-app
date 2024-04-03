@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import { Connector, MirrorFileRecord } from "@meteor-web3/connector";
 import {
   Auth as TwitterAuth,
@@ -24,6 +25,8 @@ export interface CreatorStates {
   userTierKeyBalance?: string;
   tierKeyHolders?: PyraZoneTierkeyHolderRes[];
   shareHolders?: PyraMarketShareHolderRes[];
+  shareAddress?: string;
+  revenuePoolAddress?: string;
   shareTotalValue?: string;
   shareTotalSupply?: string;
   userShareBalance?: string;
@@ -55,6 +58,8 @@ const initialState: CreatorStates = {
   userTierKeyBalance: undefined,
   tierKeyHolders: undefined,
   shareHolders: undefined,
+  shareAddress: undefined,
+  revenuePoolAddress: undefined,
   shareTotalValue: undefined,
   shareTotalSupply: undefined,
   userShareBalance: undefined,
@@ -144,11 +149,10 @@ export const buyTierkey = createAsyncThunk(
   async (args: {
     chainId: number;
     assetId: string;
-    address: string;
     connector: Connector;
     tier: number;
   }) => {
-    const { chainId, assetId, address, connector, tier } = args;
+    const { chainId, assetId, connector, tier } = args;
     const pyraZone = new PyraZone({
       chainId,
       assetId,
@@ -164,18 +168,92 @@ export const sellTierkey = createAsyncThunk(
   async (args: {
     chainId: number;
     assetId: string;
-    address: string;
     connector: Connector;
     tier: number;
     keyId: string;
   }) => {
-    const { chainId, assetId, address, connector, tier, keyId } = args;
+    const { chainId, assetId, connector, tier, keyId } = args;
     const pyraZone = new PyraZone({
       chainId,
       assetId,
       connector,
     });
     await pyraZone.sellTierkey({ tier, keyId });
+  },
+);
+
+export const stake = createAsyncThunk(
+  "creator/stake",
+  async (args: {
+    chainId: number;
+    shareAddress: string;
+    revenuePoolAddress: string;
+    connector: Connector;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, shareAddress, revenuePoolAddress, connector, amount } =
+      args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      shareAddress,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.stake(amount);
+  },
+);
+
+export const unstake = createAsyncThunk(
+  "creator/unstake",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    connector: Connector;
+    amount: ethers.BigNumber;
+  }) => {
+    const { chainId, revenuePoolAddress, connector, amount } = args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.unstake(amount);
+  },
+);
+
+export const claim = createAsyncThunk(
+  "creator/claim",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    connector: Connector;
+  }) => {
+    const { chainId, revenuePoolAddress, connector } = args;
+    const pyraZone = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    await pyraZone.claim();
+  },
+);
+
+export const loadClaimableRevenue = createAsyncThunk(
+  "creator/loadClaimableRevenue",
+  async (args: {
+    chainId: number;
+    revenuePoolAddress: string;
+    address: string;
+    connector: Connector;
+  }) => {
+    const { chainId, revenuePoolAddress, connector } = args;
+    const revenuePool = new RevenuePool({
+      chainId,
+      revenuePoolAddress,
+      connector,
+    });
+    const revenue = await revenuePool.loadClaimableRevenue();
+    return ethers.utils.formatEther(revenue);
   },
 );
 
@@ -203,11 +281,12 @@ export const loadCreatorBaseInfos = createAsyncThunk(
   async (args: {
     chainId: number;
     address: string;
+    userAddress?: string;
     assetId: string;
     connector: Connector;
     tier?: number;
   }) => {
-    const { chainId, address, assetId, connector, tier } = args;
+    const { chainId, address, userAddress, assetId, connector, tier } = args;
     const pyraMarket = new PyraMarket({
       chainId,
       connector,
@@ -228,16 +307,15 @@ export const loadCreatorBaseInfos = createAsyncThunk(
     } catch (error) {
       console.warn(error);
     }
-    console.log({
-      tier: tier || 0,
-      address,
-    });
-    const userTierKeyBalance = await pyraZone.loadTierkeyBalance({
-      tier: tier || 0,
-      address,
-    });
-    console.log({ userTierKeyBalance });
-    console.log({ shareBuyPrice, tierKeyBuyPrice, tierKeySellPrice });
+    let userTierKeyBalance;
+    try {
+      if (userAddress) {
+        userTierKeyBalance = await pyraZone.loadTierkeyBalance({
+          tier: tier || 0,
+          address: userAddress,
+        });
+      }
+    } catch (error) {}
     const tierKeyHolders = await PyraZone.loadPyraZoneTierkeyHolders({
       chainId,
       assetId,
@@ -254,7 +332,9 @@ export const loadCreatorBaseInfos = createAsyncThunk(
       tierKeySellPrice: tierKeySellPrice
         ? ethers.utils.formatEther(tierKeySellPrice)
         : "0",
-      userTierKeyBalance: userTierKeyBalance.toString(),
+      userTierKeyBalance: userTierKeyBalance
+        ? userTierKeyBalance.toString()
+        : "0",
       tierKeyHolders,
       shareHolders,
     };
@@ -307,8 +387,13 @@ export const loadShareBuyPrice = createAsyncThunk(
 
 export const loadCreatorShareInfos = createAsyncThunk(
   "creator/loadCreatorShareInfos",
-  async (args: { chainId: number; address: string; connector: Connector }) => {
-    const { chainId, address, connector } = args;
+  async (args: {
+    chainId: number;
+    address: string;
+    userAddress?: string;
+    connector: Connector;
+  }) => {
+    const { chainId, address, userAddress, connector } = args;
     let pyraMarkets = await PyraMarket.loadPyraMarkets({
       chainId,
       publishers: [address],
@@ -328,10 +413,15 @@ export const loadCreatorShareInfos = createAsyncThunk(
       connector,
     });
     const shareTotalSupply = await pyraMarket.loadTotalSupply(shareAddress);
-    const userShareBalance = await pyraMarket.loadShareBalance({
-      shareAddress,
-      address,
-    });
+    let userShareBalance;
+    try {
+      if (userAddress) {
+        userShareBalance = await pyraMarket.loadShareBalance({
+          shareAddress,
+          address: userAddress,
+        });
+      }
+    } catch (error) {}
     const revenuePoolShareBalance = await pyraMarket.loadShareBalance({
       shareAddress,
       address: revenuePoolAddress,
@@ -341,7 +431,10 @@ export const loadCreatorShareInfos = createAsyncThunk(
       revenuePoolAddress,
       connector,
     });
-    const revenue = await revenuePool.loadClaimableRevenue();
+    let revenue;
+    try {
+      revenue = await revenuePool.loadClaimableRevenue();
+    } catch (error) {}
     let shareActivities = await PyraMarket.loadPyraMarketShareActivities({
       chainId,
       publisher: address,
@@ -377,11 +470,15 @@ export const loadCreatorShareInfos = createAsyncThunk(
       shareTotalSupply: ethers.utils.formatEther(shareTotalSupply),
       shareTotalVolume: pyraMarkets[0]?.total_volume,
       shareActivities,
-      userShareBalance: ethers.utils.formatEther(userShareBalance),
+      shareAddress,
+      revenuePoolAddress,
+      userShareBalance: userShareBalance
+        ? ethers.utils.formatEther(userShareBalance)
+        : "0",
       revenuePoolShareBalance: ethers.utils.formatEther(
         revenuePoolShareBalance,
       ),
-      revenue: ethers.utils.formatEther(revenue),
+      revenue: revenue ? ethers.utils.formatEther(revenue) : "0",
       ethPrice,
     };
   },
@@ -501,12 +598,17 @@ export const creatorSlice = createSlice({
     builder.addCase(loadShareSellPrice.fulfilled, (state, action) => {
       state.shareSellPrice = action.payload;
     });
+    builder.addCase(loadClaimableRevenue.fulfilled, (state, action) => {
+      state.revenue = action.payload;
+    });
     builder.addCase(loadCreatorShareInfos.fulfilled, (state, action) => {
       const {
         shareTotalValue,
         shareTotalSupply,
         shareTotalVolume,
         shareActivities,
+        shareAddress,
+        revenuePoolAddress,
         userShareBalance,
         revenuePoolShareBalance,
         revenue,
@@ -516,6 +618,8 @@ export const creatorSlice = createSlice({
       state.shareTotalSupply = shareTotalSupply;
       state.shareTotalVolume = shareTotalVolume;
       state.shareActivities = shareActivities;
+      state.shareAddress = shareAddress;
+      state.revenuePoolAddress = revenuePoolAddress;
       state.userShareBalance = userShareBalance;
       state.revenuePoolShareBalance = revenuePoolShareBalance;
       state.revenue = revenue;

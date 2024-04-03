@@ -5,14 +5,14 @@ import { useStore } from "@meteor-web3/hooks";
 import { ethers } from "ethers";
 import { useParams } from "react-router-dom";
 
-import { Wrapper, OutWrapper, SellWrapper, BuyWrapper } from "./styled";
+import { Wrapper, OutWrapper, StakeWrapper, UnstakeWrapper } from "./styled";
 
 import closeImg from "@/assets/icons/close-btn.svg";
 import {
-  buyTierkey,
-  loadCreatorBaseInfos,
   loadCreatorShareInfos,
-  sellTierkey,
+  loadShareSellPrice,
+  stake,
+  unstake,
 } from "@/state/createor/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { uuid } from "@/utils";
@@ -30,12 +30,9 @@ export const RevenueModal = ({
 }: RevenueModalProps) => {
   const [value, setValue] = useState("");
   const [price, setPrice] = useState("");
-  const [buying, setBuying] = useState(false);
-  const [selling, setSelling] = useState(false);
+  const [staking, setStaking] = useState(false);
+  const [unstaking, setUnstaking] = useState(false);
   const [option, setOption] = useState(defaultOption);
-  const userTierKeyBalance = useSelector(
-    state => state.creator.userTierKeyBalance,
-  );
   const globalStates = useSelector(state => state.global);
   const dispatch = useDispatch();
   const { address } = useParams<{ address?: string }>();
@@ -48,7 +45,41 @@ export const RevenueModal = ({
 
   useEffect(() => {
     setValue("");
-  }, [option]);
+    setPrice("");
+  }, [visible]);
+
+  useEffect(() => {
+    if (value) {
+      if (parseFloat(value) < 0) {
+        setValue("");
+        return;
+      }
+
+      if (!creatorStates.userShareBalance) {
+        creatorStates.userShareBalance = "10000";
+      }
+
+      if (parseFloat(value) > parseFloat(creatorStates.userShareBalance)) {
+        setValue(creatorStates.userShareBalance);
+        return;
+      }
+
+      dispatch(
+        loadShareSellPrice({
+          chainId: globalStates.chainId,
+          address: (address || userAddress)!,
+          connector,
+          amount: value,
+        }),
+      ).then(res => {
+        if (res.meta.requestStatus === "fulfilled") {
+          setPrice(res.payload as string);
+        }
+      });
+    } else {
+      setPrice("");
+    }
+  }, [value]);
 
   const cancel = () => {
     if (defaultOption !== 0) {
@@ -58,28 +89,33 @@ export const RevenueModal = ({
     }
   };
 
-  const buy = async () => {
-    setBuying(true);
+  const onInput = async (e: { target: { value: any } }) => {
+    const v = e.target.value;
+    setValue(v);
+  };
+
+  const handleStake = async () => {
+    setStaking(true);
     try {
-      if (!creatorStates.pyraZone?.asset_id) {
+      if (!creatorStates.revenuePoolAddress || !creatorStates.shareAddress) {
         return;
       }
       const res = await dispatch(
-        buyTierkey({
+        stake({
           chainId: globalStates.chainId,
-          assetId: creatorStates.pyraZone.asset_id,
-          address: (address || userAddress)!,
+          shareAddress: creatorStates.shareAddress,
+          revenuePoolAddress: creatorStates.revenuePoolAddress,
           connector,
-          tier: 0,
+          amount: ethers.utils.parseEther(value),
         }),
       );
       if (res.meta.requestStatus === "fulfilled") {
-        message.success("Buy tier key successfully");
+        message.success("Stake successfully");
         dispatch(
-          loadCreatorBaseInfos({
+          loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
-            assetId: creatorStates.pyraZone.asset_id,
+            userAddress,
             connector,
           }),
         );
@@ -88,33 +124,31 @@ export const RevenueModal = ({
       console.warn(e);
       message.error(e.reason);
     }
-    setBuying(false);
+    setStaking(false);
     return;
   };
 
-  const sell = async () => {
-    setSelling(true);
+  const handleUnstake = async () => {
+    setUnstaking(true);
     try {
-      if (!creatorStates.pyraZone?.asset_id) {
+      if (!creatorStates.revenuePoolAddress || !creatorStates.shareAddress) {
         return;
       }
       const res = await dispatch(
-        sellTierkey({
+        unstake({
           chainId: globalStates.chainId,
-          assetId: creatorStates.pyraZone.asset_id,
-          address: (address || userAddress)!,
+          revenuePoolAddress: creatorStates.revenuePoolAddress,
           connector,
-          keyId: "0",
-          tier: 0,
+          amount: ethers.utils.parseEther(value),
         }),
       );
       if (res.meta.requestStatus === "fulfilled") {
-        message.success("Sell tier key successfully");
+        message.success("Unstake successfully");
         dispatch(
-          loadCreatorBaseInfos({
+          loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: (address || userAddress)!,
-            assetId: creatorStates.pyraZone.asset_id,
+            userAddress,
             connector,
           }),
         );
@@ -123,7 +157,7 @@ export const RevenueModal = ({
       console.warn(e);
       message.error(e.reason);
     }
-    setSelling(false);
+    setUnstaking(false);
     return;
   };
 
@@ -152,40 +186,66 @@ export const RevenueModal = ({
             </div>
           </OutWrapper>
         ) : option === 1 ? (
-          <BuyWrapper>
-            <div
-              className='option'
-              onClick={() => {
-                setValue("0.01");
-              }}
-              style={{
-                backgroundColor: "#f6f6f6",
-              }}
-            >
-              1 Key
+          <StakeWrapper>
+            <div className='title'>You own</div>
+            <div className='share-number'>
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
+              <span className='unit'>share</span>
             </div>
-            <div className='buy-wrapper'>
-              <div className='buy-info'>
+            <div className='share-price'>
+              = $
+              {creatorStates.ethPrice &&
+              creatorStates.shareSellPrice &&
+              parseFloat(creatorStates.shareSellPrice) !== 0
+                ? (
+                    parseFloat(creatorStates.shareSellPrice) *
+                    creatorStates.ethPrice
+                  ).toFixed(4)
+                : "0.0"}{" "}
+              <span className='eth'>
+                ({" "}
+                {creatorStates.shareSellPrice &&
+                parseFloat(creatorStates.shareSellPrice) !== 0
+                  ? parseFloat(creatorStates.shareSellPrice).toFixed(8)
+                  : "0.0"}{" "}
+                {globalStates.chainCurrency})
+              </span>
+            </div>
+            <div className='input-wrapper'>
+              <input
+                type='number'
+                className='input'
+                value={value}
+                placeholder='Set custom amount'
+                onChange={onInput}
+              />
+              <div
+                className='max'
+                onClick={() => setValue(creatorStates.userShareBalance ?? "")}
+              >
+                Max
+              </div>
+            </div>
+            <div className='stake-wrapper'>
+              <div className='stake-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice &&
-                  creatorStates.tierKeyBuyPrice &&
-                  parseFloat(creatorStates.tierKeyBuyPrice) !== 0
-                    ? (
-                        parseFloat(creatorStates.tierKeyBuyPrice) *
-                        creatorStates.ethPrice
-                      ).toFixed(4)
+                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
+                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {creatorStates.tierKeyBuyPrice
-                    ? parseFloat(creatorStates.tierKeyBuyPrice).toFixed(8)
-                    : "0.0"}{" "}
+                  {price && parseFloat(price) !== 0
+                    ? parseFloat(price).toFixed(8)
+                    : "0.0"}
                   {globalStates.chainCurrency}
                 </div>
               </div>
-              <div className='buy-button' onClick={buy}>
-                {buying ? "Buying..." : "Buy"}
+              <div className='stake-button' onClick={handleStake}>
+                {staking ? "Staking..." : "stake"}
               </div>
             </div>
 
@@ -194,59 +254,62 @@ export const RevenueModal = ({
                 cancel
               </div>
             </div>
-          </BuyWrapper>
+          </StakeWrapper>
         ) : (
-          <SellWrapper>
-            <div className='title'>You own</div>
-            <div className='key-number'>
-              {creatorStates.userTierKeyBalance || "0"}{" "}
-              <span className='unit'>
-                {creatorStates.userTierKeyBalance === "0" ||
-                creatorStates.userTierKeyBalance === "1"
-                  ? "key"
-                  : "keys"}
-              </span>
+          <UnstakeWrapper>
+            <div className='title'>You staked</div>
+            <div className='share-number'>
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
+              <span className='unit'>shares</span>
             </div>
-            <div className='key-price'>
+            <div className='share-price'>
               = $
-              {creatorStates.ethPrice &&
-              creatorStates.tierKeySellPrice &&
-              parseFloat(creatorStates.tierKeySellPrice) !== 0
-                ? (
-                    parseFloat(creatorStates.tierKeySellPrice) *
-                    creatorStates.ethPrice
-                  ).toFixed(4)
+              {creatorStates.ethPrice && price && parseFloat(price) !== 0
+                ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
                 (
-                {creatorStates.tierKeySellPrice
-                  ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
+                {price && parseFloat(price) !== 0
+                  ? parseFloat(price).toFixed(8)
                   : "0.0"}
                 {globalStates.chainCurrency})
               </span>
             </div>
-            <div className='sell-wrapper'>
-              <div className='sell-info'>
+            <div className='input-wrapper'>
+              <input
+                type='number'
+                className='input'
+                value={value}
+                placeholder='Set custom amount'
+                onChange={onInput}
+              />
+              <div
+                className='max'
+                onClick={() => setValue(creatorStates.userShareBalance ?? "")}
+              >
+                Max
+              </div>
+            </div>
+            <div className='unstake-wrapper'>
+              <div className='unstake-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice &&
-                  creatorStates.tierKeySellPrice &&
-                  parseFloat(creatorStates.tierKeySellPrice) !== 0
-                    ? (
-                        parseFloat(creatorStates.tierKeySellPrice) *
-                        creatorStates.ethPrice
-                      ).toFixed(4)
+                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
+                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>
-                  {creatorStates.tierKeySellPrice
-                    ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
+                  {price && parseFloat(price) !== 0
+                    ? parseFloat(price).toFixed(8)
                     : "0.0"}
                   {globalStates.chainCurrency}
                 </div>
               </div>
-              <div className='sell-button' onClick={sell}>
-                {selling ? "Selling..." : "Sell"}
+              <div className='unstake-button' onClick={handleUnstake}>
+                {unstaking ? "Unstaking..." : "Unstake"}
               </div>
             </div>
             <div className='cancel-wrapper'>
@@ -254,7 +317,7 @@ export const RevenueModal = ({
                 cancel
               </div>
             </div>
-          </SellWrapper>
+          </UnstakeWrapper>
         )}
       </Wrapper>
     </FullScreenModal>

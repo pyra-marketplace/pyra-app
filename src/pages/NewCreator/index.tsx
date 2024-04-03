@@ -3,17 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Media, message } from "@meteor-web3/components";
 import { MirrorFile } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
-import {
-  AvatarGroup,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  LinearProgress,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { AvatarGroup, Avatar } from "@mui/material";
 import {
   PyraZone,
   PyraZoneRes,
@@ -31,6 +21,7 @@ import * as echarts from "echarts/core";
 import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react";
+import { ethers } from "ethers";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -76,9 +67,11 @@ import { KeyModal } from "@/components/KeyModal";
 import { RevenueModal } from "@/components/RevenueModal";
 import { ShareModal } from "@/components/ShareModal";
 import {
+  claim,
   createPryaZone,
   createShare,
   creatorSlice,
+  loadClaimableRevenue,
   loadCreatorBaseInfos,
   loadCreatorContents,
   loadCreatorShareInfos,
@@ -270,6 +263,7 @@ export const NewCreator: React.FC = () => {
         loadCreatorBaseInfos({
           chainId: globalStates.chainId,
           address: _address,
+          userAddress,
           assetId: pyraZone.asset_id,
           connector,
         }),
@@ -290,24 +284,27 @@ export const NewCreator: React.FC = () => {
       const _address = address || userAddress!;
       if (selectedTab === "Content") {
         if (!creatorStates.pyraZone) return;
-        const contentInfo = await dispatch(
-          loadCreatorContents({
-            chainId: globalStates.chainId,
-            assetId: creatorStates.pyraZone.asset_id,
-            accountAddress: userAddress,
-            connector,
-          }),
-        ).unwrap();
-        console.log({
-          args: {
-            chainId: globalStates.chainId,
-            assetId: creatorStates.pyraZone.asset_id,
-            accountAddress: userAddress,
-            connector,
-          },
-          contentInfo,
-        });
-        if (_address !== userAddress && contentInfo.isAccessible) {
+        let contentInfo;
+        if (userAddress) {
+          contentInfo = await dispatch(
+            loadCreatorContents({
+              chainId: globalStates.chainId,
+              assetId: creatorStates.pyraZone.asset_id,
+              accountAddress: userAddress,
+              connector,
+            }),
+          ).unwrap();
+          console.log({
+            args: {
+              chainId: globalStates.chainId,
+              assetId: creatorStates.pyraZone.asset_id,
+              accountAddress: userAddress,
+              connector,
+            },
+            contentInfo,
+          });
+        }
+        if (_address !== userAddress && contentInfo?.isAccessible) {
           // try to unlock content folder
           try {
             const { unlockedFolder } = await dispatch(
@@ -327,6 +324,7 @@ export const NewCreator: React.FC = () => {
           loadCreatorShareInfos({
             chainId: globalStates.chainId,
             address: _address,
+            userAddress,
             connector,
           }),
         )
@@ -514,7 +512,8 @@ export const NewCreator: React.FC = () => {
             </div>
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
-                {creatorStates.tierKeyBuyPrice
+                {creatorStates.tierKeyBuyPrice &&
+                parseFloat(creatorStates.tierKeyBuyPrice) !== 0
                   ? parseFloat(creatorStates.tierKeyBuyPrice).toFixed(8)
                   : "0.0"}{" "}
                 {globalStates.chainCurrency}
@@ -1010,8 +1009,7 @@ const LockedSection = () => {
   const dispatch = useDispatch();
   const globalStates = useSelector(state => state.global);
   const creatorStates = useSelector(state => state.creator);
-  const { connector } = useStore();
-
+  const { connector, address: userAddress } = useStore();
   const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
 
   return (
@@ -1023,13 +1021,15 @@ const LockedSection = () => {
         gap='22px'
       >
         <p className='locked-tip'>
-          Unlock{" "}
-          {creatorStates.contentFiles &&
-            Object.values(creatorStates.contentFiles).length + "+ "}
-          curations
+          Unlock {creatorStates.pyraZone?.files_count || ""}{" "}
+          {creatorStates.pyraZone?.files_count === 1 ? "curation" : "curations"}
         </p>
         <BlackButton
           onClick={async () => {
+            if (!userAddress) {
+              message.info("Please login first");
+              return;
+            }
             if (!creatorStates.pyraZone || tradeKeyLoading) {
               message.info("Wait for loading...");
               return;
@@ -1131,9 +1131,13 @@ const ShareSection = () => {
   const [shareModalOption, setShareModalOption] = useState(0);
   const [keyModalOption, setKeyModalOption] = useState(0);
   const [revenueModalOption, setRevenueModalOption] = useState(0);
+  const [claiming, setClaiming] = useState(false);
+  const dispatch = useDispatch();
+  const { address } = useParams<{ address?: string }>();
+  const { connector, address: userAddress, pkh } = useStore();
 
   return (
-    <Section width='100%' padding='12px 32px' gap='36px'>
+    <Section width='100%' padding='32px' gap='36px'>
       <ShareContainer>
         <div className='info-container'>
           <div className='title'>TV</div>
@@ -1149,7 +1153,8 @@ const ShareSection = () => {
               : "0.0"}{" "}
           </div>
           <div className='added'>
-            {creatorStates.shareTotalValue
+            {creatorStates.shareTotalValue &&
+            parseFloat(creatorStates.shareTotalValue) !== 0
               ? parseFloat(creatorStates.shareTotalValue).toFixed(8)
               : "0.0"}{" "}
             {globalStates.chainCurrency}
@@ -1176,7 +1181,8 @@ const ShareSection = () => {
               : "0.0"}
           </div>
           <div className='added'>
-            {creatorStates.shareTotalVolume
+            {creatorStates.shareTotalVolume &&
+            parseFloat(creatorStates.shareTotalVolume) !== 0
               ? parseFloat(creatorStates.shareTotalVolume).toFixed(8)
               : "0.0"}{" "}
             {globalStates.chainCurrency}
@@ -1189,7 +1195,8 @@ const ShareSection = () => {
             <span className='unit'>shares</span>
           </div>
           <div className='added'>
-            {creatorStates.shareSellPrice
+            {creatorStates.shareSellPrice &&
+            parseFloat(creatorStates.shareSellPrice) !== 0
               ? parseFloat(creatorStates.shareSellPrice).toFixed(8)
               : "0.0"}{" "}
             {globalStates.chainCurrency}
@@ -1227,7 +1234,8 @@ const ShareSection = () => {
             </span>
           </div>
           <div className='added'>
-            {creatorStates.tierKeySellPrice
+            {creatorStates.tierKeySellPrice &&
+            parseFloat(creatorStates.tierKeySellPrice) !== 0
               ? parseFloat(creatorStates.tierKeySellPrice).toFixed(8)
               : "0.0"}{" "}
             {globalStates.chainCurrency}
@@ -1261,23 +1269,90 @@ const ShareSection = () => {
           </div>
           <div className='placeholder'></div>
           <div className='buttons'>
-            <div className='stake'>Stake</div>
-            <div className='unstake'>Unstake</div>
+            <div
+              className='stake'
+              onClick={() => {
+                setRevenueModalOption(1);
+                setRevenueModal(true);
+              }}
+            >
+              Stake Shares
+            </div>
+            <div
+              className='unstake'
+              onClick={() => {
+                setRevenueModalOption(2);
+                setRevenueModal(true);
+              }}
+            >
+              Unstake Shares
+            </div>
           </div>
-          <div className='rewards'>
-            current revenue: {creatorStates.revenue || "0.0"}{" "}
-            {globalStates.chainCurrency}
-            (${" "}
-            {creatorStates.ethPrice &&
-            creatorStates?.revenue &&
-            parseFloat(creatorStates.revenue) !== 0
-              ? (
-                  parseFloat(creatorStates.revenue) * creatorStates.ethPrice
-                ).toFixed(4)
-              : "0.0"}
-            )
+          <div className='tip'>
+            <div className='staked'>
+              You staked:{" "}
+              {creatorStates.userShareBalance &&
+              parseFloat(creatorStates.userShareBalance) !== 0
+                ? parseFloat(creatorStates.userShareBalance).toFixed(8)
+                : "0.0"}{" "}
+              Shares
+            </div>
+            <div className='rewards'>
+              current revenue:{" "}
+              {creatorStates.revenue && parseFloat(creatorStates.revenue) !== 0
+                ? parseFloat(creatorStates.revenue).toFixed(8)
+                : "0.0"}{" "}
+              {globalStates.chainCurrency}
+              (${" "}
+              {creatorStates.ethPrice &&
+              creatorStates?.revenue &&
+              parseFloat(creatorStates.revenue) !== 0
+                ? (
+                    parseFloat(creatorStates.revenue) * creatorStates.ethPrice
+                  ).toFixed(4)
+                : "0.0"}
+              )
+            </div>
           </div>
-          <div className='claim'>Claim</div>
+          <div
+            className='claim'
+            onClick={async () => {
+              setClaiming(true);
+              try {
+                if (
+                  !creatorStates.revenuePoolAddress ||
+                  !creatorStates.shareAddress
+                ) {
+                  return;
+                }
+                const res = await dispatch(
+                  claim({
+                    chainId: globalStates.chainId,
+                    revenuePoolAddress: creatorStates.revenuePoolAddress,
+                    connector,
+                  }),
+                );
+                if (res.meta.requestStatus === "fulfilled") {
+                  message.success("Stake successfully");
+                  dispatch(
+                    loadClaimableRevenue({
+                      chainId: globalStates.chainId,
+                      revenuePoolAddress: creatorStates.revenuePoolAddress,
+                      address: (address || userAddress)!,
+                      connector,
+                    }),
+                  );
+                }
+              } catch (e: any) {
+                console.warn(e);
+                message.error(e.reason);
+              }
+              setClaiming(false);
+              return;
+            }}
+          >
+            {claiming ? "Claiming..." : "Claim"}
+          </div>
         </div>
       </ShareContainer>
       <ShareModal
@@ -1463,7 +1538,7 @@ const ActivitySection = () => {
   };
 
   return (
-    <Section width='100%' padding='50px 40px' gap='50px'>
+    <Section width='100%' padding='32px' gap='50px'>
       <ReactECharts
         style={{ width: "100%", height: "391px" }}
         echarts={echarts}

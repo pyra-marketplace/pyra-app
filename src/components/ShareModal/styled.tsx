@@ -110,6 +110,15 @@ export const SellWrapper = styled.div`
       line-height: normal;
       letter-spacing: -0.2px;
       margin: 8px;
+      &::placeholder {
+        color: #ebebeb;
+        font-family: Inter;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: -0.24px;
+      }
     }
 
     .max {

@@ -751,15 +751,28 @@ export const ShareContainer = styled.div`
     .placeholder {
       height: 20px;
     }
-    .rewards {
+    .tip {
+      justify-content: space-between;
       padding: 21px 0;
-      color: #545454;
-      font-family: Inter;
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 500;
-      line-height: normal;
-      letter-spacing: -0.14px;
+      .staked {
+        color: #545454;
+        font-family: Inter;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        letter-spacing: -0.14px;
+        margin-bottom: 10px;
+      }
+      .rewards {
+        color: #545454;
+        font-family: Inter;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        letter-spacing: -0.14px;
+      }
     }
     .claim {
       padding: 15px;
