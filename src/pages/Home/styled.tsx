@@ -145,6 +145,7 @@ export const ScrollableSection = styled(Section)<{
   darkBackground?: boolean;
 }>`
   overflow-x: auto;
+  overflow-y: hidden;
 
   &::-webkit-scrollbar {
     display: none;
@@ -308,7 +309,9 @@ export const TableWrap = styled.div`
         width: 66px;
         height: 66px;
         border-radius: 10px;
-        background: #121212;
+        &:not(:has(img)) {
+          background: #121212;
+        }
         img {
           width: 100%;
           height: 100%;
@@ -386,7 +389,7 @@ export const TableWrap = styled.div`
       flex: 0 1 15%;
     }
     .table-item {
-      flex: 0 1 12%;
+      flex: 0 1 15%;
     }
     .table-item:nth-child(2) {
       justify-content: left !important;
@@ -515,17 +518,6 @@ export const SpotLightContentSectionWrap = styled.div<{
     cursor: pointer;
     > * {
       position: relative;
-      /* width: 262px;
-      height: 262px; */
-      /* width: 100%;
-      height: 100%; */
-      /* border-radius: 15.92px; */
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 15.92px;
-      }
     }
   }
 `;

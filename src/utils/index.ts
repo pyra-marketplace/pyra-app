@@ -1,5 +1,5 @@
 import { ChainId, DEPLOYED_ADDRESSES } from "@pyra-marketplace/pyra-sdk";
-
+import { ethers } from "ethers";
 export * from "./ui";
 
 function getWindowFeatures() {
@@ -142,3 +142,12 @@ export const getCurrencyNameByCurrencyAddress = (
   }
   return "";
 };
+
+export function normalizedAddress(address: string) {
+  return ethers.utils.getAddress(address);
+}
+
+export const getDefaultAvatar = (address?: string) =>
+  address
+    ? `https://mint.fun/api/avatar/${normalizedAddress(address)}?size=150`
+    : "";

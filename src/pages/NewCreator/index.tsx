@@ -488,12 +488,12 @@ export const NewCreator: React.FC = () => {
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
                 $
-                {creatorStates.ethPrice &&
+                {globalStates.ethPrice &&
                 creatorStates?.shareTotalVolume &&
                 parseFloat(creatorStates.shareTotalVolume) !== 0
                   ? (
                       parseFloat(creatorStates.shareTotalVolume) *
-                      creatorStates.ethPrice
+                      globalStates.ethPrice
                     ).toFixed(4)
                   : "0.0"}
               </p>
@@ -502,12 +502,12 @@ export const NewCreator: React.FC = () => {
             <div className='user-extra-info-item'>
               <p className='sub-title-text'>
                 $
-                {creatorStates.ethPrice &&
+                {globalStates.ethPrice &&
                 creatorStates?.shareTotalValue &&
                 parseFloat(creatorStates.shareTotalValue) !== 0
                   ? (
                       parseFloat(creatorStates?.shareTotalValue) *
-                      creatorStates.ethPrice
+                      globalStates.ethPrice
                     ).toFixed(4)
                   : "0.0"}{" "}
               </p>
@@ -1157,12 +1157,12 @@ const ShareSection = () => {
           <div className='title'>TV</div>
           <div className='content'>
             $
-            {creatorStates.ethPrice &&
+            {globalStates.ethPrice &&
             creatorStates?.shareTotalValue &&
             parseFloat(creatorStates.shareTotalValue) !== 0
               ? (
                   parseFloat(creatorStates?.shareTotalValue) *
-                  creatorStates.ethPrice
+                  globalStates.ethPrice
                 ).toFixed(4)
               : "0.0"}{" "}
           </div>
@@ -1185,12 +1185,12 @@ const ShareSection = () => {
           <div className='title'>Volume</div>
           <div className='content'>
             $
-            {creatorStates.ethPrice &&
+            {globalStates.ethPrice &&
             creatorStates?.shareTotalVolume &&
             parseFloat(creatorStates.shareTotalVolume) !== 0
               ? (
                   parseFloat(creatorStates.shareTotalVolume) *
-                  creatorStates.ethPrice
+                  globalStates.ethPrice
                 ).toFixed(4)
               : "0.0"}
           </div>
@@ -1318,11 +1318,11 @@ const ShareSection = () => {
                 : "0.0"}{" "}
               {globalStates.chainCurrency}
               (${" "}
-              {creatorStates.ethPrice &&
+              {globalStates.ethPrice &&
               creatorStates?.revenue &&
               parseFloat(creatorStates.revenue) !== 0
                 ? (
-                    parseFloat(creatorStates.revenue) * creatorStates.ethPrice
+                    parseFloat(creatorStates.revenue) * globalStates.ethPrice
                   ).toFixed(4)
                 : "0.0"}
               )
@@ -1395,7 +1395,7 @@ const ActivitySection = () => {
 
   const chartOption: ECOption = {
     grid: {
-      left: 80,
+      left: 120,
       top: 25,
       right: 80,
       bottom: 30,
@@ -1421,25 +1421,26 @@ const ActivitySection = () => {
     xAxis: [
       {
         type: "category",
-        data: [
-          "Nov 28",
-          "Dec 5",
-          "Dec 12",
-          "Dec 19",
-          "Dec 26",
-          "Jan 2",
-          "Jan 9",
-          "Jan 16",
-          "Jan 23",
-          "Jan 30",
-          "Feb 6",
-          "Feb 13",
-          "Feb 20",
-          "Feb 27",
-          "Mar 6",
-          "Mar 13",
-          "Mar 20",
-        ],
+        // data: [
+        //   "Nov 28",
+        //   "Dec 5",
+        //   "Dec 12",
+        //   "Dec 19",
+        //   "Dec 26",
+        //   "Jan 2",
+        //   "Jan 9",
+        //   "Jan 16",
+        //   "Jan 23",
+        //   "Jan 30",
+        //   "Feb 6",
+        //   "Feb 13",
+        //   "Feb 20",
+        //   "Feb 27",
+        //   "Mar 6",
+        //   "Mar 13",
+        //   "Mar 20",
+        // ],
+        data: creatorStates.publisherDailyRecord?.map(item => item.date) || [],
         axisPointer: {
           type: "shadow",
         },
@@ -1454,10 +1455,10 @@ const ActivitySection = () => {
     yAxis: [
       {
         type: "value",
-        name: "Volume (ETH)",
-        min: 0,
-        max: 1.25,
-        interval: 0.25,
+        name: `Volume (${globalStates.chainCurrency})`,
+        // min: 0,
+        // max: 1.25,
+        // interval: 0.25,
         axisLabel: {
           fontFamily: "Inter-ExtraLight",
           fontWeight: 200,
@@ -1470,7 +1471,7 @@ const ActivitySection = () => {
           },
         },
         nameLocation: "middle",
-        nameGap: 60,
+        nameGap: 100,
         nameTextStyle: {
           fontFamily: "Inter-SemiBold",
           fontWeight: 600,
@@ -1478,41 +1479,45 @@ const ActivitySection = () => {
           color: "#121212",
         },
       },
-      {
-        type: "value",
-        name: "Average price (ETH)",
-        min: 0,
-        max: 0.125,
-        interval: 0.025,
-        axisLabel: {
-          fontFamily: "Inter-ExtraLight",
-          fontWeight: 200,
-          fontSize: "14px",
-          color: "#545454",
-        },
-        axisLine: {
-          lineStyle: {
-            color: "#C8C8C8",
-          },
-        },
-        nameLocation: "middle",
-        nameGap: 60,
-        nameTextStyle: {
-          fontFamily: "Inter-SemiBold",
-          fontWeight: 600,
-          fontSize: "14px",
-          color: "#121212",
-        },
-      },
+      // {
+      //   type: "value",
+      //   name: `Average price (${globalStates.chainCurrency})`,
+      //   min: 0,
+      //   max: 0.125,
+      //   interval: 0.025,
+      //   axisLabel: {
+      //     fontFamily: "Inter-ExtraLight",
+      //     fontWeight: 200,
+      //     fontSize: "14px",
+      //     color: "#545454",
+      //   },
+      //   axisLine: {
+      //     lineStyle: {
+      //       color: "#C8C8C8",
+      //     },
+      //   },
+      //   nameLocation: "middle",
+      //   nameGap: 60,
+      //   nameTextStyle: {
+      //     fontFamily: "Inter-SemiBold",
+      //     fontWeight: 600,
+      //     fontSize: "14px",
+      //     color: "#121212",
+      //   },
+      // },
     ],
     series: [
       {
         name: "Volume",
         type: "bar",
-        data: [
-          0.4, 1.1, 0.25, 0.1, 0.05, 0.1, 0.07, 0.02, 0, 0, 0, 0, 0, 0, 0.1,
-          0.25, 0,
-        ],
+        // data: [
+        //   0.4, 1.1, 0.25, 0.1, 0.05, 0.1, 0.07, 0.02, 0, 0, 0, 0, 0, 0, 0.1,
+        //   0.25, 0,
+        // ],
+        data:
+          creatorStates.publisherDailyRecord?.map(item =>
+            parseFloat(item.share_volume),
+          ) || [],
         itemStyle: {
           color: "#E7E8EC",
           borderColor: "#C8C8C8",
@@ -1520,48 +1525,48 @@ const ActivitySection = () => {
           borderRadius: [4, 4, 0, 0],
         },
       },
-      {
-        name: "Average price",
-        type: "line",
-        yAxisIndex: 1,
-        data: [
-          0.11, 0.025, 0.01, 0.015, 0.02, 0.005, 0.006, 0.006, 0.006, 0.006,
-          0.006, 0.006, 0.006, 0.006, 0.006, 0.02, 0.02,
-        ],
-        symbol: "circle",
-        symbolSize: 11,
-        showSymbol: false,
-        lineStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 1,
-            y2: 1,
-            colorStops: [
-              {
-                offset: 0,
-                color: "#55DAE1",
-              },
-              {
-                offset: 1,
-                color: "#7256E5",
-              },
-            ],
-          },
-          width: 3,
-        },
-      },
+      // {
+      //   name: "Average price",
+      //   type: "line",
+      //   yAxisIndex: 1,
+      //   data: [
+      //     0.11, 0.025, 0.01, 0.015, 0.02, 0.005, 0.006, 0.006, 0.006, 0.006,
+      //     0.006, 0.006, 0.006, 0.006, 0.006, 0.02, 0.02,
+      //   ],
+      //   symbol: "circle",
+      //   symbolSize: 11,
+      //   showSymbol: false,
+      //   lineStyle: {
+      //     color: {
+      //       type: "linear",
+      //       x: 0,
+      //       y: 0,
+      //       x2: 1,
+      //       y2: 1,
+      //       colorStops: [
+      //         {
+      //           offset: 0,
+      //           color: "#55DAE1",
+      //         },
+      //         {
+      //           offset: 1,
+      //           color: "#7256E5",
+      //         },
+      //       ],
+      //     },
+      //     width: 3,
+      //   },
+      // },
     ],
   };
 
   return (
     <Section width='100%' padding='32px' gap='50px'>
-      <ReactECharts
+      {/* <ReactECharts
         style={{ width: "100%", height: "391px" }}
         echarts={echarts}
         option={chartOption}
-      />
+      /> */}
       <FlexRow width='100%' gap='16px' alignItems='flex-start'>
         <ShareCardSection>
           <p className='title-text'>Trades</p>
@@ -1576,7 +1581,10 @@ const ActivitySection = () => {
                 <div className='avatar'>
                   <img src={activity.user_info?.profile_image_url} />
                 </div>
-                <div className='user-name'>{activity.user_info?.name}</div>
+                <div className='user-name'>
+                  {activity.user_info?.name ||
+                    stringAbbreviation(activity.shareholder)}
+                </div>
                 <div className='activity-info'>
                   <span>
                     {activity.type === "Buy" ? "bought" : "sold"}{" "}
@@ -1606,7 +1614,10 @@ const ActivitySection = () => {
                 <div className='avatar'>
                   <img src={holder.user_info?.profile_image_url} />
                 </div>
-                <div className='user-name'>{holder.user_info?.name}</div>
+                <div className='user-name'>
+                  {holder.user_info?.name ||
+                    stringAbbreviation(holder.shareholder, 4, 4)}
+                </div>
               </div>
             ))}
           </div>

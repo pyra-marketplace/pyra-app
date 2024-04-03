@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useStore } from "@meteor-web3/hooks";
 import { CircularProgress } from "@mui/material";
+import { PyraMarketRes, PyraZoneRes } from "@pyra-marketplace/pyra-sdk";
 import { motion, useScroll, useTransform } from "framer-motion";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -27,18 +28,32 @@ import {
 } from "./styled";
 
 import PlaceholderSvg from "@/assets/icons/placeholder.svg";
+import DefaultCardRectanglePng from "@/assets/images/default-card-rectangle.png";
+import DefaultCardSquarePng from "@/assets/images/default-card-square.png";
 import FeaturedNftPng from "@/assets/images/featured-nft.png";
 import { TabButtons } from "@/components/TabButtons";
 import {
-  TrendingPyraZone,
   homeSlice,
-  loadTrendingPyraZones,
+  loadHomeData,
+  loadTableData,
+  // loadTrendingPyraZones,
 } from "@/state/home/slice";
 import { useDispatch, useSelector } from "@/state/hook";
 import { Section, FlexRow, RoundCard, AbsoluteSection } from "@/styled";
-import { stringAbbreviation } from "@/utils";
+import { getDefaultAvatar, stringAbbreviation } from "@/utils";
 
 export const Home: React.FC = () => {
+  const globalStates = useSelector(state => state.global);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(
+      loadHomeData({
+        chainId: globalStates.chainId,
+      }),
+    );
+  }, []);
+
   return (
     <HomeWrapper>
       <TopSection />
@@ -49,6 +64,9 @@ export const Home: React.FC = () => {
 };
 
 const TopSection: React.FC = () => {
+  const trendingPyraMarkets = useSelector(
+    state => state.home.trendingPyraMarkets,
+  );
   const [hideLeftArrow, setHideLeftArrow] = useState(true);
   const [hideRightArrow, setHideRightArrow] = useState(false);
   const scrollSectionRef = useRef<HTMLDivElement>(null);
@@ -88,7 +106,7 @@ const TopSection: React.FC = () => {
       padding='94px 32px 0px'
       gap='32px'
     >
-      <TopTabButtons>
+      {/* <TopTabButtons>
         {[
           "All",
           "Art",
@@ -104,7 +122,7 @@ const TopSection: React.FC = () => {
             </div>
           );
         })}
-      </TopTabButtons>
+      </TopTabButtons> */}
       <Section width='100%' relative>
         <ScrollableSection
           className='hideScrollbar'
@@ -153,34 +171,55 @@ const TopSection: React.FC = () => {
               />
             </svg>
           </div>
-          <HightLightCard />
-          <HightLightCard />
-          <HightLightCard />
-          <HightLightCard />
-          <HightLightCard />
-          <HightLightCard />
+          {trendingPyraMarkets?.map((item, idx) => {
+            return <HighLightCard key={idx} dataItem={item} />;
+          })}
+          {!trendingPyraMarkets &&
+            [...new Array(10)].map((_, idx) => <HighLightCard key={idx} />)}
         </ScrollableSection>
       </Section>
     </Section>
   );
 };
 
-const HightLightCard: React.FC = () => {
+const HighLightCard = ({ dataItem }: { dataItem?: PyraMarketRes }) => {
+  const chainCurrency = useSelector(state => state.global.chainCurrency);
+
   return (
-    <Section relative width='332px' height='332px'>
+    <Section relative width='332px' height='332px' flex='0 0 auto'>
       <RoundCard
         width='332px'
         height='332px'
         borderRadius='12px'
         background='#6C70C7'
-      ></RoundCard>
+      >
+        <img
+          src={
+            dataItem?.publisher_profile?.cover_iamge_url || DefaultCardSquarePng
+          }
+        />
+      </RoundCard>
       <AbsoluteSection left='0px' bottom='0px' gap='7px' padding='15px'>
         <FlexRow width='100%'>
-          <HightLightCardText bold>ZenAcademy</HightLightCardText>
+          <HightLightCardText bold>
+            {dataItem?.publisher_profile?.user_info?.name ||
+              stringAbbreviation(dataItem?.publisher) ||
+              "loading..."}
+          </HightLightCardText>
         </FlexRow>
-        <FlexRow width='100%'>
-          <HightLightCardText>Floor: 0.09 ETH</HightLightCardText>
-        </FlexRow>
+        {dataItem && (
+          <>
+            <FlexRow width='100%'>
+              <HightLightCardText>
+                Total value:{" "}
+                {parseFloat(dataItem.total_value)
+                  ? parseFloat(dataItem.total_value).toFixed(8)
+                  : "0.0"}{" "}
+                {chainCurrency}
+              </HightLightCardText>
+            </FlexRow>
+          </>
+        )}
       </AbsoluteSection>
     </Section>
   );
@@ -362,8 +401,8 @@ const CollectionCard: React.FC = () => {
 };
 
 const CreatorSection: React.FC = () => {
-  const TOTAL_ITEM_LIMIT = 5;
-  const trendingPyraZones = useSelector(state => state.home.trendingPyraZones);
+  const TOTAL_ITEM_LIMIT = 10;
+  const tableData = useSelector(state => state.home.tableData);
   const dispatch = useDispatch();
   const globalStates = useSelector(state => state.global);
   const { connector } = useStore();
@@ -378,43 +417,29 @@ const CreatorSection: React.FC = () => {
   const [nowLoadingPage, setNowLoadingPage] = useState(1);
 
   useEffect(() => {
-    dispatch(homeSlice.actions.clearTrendingPyraZones());
+    dispatch(homeSlice.actions.clearTableData());
     setNowLoadingPage(1);
     setHasMorePage(true);
   }, [selectedTab]);
 
   useEffect(() => {
-    handleLoadTrendingPyraZones(nowLoadingPage);
+    handleLoadTableData(nowLoadingPage);
   }, [selectedTab, nowLoadingPage]);
 
-  const handleLoadTrendingPyraZones = async (
-    page: number,
-    pageSize: number = 5,
-  ) => {
-    const trendingPyraZones = await dispatch(
-      loadTrendingPyraZones({
+  const handleLoadTableData = async (page: number, pageSize: number = 10) => {
+    const tableData = await dispatch(
+      loadTableData({
         chainId: globalStates.chainId,
         connector,
-        orderBy:
-          selectedTab === "Top"
-            ? "tierkey_sales"
-            : selectedTab === "Recent"
-              ? "block_number"
-              : undefined,
-        orderType: "desc",
-        page,
-        pageSize,
+        type: selectedTab,
       }),
     ).unwrap();
-    if (
-      trendingPyraZones.length < pageSize ||
-      page * pageSize >= TOTAL_ITEM_LIMIT
-    ) {
+    if (tableData.length < pageSize || page * pageSize >= TOTAL_ITEM_LIMIT) {
       setHasMorePage(false);
     } else {
       setHasMorePage(true);
     }
-    console.log({ page, pageSize, trendingPyraZones });
+    console.log({ page, pageSize, tableData });
   };
 
   return (
@@ -463,17 +488,16 @@ const CreatorSection: React.FC = () => {
         <TableWrap>
           <div className='table-container hideScrollbar'>
             <div className='table-header'>
-              <div className='table-item'>Rank</div>
-              <div className='table-item'>Collection</div>
-              <div className='table-item'>Total Volumn</div>
-              <div className='table-item'>Holders</div>
-              <div className='table-item'>Files num</div>
-              <div className='table-item'>Key price</div>
-              <div className='table-item'>Key sales</div>
+              <div className='table-item'>#</div>
+              <div className='table-item'>Zone</div>
+              <div className='table-item'>Share volume</div>
+              <div className='table-item'>Share value</div>
+              <div className='table-item'>Share supply</div>
+              <div className='table-item'>Share sales</div>
               {/* <div className='table-item'>Watchlists</div> */}
             </div>
             <InfiniteScroll
-              dataLength={trendingPyraZones?.length || 0}
+              dataLength={tableData?.length || 0}
               next={() => setNowLoadingPage(prev => prev + 1)}
               hasMore={hasMorePage}
               loader={
@@ -482,18 +506,17 @@ const CreatorSection: React.FC = () => {
                 </div>
               }
             >
-              {trendingPyraZones &&
-                trendingPyraZones.map((item, index) => {
+              {tableData &&
+                tableData.map((item, index) => {
                   return (
                     <CreatorTableItem
-                      trendingPyraZone={item}
+                      tableDataItem={item}
                       key={index}
                       idx={index + 1}
                     />
                   );
                 })}
-              {(!trendingPyraZones ||
-                (trendingPyraZones.length === 0 && !hasMorePage)) && (
+              {(!tableData || (tableData.length === 0 && !hasMorePage)) && (
                 <div className='loading'>
                   <CircularProgress color='inherit' />
                 </div>
@@ -507,10 +530,10 @@ const CreatorSection: React.FC = () => {
 };
 
 const CreatorTableItem = ({
-  trendingPyraZone,
+  tableDataItem,
   idx,
 }: {
-  trendingPyraZone: TrendingPyraZone;
+  tableDataItem: PyraMarketRes;
   idx: number;
 }) => {
   const navigate = useNavigate();
@@ -524,34 +547,44 @@ const CreatorTableItem = ({
         <FlexRow
           gap='25px'
           style={{ cursor: "pointer" }}
-          onClick={() => navigate("/creator/" + trendingPyraZone.publisher)}
+          onClick={() => navigate("/creator/" + tableDataItem.publisher)}
         >
           <div className='avatar'>
-            {trendingPyraZone.user_info?.profile_image_url && (
-              <img src={trendingPyraZone.user_info.profile_image_url} />
-            )}
+            <img
+              src={
+                tableDataItem.publisher_profile?.user_info?.profile_image_url ||
+                getDefaultAvatar(tableDataItem.publisher)
+              }
+            />
           </div>
           <span>
-            {trendingPyraZone.user_info?.name ||
-              stringAbbreviation(trendingPyraZone.publisher, 4, 4)}
+            {tableDataItem.publisher_profile?.user_info?.name ||
+              stringAbbreviation(tableDataItem.publisher, 4, 4)}
           </span>
         </FlexRow>
       </div>
       <div className='table-item'>
-        {trendingPyraZone.total_volume
-          ? parseFloat(trendingPyraZone.total_volume).toFixed(8)
-          : "0.0"}{" "}
-      </div>
-      <div className='table-item'>{trendingPyraZone.share_holders}</div>
-      <div className='table-item'>{trendingPyraZone.files_count}</div>
-      <div className='table-item'>
-        {trendingPyraZone.tierkey_price
-          ? parseFloat(trendingPyraZone.tierkey_price).toFixed(8)
+        {parseFloat(tableDataItem.total_volume)
+          ? parseFloat(tableDataItem.total_volume).toFixed(8)
           : "0.0"}{" "}
         {chainCurrency}
       </div>
-      <div className='table-item'>{trendingPyraZone.tierkey_sales}</div>
-      {/* <div className='table-item'>{trendingPyraZone.watch_lists}</div> */}
+      <div className='table-item'>
+        {parseFloat(tableDataItem.total_value)
+          ? parseFloat(tableDataItem.total_value).toFixed(8)
+          : "0.0"}{" "}
+        {chainCurrency}
+      </div>
+      <div className='table-item'>{tableDataItem.total_supply}</div>
+      <div className='table-item'>{tableDataItem.share_sales}</div>
+      {/* <div className='table-item'>
+        {tableDataItem.tierkey_price
+          ? parseFloat(tableDataItem.tierkey_price).toFixed(8)
+          : "0.0"}{" "}
+        {chainCurrency}
+      </div>
+      <div className='table-item'>{tableDataItem.tierkey_sales}</div> */}
+      {/* <div className='table-item'>{tableDataItem.watch_lists}</div> */}
     </div>
   );
 };
@@ -560,6 +593,9 @@ const SpotLightSection: React.FC = () => {
   const [hideLeftArrow, setHideLeftArrow] = useState(true);
   const [hideRightArrow, setHideRightArrow] = useState(false);
   const scrollSectionRef = useRef<HTMLDivElement>(null);
+
+  const popularPyraZones = useSelector(state => state.home.popularPyraZones);
+  const trendingPyraZones = useSelector(state => state.home.trendingPyraZones);
 
   useEffect(() => {
     if (scrollSectionRef.current) {
@@ -591,68 +627,22 @@ const SpotLightSection: React.FC = () => {
   };
 
   return (
-    <Section width='100%' padding='10px 32px' gap='24px'>
-      <SpotLightText>Memberships spotlight</SpotLightText>
-      {/* <Section width='100%' relative>
-        <ScrollableSection
-          className='hideScrollbar'
-          width='100%'
-          gap='16px'
-          flexDirection='row'
-          darkBackground
-          style={{ overflowY: "visible" }}
-          ref={scrollSectionRef}
-        >
-          <div
-            className='left-arrow-btn'
-            onClick={() => !hideLeftArrow && handleScroll(-800)}
-            data-hidden={hideLeftArrow}
-          >
-            <svg
-              width='16'
-              height='30'
-              viewBox='0 0 16 30'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <path
-                d='M2.5 27.4342L13.75 15L2.5 2.5658'
-                stroke='black'
-                strokeWidth='3'
-                strokeLinecap='square'
-              />
-            </svg>
-          </div>
-          <div
-            className='right-arrow-btn'
-            onClick={() => !hideRightArrow && handleScroll(800)}
-            data-hidden={hideRightArrow}
-          >
-            <svg
-              width='16'
-              height='30'
-              viewBox='0 0 16 30'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <path
-                d='M2.5 27.4342L13.75 15L2.5 2.5658'
-                stroke='black'
-                strokeWidth='3'
-                strokeLinecap='square'
-              />
-            </svg>
-          </div>
-          <SpotLightCard />
-          <SpotLightCard />
-          <SpotLightCard />
-          <SpotLightCard />
-          <SpotLightCard />
-          <SpotLightCard />
-        </ScrollableSection>
-      </Section> */}
-      <SpotLightContentSection data={[...new Array(10)]} foldItems />
-    </Section>
+    <>
+      <Section width='100%' padding='10px 32px' gap='24px'>
+        <SpotLightText>Most popular zones</SpotLightText>
+        <SpotLightContentSection
+          data={popularPyraZones || [...new Array(10)]}
+          foldItems
+        />
+      </Section>
+      <Section width='100%' padding='10px 32px' gap='24px'>
+        <SpotLightText>Trending zones</SpotLightText>
+        <SpotLightContentSection
+          data={trendingPyraZones || [...new Array(10)]}
+          foldItems
+        />
+      </Section>
+    </>
   );
 };
 
@@ -660,7 +650,7 @@ const SpotLightContentSection = ({
   data,
   foldItems,
 }: {
-  data: any[];
+  data: PyraZoneRes[] | undefined[];
   foldItems?: boolean;
 }) => {
   const itemCount = data.length;
@@ -724,7 +714,7 @@ const SpotLightContentSection = ({
               />
             </div>
             <p className='file-name'>{file.content.title}</p> */}
-            <SpotLightCard />
+            <SpotLightCard dataItem={item} />
           </div>
         );
       })}
@@ -732,7 +722,9 @@ const SpotLightContentSection = ({
   );
 };
 
-const SpotLightCard: React.FC = () => {
+const SpotLightCard = ({ dataItem }: { dataItem?: PyraZoneRes }) => {
+  const chainCurrency = useSelector(state => state.global.chainCurrency);
+
   return (
     <Section width='264px' height='289px'>
       <RoundCard
@@ -742,21 +734,35 @@ const SpotLightCard: React.FC = () => {
         background='#ffffff'
         style={{ boxShadow: "1px 2px 18.700000762939453px 0px #0000001A" }}
       >
-        <RoundCard
-          width='100%'
-          height='176px'
-          borderRadius='13px 13px 0px 0px'
-        ></RoundCard>
+        <RoundCard width='100%' height='176px' borderRadius='13px 13px 0px 0px'>
+          <img
+            src={
+              dataItem?.publisher_profile?.cover_iamge_url ||
+              DefaultCardRectanglePng
+            }
+          />
+        </RoundCard>
         <Section width='100%' padding='18px 16px' gap='18px'>
-          <SpotLightCardText>ETHJETS</SpotLightCardText>
+          <SpotLightCardText>
+            {dataItem?.publisher_profile?.user_info?.name ||
+              stringAbbreviation(dataItem?.publisher) ||
+              "loading..."}
+          </SpotLightCardText>
           <FlexRow width='100%'>
             <Section gap='4px'>
-              <SpotLightCardText small>Floor</SpotLightCardText>
-              <SpotLightCardText>0.17 ETH</SpotLightCardText>
+              <SpotLightCardText small>Key sales</SpotLightCardText>
+              <SpotLightCardText>
+                {dataItem && parseFloat(dataItem.tierkey_prices[0])
+                  ? parseFloat(dataItem.tierkey_prices[0]).toFixed(4)
+                  : "0.0"}{" "}
+                {chainCurrency}
+              </SpotLightCardText>
             </Section>
             <Section gap='4px'>
-              <SpotLightCardText small>7 day volume</SpotLightCardText>
-              <SpotLightCardText>0 ETH</SpotLightCardText>
+              <SpotLightCardText small>Files num</SpotLightCardText>
+              <SpotLightCardText>
+                {dataItem?.files_count || 0} files
+              </SpotLightCardText>
             </Section>
           </FlexRow>
         </Section>

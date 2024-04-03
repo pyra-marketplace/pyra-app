@@ -237,7 +237,7 @@ export const RoundCard = styled.div<{
   img {
     width: 100%;
     height: 100%;
-    border-radius: 16px;
+    border-radius: ${prop => prop.borderRadius || "16px"};
   }
 `;
 

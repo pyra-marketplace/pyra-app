@@ -11,6 +11,7 @@ import {
   PyraZoneTierkeyHolderRes,
   PyraMarketRes,
   RevenuePool,
+  PublisherDailyRecordRes,
 } from "@pyra-marketplace/pyra-sdk";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
@@ -32,9 +33,9 @@ export interface CreatorStates {
   userShareBalance?: string;
   revenuePoolShareBalance?: string;
   revenue?: string;
-  ethPrice?: number;
   shareTotalVolume?: string;
   shareActivities?: PyraMarketShareActivityRes[];
+  publisherDailyRecord?: PublisherDailyRecordRes[];
   contentFiles?: MirrorFileRecord;
   contentAccessible?: boolean;
   userInfo?: {
@@ -65,7 +66,6 @@ const initialState: CreatorStates = {
   userShareBalance: undefined,
   revenuePoolShareBalance: undefined,
   revenue: undefined,
-  ethPrice: undefined,
   shareTotalVolume: undefined,
   shareActivities: undefined,
   contentFiles: undefined,
@@ -457,15 +457,19 @@ export const loadCreatorShareInfos = createAsyncThunk(
       }),
     }));
 
-    const ethPrice = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"}&vs_currencies=usd&precision=2`,
-    )
-      .then(r => r.json())
-      .then(
-        r =>
-          r[chainId === 137 || chainId === 80001 ? "matic-network" : "ethereum"]
-            .usd as number,
-      );
+    let publisherDailyRecord = await PyraMarket.loadPublisherDailyRecordChart({
+      chainId,
+      publisher: address,
+      days: 15,
+    });
+    publisherDailyRecord = publisherDailyRecord.map(item => ({
+      ...item,
+      date: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      share_volume: ethers.utils.formatEther(item.share_volume),
+    }));
 
     return {
       shareTotalValue: pyraMarkets[0]?.total_value,
@@ -481,7 +485,7 @@ export const loadCreatorShareInfos = createAsyncThunk(
         revenuePoolShareBalance,
       ),
       revenue: revenue ? ethers.utils.formatEther(revenue) : "0",
-      ethPrice,
+      publisherDailyRecord,
     };
   },
 );
@@ -614,7 +618,7 @@ export const creatorSlice = createSlice({
         userShareBalance,
         revenuePoolShareBalance,
         revenue,
-        ethPrice,
+        publisherDailyRecord,
       } = action.payload;
       state.shareTotalValue = shareTotalValue;
       state.shareTotalSupply = shareTotalSupply;
@@ -625,7 +629,7 @@ export const creatorSlice = createSlice({
       state.userShareBalance = userShareBalance;
       state.revenuePoolShareBalance = revenuePoolShareBalance;
       state.revenue = revenue;
-      state.ethPrice = ethPrice;
+      state.publisherDailyRecord = publisherDailyRecord;
     });
     builder.addCase(loadCreatorContents.fulfilled, (state, action) => {
       const { files, isAccessible } = action.payload;
