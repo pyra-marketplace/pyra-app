@@ -94,10 +94,14 @@ export const createShare = createAsyncThunk(
       chainId,
       connector,
     });
-    await pyraMarket.createShare({
-      shareName: "Test Share",
-      shareSymbol: "TS",
-    });
+    try {
+      await pyraMarket.createShare({
+        shareName: "Test Share",
+        shareSymbol: "TS",
+      });
+    } catch (error: any) {
+      throw new Error(error.reason);
+    }
     return true;
   },
 );

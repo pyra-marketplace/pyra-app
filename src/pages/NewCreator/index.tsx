@@ -421,7 +421,7 @@ export const NewCreator: React.FC = () => {
       }
     } catch (e: any) {
       console.warn("Create share failed: ", e);
-      message.error("Create share failed: " + (e.reason || e.message || e));
+      message.error("Create share failed: " + (e.message || e));
     }
   };
 
