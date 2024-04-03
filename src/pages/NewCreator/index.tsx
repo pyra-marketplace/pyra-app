@@ -421,7 +421,7 @@ export const NewCreator: React.FC = () => {
       }
     } catch (e: any) {
       console.warn("Create share failed: ", e);
-      message.error("Create share failed: " + (e.message || e));
+      message.error(("Create share failed: " + (e.message || e)).slice(0, 100));
     }
   };
 
@@ -441,7 +441,12 @@ export const NewCreator: React.FC = () => {
       }
     } catch (e: any) {
       console.warn("Create pyra zone failed: ", e);
-      message.error("Create pyra zone failed: " + (e.reason || e.message || e));
+      message.error(
+        ("Create pyra zone failed: " + (e.reason || e.message || e)).slice(
+          0,
+          100,
+        ),
+      );
     }
   };
 
