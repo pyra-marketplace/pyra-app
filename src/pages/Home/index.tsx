@@ -183,10 +183,18 @@ const TopSection: React.FC = () => {
 };
 
 const HighLightCard = ({ dataItem }: { dataItem?: PyraMarketRes }) => {
+  const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
 
   return (
-    <Section relative width='332px' height='332px' flex='0 0 auto'>
+    <Section
+      relative
+      width='332px'
+      height='332px'
+      flex='0 0 auto'
+      style={{ cursor: "pointer" }}
+      onClick={() => navigate("/creator/" + dataItem?.publisher)}
+    >
       <RoundCard
         width='332px'
         height='332px'
@@ -723,10 +731,15 @@ const SpotLightContentSection = ({
 };
 
 const SpotLightCard = ({ dataItem }: { dataItem?: PyraZoneRes }) => {
+  const navigate = useNavigate();
   const chainCurrency = useSelector(state => state.global.chainCurrency);
 
   return (
-    <Section width='264px' height='289px'>
+    <Section
+      width='264px'
+      height='289px'
+      onClick={() => navigate("/creator/" + dataItem?.publisher)}
+    >
       <RoundCard
         width='264px'
         height='289px'
@@ -750,7 +763,7 @@ const SpotLightCard = ({ dataItem }: { dataItem?: PyraZoneRes }) => {
           </SpotLightCardText>
           <FlexRow width='100%'>
             <Section gap='4px'>
-              <SpotLightCardText small>Key sales</SpotLightCardText>
+              <SpotLightCardText small>Key price</SpotLightCardText>
               <SpotLightCardText>
                 {dataItem && parseFloat(dataItem.tierkey_prices[0])
                   ? parseFloat(dataItem.tierkey_prices[0]).toFixed(4)
@@ -759,7 +772,7 @@ const SpotLightCard = ({ dataItem }: { dataItem?: PyraZoneRes }) => {
               </SpotLightCardText>
             </Section>
             <Section gap='4px'>
-              <SpotLightCardText small>Files num</SpotLightCardText>
+              <SpotLightCardText small>Contents</SpotLightCardText>
               <SpotLightCardText>
                 {dataItem?.files_count || 0} files
               </SpotLightCardText>

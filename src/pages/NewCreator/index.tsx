@@ -470,7 +470,13 @@ export const NewCreator: React.FC = () => {
   return (
     <CreatorWrapper>
       <BannerContainer>
-        <img className='banner-img' src={DefaultBannerPng} />
+        <img
+          className='banner-img'
+          src={
+            creatorStates.pyraZone?.publisher_profile?.cover_image_url ||
+            DefaultBannerPng
+          }
+        />
         <div className='banner-section'>
           <div className='user-base-info'>
             <img
