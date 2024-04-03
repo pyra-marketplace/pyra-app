@@ -69,7 +69,7 @@ const initialState: CreatorStates = {
   shareTotalVolume: undefined,
   shareActivities: undefined,
   contentFiles: undefined,
-  contentAccessible: undefined,
+  contentAccessible: true,
   userInfo: undefined,
 };
 
@@ -77,11 +77,15 @@ export const createPryaZone = createAsyncThunk(
   "global/createPryaZone",
   async (args: { chainId: number; address: string; connector: Connector }) => {
     const { chainId, connector } = args;
-    const pyraZone = new PyraZone({
-      chainId,
-      connector,
-    });
-    await pyraZone.createPyraZone();
+    try {
+      const pyraZone = new PyraZone({
+        chainId,
+        connector,
+      });
+      await pyraZone.createPyraZone();
+    } catch (error: any) {
+      throw new Error(error.reason ?? error.message);
+    }
     return true;
   },
 );
@@ -94,10 +98,14 @@ export const createShare = createAsyncThunk(
       chainId,
       connector,
     });
-    await pyraMarket.createShare({
-      shareName: "Test Share",
-      shareSymbol: "TS",
-    });
+    try {
+      await pyraMarket.createShare({
+        shareName: "Test Share",
+        shareSymbol: "TS",
+      });
+    } catch (error: any) {
+      throw new Error(error.reason ?? error.message);
+    }
     return true;
   },
 );
@@ -512,6 +520,7 @@ export const loadCreatorContents = createAsyncThunk(
           account: accountAddress,
         })
       : undefined;
+    console.log({ isAccessible });
     return { files, isAccessible };
   },
 );
