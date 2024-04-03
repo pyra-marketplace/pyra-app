@@ -195,7 +195,7 @@ const HighLightCard = ({ dataItem }: { dataItem?: PyraMarketRes }) => {
       >
         <img
           src={
-            dataItem?.publisher_profile?.cover_iamge_url || DefaultCardSquarePng
+            dataItem?.publisher_profile?.cover_image_url || DefaultCardSquarePng
           }
         />
       </RoundCard>
@@ -737,7 +737,7 @@ const SpotLightCard = ({ dataItem }: { dataItem?: PyraZoneRes }) => {
         <RoundCard width='100%' height='176px' borderRadius='13px 13px 0px 0px'>
           <img
             src={
-              dataItem?.publisher_profile?.cover_iamge_url ||
+              dataItem?.publisher_profile?.cover_image_url ||
               DefaultCardRectanglePng
             }
           />

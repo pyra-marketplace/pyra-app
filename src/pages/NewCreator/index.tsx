@@ -287,7 +287,9 @@ export const NewCreator: React.FC = () => {
       console.log({ baseInfos });
     } catch (e: any) {
       console.error("Init failed: ", e);
-      message.error("Init failed: " + (e.reason || e.message || e));
+      message.error(
+        "Init failed: " + (e.reason || e.message || e).slice(0, 100),
+      );
     }
   };
 
@@ -350,7 +352,9 @@ export const NewCreator: React.FC = () => {
       }
     } catch (e: any) {
       console.error("Content init failed: ", e);
-      message.error("Content init failed: " + (e.reason || e.message || e));
+      message.error(
+        "Content init failed: " + (e.reason || e.message || e).slice(0, 100),
+      );
     }
   };
 
