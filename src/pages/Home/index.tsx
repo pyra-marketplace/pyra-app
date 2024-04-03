@@ -505,6 +505,7 @@ const CreatorSection: React.FC = () => {
               {/* <div className='table-item'>Watchlists</div> */}
             </div>
             <InfiniteScroll
+              style={{ minHeight: 96 * 10 }}
               dataLength={tableData?.length || 0}
               next={() => setNowLoadingPage(prev => prev + 1)}
               hasMore={hasMorePage}
