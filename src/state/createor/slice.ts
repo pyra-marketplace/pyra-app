@@ -69,7 +69,7 @@ const initialState: CreatorStates = {
   shareTotalVolume: undefined,
   shareActivities: undefined,
   contentFiles: undefined,
-  contentAccessible: undefined,
+  contentAccessible: true,
   userInfo: undefined,
 };
 
@@ -516,6 +516,7 @@ export const loadCreatorContents = createAsyncThunk(
           account: accountAddress,
         })
       : undefined;
+    console.log({ isAccessible });
     return { files, isAccessible };
   },
 );

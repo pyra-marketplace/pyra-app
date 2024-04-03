@@ -22,7 +22,7 @@ import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react";
 import { ethers } from "ethers";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import {
   BannerContainer,
@@ -120,6 +120,7 @@ export const NewCreator: React.FC = () => {
   const [tradeKeyLoading, setTradeKeyLoading] = useState(false);
   const [creatingPyraZone, setCreatingPyraZone] = useState(false);
   const [isGuidePage, setIsGuidePage] = useState(false);
+  const [isNewCreator, setIsNewCreator] = useState(false);
   const [emptyPyraZone, setEmptyPyraZone] = useState(false);
   const [emptyPyraMarket, setEmptyPyraMarket] = useState(false);
   const [emptyProfile, setEmptyProfile] = useState(false);
@@ -136,6 +137,7 @@ export const NewCreator: React.FC = () => {
     state => state.creator.contentAccessible,
   );
   const userInfo = useSelector(state => state.global.userInfo);
+  const loc = useLocation();
   console.log({ creatorStates });
 
   useEffect(() => {
@@ -161,15 +163,20 @@ export const NewCreator: React.FC = () => {
   }, [address, userAddress, globalStates.autoConnecting]);
 
   useEffect(() => {
-    if (globalStates.autoConnecting) return;
+    if (globalStates.autoConnecting || isNewCreator) return;
     contentInit();
   }, [
+    isNewCreator,
     selectedTab,
     creatorStates.pyraZone,
     address,
     userAddress,
     globalStates.autoConnecting,
   ]);
+
+  useEffect(() => {
+    setIsNewCreator(false);
+  }, [selectedTab, loc.pathname]);
 
   const init = async () => {
     // if ((await connector.getCurrentWallet()) === undefined) {
@@ -285,6 +292,7 @@ export const NewCreator: React.FC = () => {
   };
 
   const contentInit = async () => {
+    console.log("Init content...");
     if (!address && !userAddress) {
       navigate("/");
       return;
@@ -437,6 +445,7 @@ export const NewCreator: React.FC = () => {
       if (res) {
         message.success("Create pyra zone successfully.");
         setEmptyPyraZone(false);
+        setIsNewCreator(true);
         setIsGuidePage(false);
       }
     } catch (e: any) {
