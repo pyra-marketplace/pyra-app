@@ -197,12 +197,12 @@ export const RevenueModal = ({
             </div>
             <div className='share-price'>
               = $
-              {creatorStates.ethPrice &&
+              {globalStates.ethPrice &&
               creatorStates.shareSellPrice &&
               parseFloat(creatorStates.shareSellPrice) !== 0
                 ? (
                     parseFloat(creatorStates.shareSellPrice) *
-                    creatorStates.ethPrice
+                    globalStates.ethPrice
                   ).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
@@ -233,8 +233,8 @@ export const RevenueModal = ({
               <div className='stake-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
-                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
+                  {globalStates.ethPrice && price && parseFloat(price) !== 0
+                    ? (parseFloat(price) * globalStates.ethPrice).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>
@@ -267,8 +267,8 @@ export const RevenueModal = ({
             </div>
             <div className='share-price'>
               = $
-              {creatorStates.ethPrice && price && parseFloat(price) !== 0
-                ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
+              {globalStates.ethPrice && price && parseFloat(price) !== 0
+                ? (parseFloat(price) * globalStates.ethPrice).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
                 (
@@ -297,8 +297,8 @@ export const RevenueModal = ({
               <div className='unstake-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice && price && parseFloat(price) !== 0
-                    ? (parseFloat(price) * creatorStates.ethPrice).toFixed(4)
+                  {globalStates.ethPrice && price && parseFloat(price) !== 0
+                    ? (parseFloat(price) * globalStates.ethPrice).toFixed(4)
                     : "0.0"}
                 </div>
                 <div className='eth'>

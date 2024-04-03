@@ -270,12 +270,12 @@ export const Creator: React.FC = () => {
             <div className='data-item'>
               <span className='item-value'>
                 $
-                {creatorStates.ethPrice &&
+                {globalStates.ethPrice &&
                 creatorStates.shareBuyPrice &&
                 parseFloat(creatorStates.shareBuyPrice) !== 0
                   ? (
                       parseFloat(creatorStates.shareBuyPrice) *
-                      creatorStates.ethPrice
+                      globalStates.ethPrice
                     ).toFixed(4)
                   : "0.0"}{" "}
               </span>

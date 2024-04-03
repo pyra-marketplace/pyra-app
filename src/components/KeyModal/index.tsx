@@ -172,12 +172,12 @@ export const KeyModal = ({
               <div className='buy-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice &&
+                  {globalStates.ethPrice &&
                   creatorStates.tierKeyBuyPrice &&
                   parseFloat(creatorStates.tierKeyBuyPrice) !== 0
                     ? (
                         parseFloat(creatorStates.tierKeyBuyPrice) *
-                        creatorStates.ethPrice
+                        globalStates.ethPrice
                       ).toFixed(4)
                     : "0.0"}
                 </div>
@@ -214,12 +214,12 @@ export const KeyModal = ({
             </div>
             <div className='key-price'>
               = $
-              {creatorStates.ethPrice &&
+              {globalStates.ethPrice &&
               creatorStates.tierKeySellPrice &&
               parseFloat(creatorStates.tierKeySellPrice) !== 0
                 ? (
                     parseFloat(creatorStates.tierKeySellPrice) *
-                    creatorStates.ethPrice
+                    globalStates.ethPrice
                   ).toFixed(4)
                 : "0.0"}{" "}
               <span className='eth'>
@@ -235,12 +235,12 @@ export const KeyModal = ({
               <div className='sell-info'>
                 <div className='price'>
                   ${" "}
-                  {creatorStates.ethPrice &&
+                  {globalStates.ethPrice &&
                   creatorStates.tierKeySellPrice &&
                   parseFloat(creatorStates.tierKeySellPrice) !== 0
                     ? (
                         parseFloat(creatorStates.tierKeySellPrice) *
-                        creatorStates.ethPrice
+                        globalStates.ethPrice
                       ).toFixed(4)
                     : "0.0"}
                 </div>
