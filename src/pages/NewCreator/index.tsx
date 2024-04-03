@@ -1439,7 +1439,24 @@ const ActivitySection = () => {
         symbolSize: 11,
         showSymbol: false,
         lineStyle: {
-          color: "#0086DC",
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 1,
+            y2: 1,
+            colorStops: [
+              {
+                offset: 0,
+                color: "#55DAE1",
+              },
+              {
+                offset: 1,
+                color: "#7256E5",
+              },
+            ],
+          },
+          width: 3,
         },
       },
     ],
