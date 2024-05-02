@@ -38,6 +38,10 @@ Pyra is running on top of [DataverseOS](https://dataverse-os.com/) 💻, an Inte
 
 For a place to have open discussions on features, voice your ideas, or get help with general questions please visit our community at [Discord](https://discord.com/invite/9p8eU3uT6U).
 
+## 📊 Repo Activity
+
+<img width="100%" src="https://repobeats.axiom.co/api/embed/fc0b9b5c5454f021ec0e397810397de08d292280.svg" alt="Repobeats analytics" />
+
 ## 💕 Contributing
 
 Contributions to this project are welcome. To contribute, please follow these steps:
