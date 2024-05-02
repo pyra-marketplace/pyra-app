@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/pyra.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyra</title>
+  <meta property="og:title" content="Pyra" />
+  <!-- <meta property="og:description" content="Your Secure Personal Cyberspace" /> -->
+  <!-- <meta property="og:image" content="/preview.png" /> -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pyra" />
+  <!-- <meta name="twitter:description" content="Your Secure Personal Cyberspace" /> -->
+  <!-- <meta name="twitter:image" content="/preview.png" /> -->
+  <link rel="shortcut icon" href="/pyra.svg" type="image/x-icon" />
+  <link rel="icon" href="/pyra.svg" type="image/x-icon" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    window.global = window;
+  </script>
+  <script type="module">
+    import { Buffer } from "buffer";
+    window.Buffer = Buffer;
+  </script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
