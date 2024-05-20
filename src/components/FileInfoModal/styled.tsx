@@ -16,7 +16,7 @@ export const FileInfoModalWrap = styled.div`
   }
 
   .content-viewer {
-    flex: 0 1 60%;
+    flex: 0 0 60%;
     background-color: #f7fbfa;
     border-radius: 20px 0px 0px 20px;
     padding: 60px;

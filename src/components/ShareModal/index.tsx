@@ -279,7 +279,7 @@ export const ShareModal = ({
             </div>
             <div className='cancel-wrapper'>
               <div className='cancel' onClick={cancel}>
-                cancel
+                Cancel
               </div>
             </div>
           </TradeWrapper>

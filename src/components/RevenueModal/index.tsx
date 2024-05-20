@@ -219,10 +219,10 @@ export const RevenueModal = ({
                 {option === 1
                   ? staking
                     ? "Staking..."
-                    : "stake"
+                    : "Stake"
                   : unstaking
                     ? "Unstaking..."
-                    : "unstake"}
+                    : "Unstake"}
               </div>
             </div>
             {option === 1 && (
@@ -235,7 +235,7 @@ export const RevenueModal = ({
             )}
             <div className='cancel-wrapper'>
               <div className='cancel' onClick={cancel}>
-                cancel
+                Cancel
               </div>
             </div>
           </StakeWrapper>

@@ -153,6 +153,11 @@ const ScrollSection = ({
             <div
               key={item.key_id}
               className='key-box'
+              style={{
+                ...(currentKeyId === item.key_id && {
+                  borderColor: "#fe5a0277",
+                }),
+              }}
               onClick={() => setCurrentKeyId(item.key_id)}
             >
               <div
@@ -471,7 +476,7 @@ export const KeyModal = ({
             </div>
             <div className='cancel-wrapper'>
               <div className='cancel' onClick={cancel}>
-                cancel
+                Cancel
               </div>
             </div>
           </BuyWrapper>

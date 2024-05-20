@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Auth, message } from "@meteor-web3/components";
 import { MeteorContext, useStore } from "@meteor-web3/hooks";
+import { Tooltip } from "@mui/material";
 import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
 import { useScroll } from "@reactuses/core";
 import { AnimatePresence, motion } from "framer-motion";
@@ -234,7 +235,20 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
                   {walletBalance} {chainCurrency}
                 </span>
                 <Divider width='1px' height='23px' margin='0 5px' />
-                <span>{stringAbbreviation(address, 4, 4)}</span>
+                <Tooltip arrow title='Copy Address'>
+                  <a
+                    onClick={async event => {
+                      if (address) {
+                        // copy address to clipboard
+                        event.stopPropagation();
+                        await navigator.clipboard.writeText(address);
+                        message.success("Address copied to clipboard");
+                      }
+                    }}
+                  >
+                    {stringAbbreviation(address, 4, 4)}
+                  </a>
+                </Tooltip>
               </>
             ) : (
               "Login"

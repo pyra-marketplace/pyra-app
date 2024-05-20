@@ -391,6 +391,7 @@ export const FilesContentSectionWrap = styled.div<{
       }
     }
     .file-info {
+      width: 256px;
       padding: 18px 15px;
       display: flex;
       flex-direction: column;
@@ -401,6 +402,11 @@ export const FilesContentSectionWrap = styled.div<{
       line-height: 16.94px;
       text-align: left;
       color: #414141;
+      p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       .grey {
         font-family: Inter-Medium;
         font-weight: 500;
@@ -1107,9 +1113,9 @@ export const NewUserGuidingPageContainer = styled.div`
 
   .guide-desc {
     /* font */
-    font-family: Inter-SemiBold;
+    font-family: Inter-Medium;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 19.36px;
     letter-spacing: -0.015em;
     text-align: left;

@@ -20,6 +20,7 @@ import {
 
 import DropzoneUploadSvg from "@/assets/icons/dropzone-upload.svg";
 import LoadingWhiteIconSvg from "@/assets/icons/loading-white.svg";
+import PlusIconSvg from "@/assets/icons/plus.svg";
 import WhiteRightArrowIconSvg from "@/assets/icons/white-right-arrow.svg";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TextInput } from "@/components/TextInput";
@@ -220,7 +221,7 @@ export const Upload: React.FC = () => {
               className='delete-btn'
               onClick={event => handleRemoveFile(event, 0)}
             >
-              X
+              ×
             </div>
             {fileList[0] && (
               <img
@@ -253,13 +254,20 @@ export const Upload: React.FC = () => {
                   className='delete-btn'
                   onClick={event => handleRemoveFile(event, index + 1)}
                 >
-                  X
+                  ×
                 </div>
                 {fileList[index + 1] && (
                   <img
                     className='preview-img'
                     src={URL.createObjectURL(fileList[index + 1])}
                   />
+                )}
+                {fileList[index] && !fileList[index + 1] && (
+                  <DropzoneTips>
+                    <div className='upload-plus-icon'>
+                      <img src={PlusIconSvg} alt='Dropzone Upload' />
+                    </div>
+                  </DropzoneTips>
                 )}
               </div>
             ))}

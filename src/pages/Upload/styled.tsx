@@ -50,6 +50,9 @@ export const DropzoneSection = styled(Section)`
     .preview-container {
       width: 183.5px;
       height: 183.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       .preview-img {
         width: 183.5px;
         height: 183.5px;
@@ -70,8 +73,12 @@ export const DropzoneSection = styled(Section)`
       right: 10px;
       width: 25px;
       height: 25px;
-      border-radius: 20px;
+      border-radius: 50%;
       background: #f7fbfa;
+      font-size: 22px;
+      line-height: 1.2;
+      font-family: Inter-SemiBold;
+      font-weight: 500;
       display: none;
       align-items: center;
       justify-content: center;
@@ -102,6 +109,18 @@ export const DropzoneTips = styled.div`
     width: 75px;
     height: 75px;
     border-radius: 75px;
+    background: #f7fbfa;
+    box-shadow: 0px 29.999998092651367px 44.999996185302734px -14.999999046325684px
+      #0000001a;
+  }
+
+  .upload-plus-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
     background: #f7fbfa;
     box-shadow: 0px 29.999998092651367px 44.999996185302734px -14.999999046325684px
       #0000001a;
