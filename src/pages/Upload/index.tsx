@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { message } from "@meteor-web3/components";
+import { Media, message } from "@meteor-web3/components";
 import { SYSTEM_CALL } from "@meteor-web3/connector";
 import { useStore } from "@meteor-web3/hooks";
 import { PyraZone } from "@pyra-marketplace/pyra-sdk";
@@ -49,9 +49,9 @@ export const Upload: React.FC = () => {
   const pyraZone = useSelector(state => state.creator.pyraZone);
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
-    accept: {
-      "image/*": [".jpg", ".jpeg", ".png"],
-    },
+    // accept: {
+    //   "image/*": [".jpg", ".jpeg", ".png"],
+    // },
     maxFiles: maxFiles - fileList.length,
     disabled: fileList.length >= maxFiles,
     // Max File Size -> 50MB
@@ -134,7 +134,17 @@ export const Upload: React.FC = () => {
       //   },
       // });
       const uploadedFileUrls = await Promise.all(
-        fileList.map(file => connector.uploadFile(file).then(ipfs.getFileLink)),
+        fileList.map(file =>
+          connector
+            .uploadFile(file)
+            .then(ipfs.getFileLink)
+            .then(fileLink =>
+              JSON.stringify({
+                url: fileLink,
+                type: file.type,
+              }),
+            ),
+        ),
       );
       const _pyraZone = new PyraZone({
         chainId: globalStates.chainId,
@@ -224,10 +234,12 @@ export const Upload: React.FC = () => {
               ×
             </div>
             {fileList[0] && (
-              <img
-                className='preview-img'
-                src={URL.createObjectURL(fileList[0])}
-              />
+              <div className='preview-img'>
+                <Media
+                  mediaUrl={URL.createObjectURL(fileList[0])}
+                  mediaMimeType={fileList[0].type as any}
+                />
+              </div>
             )}
             {!fileList[0] && (
               <DropzoneTips>
@@ -238,7 +250,7 @@ export const Upload: React.FC = () => {
                   <p className='tips-title'>
                     Choose a file or drag & drop it here
                   </p>
-                  <p className='tips-desc'>JPG, PNG. Max 50Mb</p>
+                  <p className='tips-desc'>Max 50Mb</p>
                 </div>
               </DropzoneTips>
             )}
@@ -257,10 +269,12 @@ export const Upload: React.FC = () => {
                   ×
                 </div>
                 {fileList[index + 1] && (
-                  <img
-                    className='preview-img'
-                    src={URL.createObjectURL(fileList[index + 1])}
-                  />
+                  <div className='preview-img'>
+                    <Media
+                      mediaUrl={URL.createObjectURL(fileList[index + 1])}
+                      mediaMimeType={fileList[index + 1].type as any}
+                    />
+                  </div>
                 )}
                 {fileList[index] && !fileList[index + 1] && (
                   <DropzoneTips>
@@ -306,7 +320,7 @@ export const Upload: React.FC = () => {
             controlledTags={fileTags}
             onChange={setFileTags}
           />
-          <Section width='100%' gap='12px'>
+          {/* <Section width='100%' gap='12px'>
             <Selector
               title='Who can see this?'
               options={["All paid members", "Select tiers"]}
@@ -324,7 +338,7 @@ export const Upload: React.FC = () => {
                 onChange={(_, idx) => setSelectedTier(idx)}
               />
             )}
-          </Section>
+          </Section> */}
         </Section>
         <button
           style={{ marginTop: "26px" }}

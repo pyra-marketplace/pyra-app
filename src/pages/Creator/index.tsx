@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Auth, Media, message } from "@meteor-web3/components";
+import { Media, message } from "@meteor-web3/components";
 import {
   MirrorFile,
   SignalType,
@@ -63,6 +63,7 @@ import { RevenueModal } from "@/components/RevenueModal";
 import Selector from "@/components/Selector";
 import { ShareModal } from "@/components/ShareModal";
 import { TextInput } from "@/components/TextInput";
+import { useAuth } from "@/hooks/useAuth";
 import {
   claim,
   createPryaZone,
@@ -963,8 +964,8 @@ const FileCard = ({
       {file ? (
         <div className='preview'>
           <Media
-            mediaUrl={file.locked ? QuestionPng : file.content.resources[0]}
-            mediaMimeType={"image/png"}
+            mediaUrl={file.locked ? QuestionPng : file.content.resources[0].url}
+            mediaMimeType={file.content.resources[0].type}
           />
         </div>
       ) : (
@@ -2109,6 +2110,7 @@ const NewUserGuidingPage = () => {
   const [inputNickname, setInputNickname] = useState("");
   const [coverImageFile, setCoverImageFile] = useState<File>();
 
+  const { logout } = useAuth({ appId: process.env.PYRA_APP_ID! });
   const dispatch = useDispatch();
   const { address } = useParams<{ address?: string }>();
   const { connector, address: userAddress, pkh } = useStore();
@@ -2335,8 +2337,8 @@ const NewUserGuidingPage = () => {
               flex='0 0 auto'
               gap='8px'
               className='logout'
-              onClick={() => {
-                Auth.clearAuthCache();
+              onClick={async () => {
+                await logout();
                 location.replace("/");
               }}
             >

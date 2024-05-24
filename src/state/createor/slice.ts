@@ -23,6 +23,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ethers } from "ethers";
 
 import { ipfs } from "@/utils";
+import { adaptFolders } from "@/utils/file";
 
 export interface CreatorStates {
   emptyUserInfo: boolean;
@@ -988,7 +989,7 @@ export const creatorSlice = createSlice({
     });
     builder.addCase(loadCreatorContents.fulfilled, (state, action) => {
       const { folders, isAccessible } = action.payload;
-      state.contentFolders = folders;
+      state.contentFolders = adaptFolders(folders);
       state.contentAccessible = isAccessible;
     });
     builder.addCase(loadContentAccessible.fulfilled, (state, action) => {
@@ -1004,7 +1005,7 @@ export const creatorSlice = createSlice({
           contentFolders[folder.folderId] = folder;
         }
       });
-      state.contentFolders = contentFolders;
+      state.contentFolders = adaptFolders(contentFolders);
     });
     builder.addCase(loadCreatorUserInfo.fulfilled, (state, action) => {
       state.userInfo = action.payload;

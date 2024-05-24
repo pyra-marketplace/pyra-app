@@ -68,6 +68,7 @@ export const DropzoneSection = styled(Section)`
     background: #e9ebeb;
     overflow: hidden;
     .delete-btn {
+      z-index: 1;
       position: absolute;
       top: 10px;
       right: 10px;

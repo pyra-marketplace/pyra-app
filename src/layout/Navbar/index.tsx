@@ -2,7 +2,7 @@
 import React, { useContext } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Auth, message } from "@meteor-web3/components";
+import { message } from "@meteor-web3/components";
 import { MeteorContext, useStore } from "@meteor-web3/hooks";
 import { Tooltip } from "@mui/material";
 import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
@@ -27,6 +27,7 @@ import profileSvg from "@/assets/icons/profile.svg?raw";
 import PyraBrandDarkIconSvg from "@/assets/icons/pyra-brand-dark.svg";
 import PyraBrandIconSvg from "@/assets/icons/pyra-brand.svg";
 import Selector from "@/components/Selector";
+import { useAuth } from "@/hooks/useAuth";
 import { getWalletBalance, globalSlice } from "@/state/global/slice";
 import { useSelector, useDispatch } from "@/state/hook";
 import { Divider, FlexRow } from "@/styled";
@@ -90,8 +91,11 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { connecting, connectWallet, logout } = useAuth({
+    appId: process.env.PYRA_APP_ID!,
+    onConnectSucceed: (_, connectRes) => console.log({ connectRes }),
+  });
   const { pkh, address, connector } = useStore();
-  const meteorContext = useContext(MeteorContext);
   const autoConnecting = useSelector(state => state.global.autoConnecting);
   const walletBalance = useSelector(state => state.global.walletBalance);
   const chainCurrency = useSelector(state => state.global.chainCurrency);
@@ -147,13 +151,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
       message.info("Please wait for auto connecting...");
       return;
     }
-    const connectRes = await Auth.openModal(
-      {
-        appId: process.env.PYRA_APP_ID!,
-      },
-      meteorContext,
-    );
-    console.log(connectRes);
+    connectWallet();
   };
 
   const menuItems: MenuItem[] = [
@@ -227,7 +225,7 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
             }}
           >
             <img src={dark ? NavbarWalletDarkIconSvg : NavbarWalletIconSvg} />
-            {autoConnecting ? (
+            {autoConnecting || connecting ? (
               "Connecting..."
             ) : pkh ? (
               <>
@@ -273,13 +271,13 @@ export default function Navbar({ dark = false }: { dark?: boolean }) {
                 right: 0,
               }}
               defaultSelectedItem
-              onChange={item => {
+              onChange={async item => {
                 if (item.includes("Profile")) {
                   navigate("/profile");
                 } else if (item.includes("Creator")) {
                   navigate("/creator");
                 } else if (item.includes("Logout")) {
-                  Auth.clearAuthCache();
+                  await logout();
                   location.replace("/");
                 }
               }}

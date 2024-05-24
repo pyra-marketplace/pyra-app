@@ -1,8 +1,6 @@
 import React, { useContext, useEffect } from "react";
 
-import { Auth } from "@meteor-web3/components";
 import { MeteorContext, useStore } from "@meteor-web3/hooks";
-import { ethers } from "ethers";
 
 import { Wrapper } from "./styled";
 
@@ -35,15 +33,15 @@ export const CreatorHeader = (): React.ReactElement => {
           <div
             className='chip'
             style={{ cursor: "pointer" }}
-            onClick={async () => {
-              const connectRes = await Auth.openModal(
-                {
-                  appId: process.env.PYRA_APP_ID!,
-                },
-                meteorContext,
-              );
-              console.log({ connectRes });
-            }}
+            // onClick={async () => {
+            //   const connectRes = await Auth.openModal(
+            //     {
+            //       appId: process.env.PYRA_APP_ID!,
+            //     },
+            //     meteorContext,
+            //   );
+            //   console.log({ connectRes });
+            // }}
           >
             <span>
               {globalStates.autoConnecting

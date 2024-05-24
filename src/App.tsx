@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
 
-import { useAuth } from "@meteor-web3/components";
 import { MeteorContext } from "@meteor-web3/hooks";
 import { RouterProvider } from "react-router-dom";
 
+import { useAuth } from "./hooks/useAuth";
 import { router } from "./router";
 import { getEthPrice, globalSlice } from "./state/global/slice";
 import { useDispatch, useSelector } from "./state/hook";
@@ -11,10 +11,8 @@ import { Frame, GlobalStyle } from "./styled";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
-  const meteorContext = useContext(MeteorContext);
   const { autoConnecting } = useAuth({
     appId: process.env.PYRA_APP_ID!,
-    meteorContext,
     autoConnect: true,
   });
   const globalState = useSelector(state => state.global);

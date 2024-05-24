@@ -71,9 +71,9 @@ export const FileInfoModal = ({
                 mediaUrl={
                   locked
                     ? QuestionPng
-                    : file.content.resources[selectedMediaIndex]
+                    : file.content.resources[selectedMediaIndex].url
                 }
-                mediaMimeType={"image/png"}
+                mediaMimeType={file.content.resources[selectedMediaIndex].type}
               />
               {selectedMediaIndex > 0 && (
                 <img

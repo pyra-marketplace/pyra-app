@@ -2,11 +2,11 @@ import React from "react";
 
 import { Outlet, useLocation } from "react-router-dom";
 
-import { CreatorHeader } from "./CreatorHeader";
-import { HomeHeader } from "./HomeHeader";
+// import { CreatorHeader } from "./CreatorHeader";
+// import { HomeHeader } from "./HomeHeader";
 import Navbar from "./Navbar";
 import { Container, BodyWrapper } from "./styled";
-import { UploadHeader } from "./UploadHeader";
+// import { UploadHeader } from "./UploadHeader";
 
 import { useSelector } from "@/state/hook";
 

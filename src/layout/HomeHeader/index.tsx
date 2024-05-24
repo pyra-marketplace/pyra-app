@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { Auth, message } from "@meteor-web3/components";
-import { MeteorContext, useAction, useStore } from "@meteor-web3/hooks";
+import { message } from "@meteor-web3/components";
+import { MeteorContext, useStore } from "@meteor-web3/hooks";
 import { Auth as TwitterAuth } from "@pyra-marketplace/pyra-sdk";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Wrapper } from "./styled";
 
@@ -24,21 +24,21 @@ export const HomeHeader = (): React.ReactElement => {
   const [authenticating, setAuthenticating] = useState(false);
 
   const handleConnect = async () => {
-    if (autoConnecting) {
-      message.info("Please wait for auto connecting...");
-      return;
-    }
-    if (authenticating) {
-      message.info("Please wait for authenticating...");
-      return;
-    }
-    const connectRes = await Auth.openModal(
-      {
-        appId: process.env.PYRA_APP_ID!,
-      },
-      meteorContext,
-    );
-    console.log(connectRes);
+    // if (autoConnecting) {
+    //   message.info("Please wait for auto connecting...");
+    //   return;
+    // }
+    // if (authenticating) {
+    //   message.info("Please wait for authenticating...");
+    //   return;
+    // }
+    // const connectRes = await Auth.openModal(
+    //   {
+    //     appId: process.env.PYRA_APP_ID!,
+    //   },
+    //   meteorContext,
+    // );
+    // console.log(connectRes);
   };
 
   const handleBindTwitter = async () => {
